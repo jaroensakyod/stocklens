@@ -83,11 +83,11 @@ export default function AIAnalysis({ ticker }: { ticker: string }) {
         <h2 className="text-lg font-bold text-zinc-50">บทวิเคราะห์ {ticker}</h2>
         <div className="flex gap-1 flex-wrap">
           {PERSONAS.map((p) => {
-            const locked = p.pro && tier !== "pro";
+            const locked = tier === "free" || (p.pro && tier !== "pro");
             return (
               <button
                 key={p.id}
-                onClick={() => (locked ? setLockMsg("🔒 มุมมองกูรูทั้ง 4 เป็นสิทธิ์สมาชิก 🥇 Pro — เข้าสู่ระบบ/อัปเกรดที่หน้าแพ็กเกจ") : run(p.id))}
+                onClick={() => (locked ? setLockMsg(tier === "free" ? "🔒 การวิเคราะห์ด้วย AI เป็นสิทธิ์สมาชิก Starter ขึ้นไป — เข้าสู่ระบบที่ /login" : "🔒 มุมมองกูรูทั้ง 4 เป็นสิทธิ์สมาชิก 🥇 Pro") : run(p.id))}
                 disabled={mode === "loading" || mode === "streaming"}
                 className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-colors ${locked ? "opacity-50 cursor-not-allowed" : persona === p.id && mode !== "idle" ? "bg-accent text-zinc-950" : "bg-base-800 text-zinc-400 hover:bg-base-700"}`}
                 title={locked ? "สิทธิ์สมาชิก Pro" : p.id ? `วิเคราะห์ในสไตล์${p.label.slice(2)}` : "นักวิเคราะห์ปกติ"}

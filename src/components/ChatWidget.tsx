@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import { useAuth } from "@/lib/authContext";
 import { mdToHtml } from "@/lib/markdown";
 
 interface Msg {
@@ -25,6 +27,7 @@ function portfolioQuestion(): string | null {
 
 // แชทลอยติดทุกหน้า — ถามเรื่องหุ้น/เหตุการณ์ ตอบจากข้อมูลจริง (grounded)
 export default function ChatWidget() {
+  const { tier } = useAuth();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([
     { role: "assistant", content: "สวัสดีครับ 👋 ผมคือผู้ช่วย StockLens\nถามอะไรก็ได้เกี่ยวกับหุ้น — พิมพ์ชื่อหุ้น (เช่น NVDA, PTT.BK) ผมจะดึงราคา/คะแนน/สัญญาณจริงมาตอบ หรือเล่าเหตุการณ์ (เช่น \"สงคราม น้ำมันแพง\") ผมจะวิเคราะห์ห่วงโซ่ผลกระทบให้" },
@@ -143,19 +146,29 @@ export default function ChatWidget() {
             </div>
           )}
 
-          <div className="p-3 border-t border-base-700/60 flex gap-2">
-            <input
-              className="input"
-              placeholder="พิมพ์คำถาม เช่น AAPL น่าซื้อไหม…"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && send()}
-              disabled={busy}
-            />
-            <button className="btn-primary !px-3.5" onClick={() => send()} disabled={busy || !input.trim()}>
-              ส่ง
-            </button>
-          </div>
+          {tier === "free" ? (
+            <div className="p-4 border-t border-base-700/60 text-center space-y-2">
+              <p className="text-xs text-zinc-400">🔒 ผู้ช่วย AI เป็นสิทธิ์สมาชิก Starter ขึ้นไป</p>
+              <div className="flex gap-2 justify-center">
+                <Link href="/login" className="btn-primary !py-1.5 !px-3 text-xs">🔐 เข้าสู่ระบบ</Link>
+                <Link href="/pricing" className="btn-ghost !py-1.5 !px-3 text-xs">ดูแพ็กเกจ</Link>
+              </div>
+            </div>
+          ) : (
+            <div className="p-3 border-t border-base-700/60 flex gap-2">
+              <input
+                className="input"
+                placeholder="พิมพ์คำถาม เช่น AAPL น่าซื้อไหม…"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && send()}
+                disabled={busy}
+              />
+              <button className="btn-primary !px-3.5" onClick={() => send()} disabled={busy || !input.trim()}>
+                ส่ง
+              </button>
+            </div>
+          )}
         </div>
       )}
     </>

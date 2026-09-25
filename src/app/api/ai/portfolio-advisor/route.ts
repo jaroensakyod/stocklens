@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireMember } from "@/lib/auth";
 import { buildAnalysis } from "@/lib/analysis";
 import { chatOnce, hasAI, friendlyAIError } from "@/lib/ai";
 import { findSectorInfo, tvUniverse } from "@/lib/tvscanner";
@@ -17,6 +18,9 @@ interface Holding {
 // POST /api/ai/portfolio-advisor { holdings: [{ticker, qty, avgCost}] }
 // ดึงข้อมูลจริงทั้งหมด (sector/factors/technicals/radar) → วิเคราะห์ 4 มิติ → AI แนะนำปรับพอร์ตเป็นข้อๆ
 export async function POST(req: NextRequest) {
+  // 🔒 AI = สิทธิ์สมาชิก Starter ขึ้นไป (free ใช้ไม่ได้)
+  const guard = requireMember(req);
+  if (!guard.ok) return Response.json({ error: "🔒 การใช้ AI เป็นสิทธิ์สมาชิก Starter ขึ้นไป — เข้าสู่ระบบด้วยรหัสสมาชิกที่หน้า /login" }, { status: 401 });
   const { holdings } = (await req.json().catch(() => ({}))) as { holdings?: Holding[] };
   if (!holdings?.length || holdings.length < 2) {
     return NextResponse.json({ error: "ต้องมี holdings อย่างน้อย 2 ตัว (ใส่ที่หน้าพอร์ต)" }, { status: 400 });

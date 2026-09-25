@@ -1,5 +1,6 @@
 // ===== AI Chat แบบ Grounded (หลักการเดียวกับ bazi: "Truth Packet" — ข้อมูลจริงเข้าก่อน LLM เดาไม่ได้) =====
 import { NextRequest } from "next/server";
+import { requireMember } from "@/lib/auth";
 import { buildAnalysis } from "@/lib/analysis";
 import { keywordAnalyze } from "@/lib/radar";
 import { chatStream, hasAI, SYSTEM_ANALYST, friendlyAIError } from "@/lib/ai";
@@ -113,6 +114,9 @@ async function buildTruthPacket(userText: string): Promise<{ packet: string; dem
 
 // POST /api/chat { messages } → stream คำตอบภาษาไทย
 export async function POST(req: NextRequest) {
+  // 🔒 AI = สิทธิ์สมาชิก Starter ขึ้นไป (free ใช้ไม่ได้)
+  const guard = requireMember(req);
+  if (!guard.ok) return Response.json({ error: "🔒 การใช้ AI เป็นสิทธิ์สมาชิก Starter ขึ้นไป — เข้าสู่ระบบด้วยรหัสสมาชิกที่หน้า /login" }, { status: 401 });
   const { messages } = (await req.json().catch(() => ({}))) as { messages?: ChatMsg[] };
   if (!messages?.length) return new Response("missing messages", { status: 400 });
   const history = messages.slice(-8); // จำกล่องล่าสุด 8 ข้อความ

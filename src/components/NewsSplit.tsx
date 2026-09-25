@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
+import { useAuth } from "@/lib/authContext";
 
 interface NewsItem {
   title: string;
@@ -43,6 +45,7 @@ function useSummary() {
 
 // 📰 ข่าวแบบแบ่งครึ่งสไตล์หน้าข่าวจริง: ซ้าย = ข่าวเด่นการ์ดใหญ่ / ขวา = ลิสต์หัวข้อกระชับ
 export default function NewsSplit({ news, aiAvailable }: { news: NewsItem[]; aiAvailable: boolean }) {
+  const { tier } = useAuth();
   const [openIdx, setOpenIdx] = useState<number | null>(null);
   const featured = useSummary();
   if (!news.length) return null;
@@ -71,11 +74,12 @@ export default function NewsSplit({ news, aiAvailable }: { news: NewsItem[]; aiA
             className="btn-ghost !py-1 !px-3 text-xs"
             onClick={() => {
               setOpenIdx(0);
-              if (!featured.summary) featured.summarize(first.title, first.publisher, aiAvailable);
+              if (tier !== "free" && !featured.summary) featured.summarize(first.title, first.publisher, aiAvailable);
             }}
           >
             {featured.loading ? "กำลังสรุป…" : "🇹🇭 สรุปไทยโดย AI"}
           </button>
+          ).replacenothing()
           {openIdx === 0 && featured.summary && (
             <p className="text-sm text-zinc-300 leading-relaxed mt-2.5 bg-base-850 rounded-lg p-3 border border-base-700/60">{featured.summary}</p>
           )}

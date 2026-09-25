@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useAuth } from "@/lib/authContext";
 import { mdToHtml } from "@/lib/markdown";
 import { usePortfolio } from "@/lib/store";
 
@@ -16,7 +17,7 @@ interface AdvisorResult {
 }
 
 // AI Portfolio Advisor — วิเคราะห์พอร์ตจริง แนะนำการปรับ 4-6 ข้อ พร้อมเหตุผล
-export default function PortfolioAdvisor() {
+function PortfolioAdvisorInner() {
   const { holdings } = usePortfolio();
   const [result, setResult] = useState<AdvisorResult | null>(null);
   const [busy, setBusy] = useState(false);
@@ -122,4 +123,17 @@ function Metric({ k, v, warn }: { k: string; v: string; warn?: boolean }) {
       <div className={`num text-sm font-bold ${warn ? "text-rose-400" : "text-zinc-100"}`}>{v}</div>
     </div>
   );
+}
+
+
+export default function PortfolioAdvisor() {
+  const { tier } = useAuth();
+  if (tier === "free")
+    return (
+      <div className="card p-5">
+        <h2 className="text-sm font-bold text-zinc-100 mb-2">🤖 AI Portfolio Advisor — ให้ AI ปรับพอร์ตให้</h2>
+        <p className="text-xs text-zinc-500">🔒 ให้ AI ช่วยปรับพอร์ตเป็นสิทธิ์สมาชิก Starter ขึ้นไป — <a href="/login" className="text-accent-soft underline">เข้าสู่ระบบ</a> หรือ <a href="/pricing" className="text-accent-soft underline">ดูแพ็กเกจ</a></p>
+      </div>
+    );
+  return <PortfolioAdvisorInner />;
 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { chatOnce, hasAI, SYSTEM_EVENT } from "@/lib/ai";
 import { buildChainsForNodeIds, keywordAnalyze } from "@/lib/radar";
 import { getQuotes } from "@/lib/yahoo";
+import { getTierFromRequest } from "@/lib/auth";
 import type { ChainResult, EventAnalysis } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -17,7 +18,7 @@ export async function POST(req: NextRequest) {
   const base = await keywordAnalyze(text);
 
   // 2) ถ้ามี AI — ให้ LLM วิเคราะห์ทับ + เขียนบทวิเคราะห์
-  if (hasAI()) {
+  if (hasAI() && getTierFromRequest(req) !== "free") { // free ใช้โหมดคีย์เวิร์ด — AI เป็นสิทธิ์สมาชิก
     try {
       const raw = await chatOnce(
         [

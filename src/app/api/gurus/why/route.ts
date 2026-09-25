@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireMember } from "@/lib/auth";
 import { getLiveGurus } from "@/lib/gurus13f";
 import { chatOnce, hasAI } from "@/lib/ai";
 
@@ -7,6 +8,9 @@ export const maxDuration = 120;
 
 // POST /api/gurus/why { id } — AI วิเคราะห์ "ทำไมกูรูคนนี้ถึงเลือกตำแหน่งเหล่านี้" จาก holdings 13F จริง + สไตล์การลงทุน
 export async function POST(req: NextRequest) {
+  // 🔒 AI = สิทธิ์สมาชิก Starter ขึ้นไป (free ใช้ไม่ได้)
+  const guard = requireMember(req);
+  if (!guard.ok) return Response.json({ error: "🔒 การใช้ AI เป็นสิทธิ์สมาชิก Starter ขึ้นไป — เข้าสู่ระบบด้วยรหัสสมาชิกที่หน้า /login" }, { status: 401 });
   const { id } = (await req.json().catch(() => ({}))) as { id?: string };
   if (!id) return NextResponse.json({ error: "missing id" }, { status: 400 });
   if (!hasAI()) {

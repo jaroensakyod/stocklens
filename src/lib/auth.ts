@@ -61,3 +61,18 @@ export async function loginByCode(code: string): Promise<SessionMember | null> {
   if (new Date(m.paidUntil).getTime() < Date.now() - 24 * 3600e3) return null; // หมดอายุ
   return { id: m.id, name: m.name, tier: m.tier, paidUntil: m.paidUntil, code: normalized };
 }
+
+// ---------- ตรวจสิทธิ์จาก request (ใช้ใน API routes) ----------
+import type { NextRequest } from "next/server";
+
+/** อ่าน tier จาก cookie — "free" = ไม่ได้ login / หมดอายุ */
+export function getTierFromRequest(req: NextRequest): "free" | "starter" | "pro" {
+  const m = verifyToken(req.cookies.get(AUTH_COOKIE)?.value);
+  return m ? m.tier : "free";
+}
+
+/** AI ทุกชนิด = ต้องเป็นสมาชิกอย่างน้อย Starter (free ใช้ไม่ได้ทั้งหมด) */
+export function requireMember(req: NextRequest): { ok: boolean; tier: "free" | "starter" | "pro" } {
+  const tier = getTierFromRequest(req);
+  return { ok: tier !== "free", tier };
+}
