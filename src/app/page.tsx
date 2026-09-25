@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import NewsCard from "@/components/NewsCard";
+import NewsSplit from "@/components/NewsSplit";
 import WatchlistStrip from "@/components/WatchlistStrip";
 import MarketHeatmap from "@/components/MarketHeatmap";
 import MoversByMarket from "@/components/MoversByMarket";
@@ -15,7 +15,7 @@ interface DashboardData {
   popular: Quote[];
   gainers: Quote[];
   losers: Quote[];
-  news: { title: string; publisher: string; link: string; time: number }[];
+  news: { title: string; publisher: string; link: string; time: number; relatedTickers?: string[] }[];
   events: { date: string; label: string; impact: string; star: number }[];
   usdThb: number;
   aiAvailable: boolean;
@@ -147,11 +147,7 @@ export default function HomePage() {
               <span className="text-xs text-zinc-600 num">USD/THB {data.usdThb.toFixed(2)}</span>
             </div>
           </div>
-          <div className="grid md:grid-cols-2 gap-3">
-            {data.news.map((n, i) => (
-              <NewsCard key={i} {...n} aiAvailable={data.aiAvailable} />
-            ))}
-          </div>
+          <NewsSplit news={data.news} aiAvailable={data.aiAvailable} />
         </section>
 
         <div className="space-y-6">
