@@ -33,7 +33,7 @@ export default function StockPage() {
     fetch(`/api/analysis?s=${encodeURIComponent(ticker)}`)
       .then(async (r) => {
         const j = await r.json();
-        if (!j.quote || !isFinite(j.quote.price)) throw new Error("ไม่พบสัญลักษณ์นี้");
+        if (!j.quote || typeof j.quote.price !== "number" || !isFinite(j.quote.price)) throw new Error(j.error || "ไม่พบสัญลักษณ์นี้");
         setA(j);
       })
       .catch((e) => setErr(e.message));
