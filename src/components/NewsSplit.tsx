@@ -49,7 +49,7 @@ export default function NewsSplit({ news, aiAvailable }: { news: NewsItem[]; aiA
   const [first, ...rest] = news;
 
   return (
-    <div className="grid lg:grid-cols-2 gap-4 items-start">
+    <div className="grid sm:grid-cols-2 gap-4 items-start">
       {/* ซ้าย: ข่าวเด่น */}
       <div className="card p-5 border-l-4 border-l-accent/70">
         <div className="flex items-center gap-2 flex-wrap">
