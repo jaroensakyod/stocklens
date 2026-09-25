@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { requireMember } from "@/lib/auth";
+import { requireMember, requirePro } from "@/lib/auth";
 import { buildAnalysis } from "@/lib/analysis";
 import { findSectorInfo } from "@/lib/tvscanner";
 import { chatStream, hasAI, SYSTEM_ANALYST, friendlyAIError } from "@/lib/ai";
@@ -42,12 +42,20 @@ const PERSONAS: Record<string, { name: string; style: string; demoFocus: string 
 
 // GET /api/ai/analyze?s=AAPL&persona=burry — สตรีมบทวิเคราะห์ภาษาไทย (AI ถ้ามี key / โหมดตัวอย่างถ้าไม่มี)
 export async function GET(req: NextRequest) {
-  // 🔒 AI = สิทธิ์สมาชิก Starter ขึ้นไป (free ใช้ไม่ได้)
-  const guard = requireMember(req);
-  if (!guard.ok) return Response.json({ error: "🔒 การใช้ AI เป็นสิทธิ์สมาชิก Starter ขึ้นไป — เข้าสู่ระบบด้วยรหัสสมาชิกที่หน้า /login" }, { status: 401 });
-  const s = (req.nextUrl.searchParams.get("s") || "").toUpperCase();
+  // 🔒 มุมมองนักวิเคราะห์หลัก = Starter ขึ้นไป / มุมมองกูรู 4 สไตล์ (persona) = Pro เท่านั้น
   const personaId = (req.nextUrl.searchParams.get("persona") || "").toLowerCase();
   const persona = PERSONAS[personaId];
+  const guard = persona ? requirePro(req) : requireMember(req);
+  if (!guard.ok)
+    return Response.json(
+      {
+        error: persona
+          ? "🔒 มุมมองกูรูทั้ง 4 (Burry/Buffett/Lynch/ภูมิรัฐศาสตร์) เป็นสิทธิ์สมาชิก 🥇 Pro — อัปเกรดที่หน้า /pricing"
+          : "🔒 การใช้ AI เป็นสิทธิ์สมาชิก Starter ขึ้นไป — เข้าสู่ระบบด้วยรหัสสมาชิกที่หน้า /login",
+      },
+      { status: 403 }
+    );
+  const s = (req.nextUrl.searchParams.get("s") || "").toUpperCase();
   if (!s) return new Response("missing s", { status: 400 });
 
   const a = await buildAnalysis(s);

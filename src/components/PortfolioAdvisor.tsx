@@ -128,11 +128,19 @@ function Metric({ k, v, warn }: { k: string; v: string; warn?: boolean }) {
 
 export default function PortfolioAdvisor() {
   const { tier } = useAuth();
-  if (tier === "free")
+  if (tier !== "pro")
     return (
       <div className="card p-5">
         <h2 className="text-sm font-bold text-zinc-100 mb-2">🤖 AI Portfolio Advisor — ให้ AI ปรับพอร์ตให้</h2>
-        <p className="text-xs text-zinc-500">🔒 ให้ AI ช่วยปรับพอร์ตเป็นสิทธิ์สมาชิก Starter ขึ้นไป — <a href="/login" className="text-accent-soft underline">เข้าสู่ระบบ</a> หรือ <a href="/pricing" className="text-accent-soft underline">ดูแพ็กเกจ</a></p>
+        <p className="text-xs text-zinc-500">
+          🔒 AI ปรับพอร์ตส่วนตัวเป็นสิทธิ์สมาชิก 🥇 Pro —{" "}
+          <a href="/pricing" className="text-accent-soft underline">อัปเกรดเป็น Pro</a>
+          {tier === "free" && (
+            <>
+              {" "}หรือถ้ายังไม่ได้เข้าสู่ระบบ <a href="/login" className="text-accent-soft underline">เข้าสู่ระบบก่อน</a>
+            </>
+          )}
+        </p>
       </div>
     );
   return <PortfolioAdvisorInner />;
