@@ -7,6 +7,32 @@ import { tvUniverse, toYahooSymbol } from "@/lib/tvscanner";
 import { getLiveGurus } from "@/lib/gurus13f";
 import { chatOnce, hasAI } from "@/lib/ai";
 import calendarJson from "@/data/calendar.json";
+import impactJson from "@/data/impact-map.json";
+import themesJson from "@/data/radar-themes.json";
+
+// หุ้นในห่วงโซ่ของธีม (จาก impact map) พร้อมราคา % วันนี้ — พูดธีมต้องบอก "หุ้นตัวไหน" เสมอ
+async function themeStocksWithQuotes(themeId: string): Promise<{ ticker: string; direction: "positive" | "negative"; reason: string; changePct: number | null }[]> {
+  try {
+    const theme = (themesJson as { themes: { id: string; impactIds: string[] }[] }).themes.find((t) => t.id === themeId);
+    const nodes = (impactJson as { nodes: { id: string; name: string; stocks: { ticker: string; direction: "positive" | "negative"; reason: string }[] }[] }).nodes;
+    const stocks: { ticker: string; direction: "positive" | "negative"; reason: string }[] = [];
+    for (const nid of theme?.impactIds ?? []) {
+      const node = nodes.find((n) => n.id === nid);
+      if (node) stocks.push(...node.stocks.map((s) => ({ ...s, reason: `${node.name}: ${s.reason}` })));
+    }
+    const uniq = stocks.filter((s, i) => stocks.findIndex((x) => x.ticker === s.ticker) === i).slice(0, 6);
+    const qmap = await getQuotes(uniq.map((s) => s.ticker)).catch(() => ({}) as Record<string, never>);
+    return uniq.map((s) => ({
+      ...s,
+      changePct: (() => {
+        const q = (qmap as Record<string, { changePct: number }>)[s.ticker];
+        return q && isFinite(q.changePct) ? q.changePct : null;
+      })(),
+    }));
+  } catch {
+    return [];
+  }
+}
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120;
@@ -27,7 +53,7 @@ interface TodayResult {
   watch: TodayItem[]; // 🟢 น่าสนใจ
   pressure: TodayItem[]; // 🔴 มีแรงกดดัน
   caution: { icon: string; text: string }[]; // ⚠️ ระวัง
-  opportunity: { icon: string; title: string; text: string; link?: string }[]; // 💎 โอกาส
+  opportunity: { icon: string; title: string; text: string; link?: string; stocks?: { ticker: string; direction: "positive" | "negative"; reason: string; changePct: number | null }[] }[]; // 💎 โอกาส
   portfolio: { ticker: string; flag: "warn" | "good"; text: string }[]; // 🫵 พอร์ตคุณ
 }
 
@@ -87,15 +113,19 @@ async function buildToday(holdings: string[]): Promise<TodayResult> {
   const oil = (macro as Record<string, { price: number; changePct: number }>)["CL=F"];
   if (oil && isFinite(oil.changePct) && oil.changePct >= 3) caution.push({ icon: "🛢️", text: `น้ำมันขึ้นแรง +${oil.changePct.toFixed(1)}% — กดดันเงินเฟ้อ/ต้นทุน โดยเฉพาะขนส่ง-การบิน` });
   const hotTheme = heat[0];
-  if (hotTheme && hotTheme.heat >= 70) caution.push({ icon: hotTheme.theme.emoji, text: `ธีม "${hotTheme.theme.name}" ร้อน ${hotTheme.heat}/100 — ราคาในกลุ่มนี้อาจ overheat แล้ว ระวังได้กำไรไม่ปล่อย` });
+  const hotThemeStocks = hotTheme ? await themeStocksWithQuotes(hotTheme.theme.id) : [];
+  if (hotTheme && hotTheme.heat >= 70) {
+    const names = hotThemeStocks.filter((s) => s.direction === "positive").slice(0, 3).map((s) => s.ticker).join(", ");
+    caution.push({ icon: hotTheme.theme.emoji, text: `ธีม "${hotTheme.theme.name}" ร้อน ${hotTheme.heat}/100${names ? ` (${names})` : ""} — ราคาในกลุ่มนี้อาจ overheat แล้ว ระวังได้กำไรไม่ปล่อย` });
+  }
   const today = new Date().toISOString().slice(0, 10);
   const soon = (calendarJson as { events: { date: string; label: string; star: number }[] }).events.find((e) => e.date >= today && e.date <= new Date(Date.now() + 10 * 864e5).toISOString().slice(0, 10) && e.star >= 3);
   if (soon) caution.push({ icon: "🗓️", text: `${soon.date}: ${soon.label} — เหตุการณ์ระดับ ★★★ ความผันผวนช่วงก่อน-หลังประกาศสูง` });
   const hotRSI = picks.picks.find((p) => /RSI (7[5-9]|[89]\d|100)/.test(p.reason));
   if (hotRSI) caution.push({ icon: "🌡️", text: `${hotRSI.ticker} RSI สูงผิดปกติ (${(hotRSI.reason.match(/RSI (\d+)/) ?? [])[1]}) — ราคาร้อนแรง ไล่ตามตอนนี้เสี่ยงถูกเก็บกำไร` });
 
-  // 💎 โอกาส — ธีมที่กำลังร้อน + กูรูเพิ่งขยับ
-  const opportunity: { icon: string; title: string; text: string; link?: string }[] = [];
+  // 💎 โอกาส — ธีมที่กำลังร้อน (พร้อมหุ้นในห่วงโซ่!) + กูรูเพิ่งขยับ
+  const opportunity: { icon: string; title: string; text: string; link?: string; stocks?: { ticker: string; direction: "positive" | "negative"; reason: string; changePct: number | null }[] }[] = [];
   if (hotTheme) {
     const wq = await getQuotes(hotTheme.theme.watch.slice(0, 4)).catch(() => ({}) as Record<string, never>);
     const movers = hotTheme.theme.watch.map((w) => (wq as Record<string, { symbol: string; changePct: number }>)[w]).filter((q) => q && isFinite(q.changePct));
@@ -105,6 +135,7 @@ async function buildToday(holdings: string[]): Promise<TodayResult> {
       title: `ธีมร้อนสุดวันนี้: ${hotTheme.theme.name} (${hotTheme.heat}/100)`,
       text: best ? `ตัวนำขบวน: ${best.symbol} ${best.changePct >= 0 ? "+" : ""}${best.changePct.toFixed(1)}% — ${hotTheme.theme.desc}` : hotTheme.theme.desc,
       link: "/radar",
+      stocks: hotThemeStocks,
     });
   }
   try {

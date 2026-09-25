@@ -15,7 +15,7 @@ interface TodayData {
   watch: TodayItem[];
   pressure: TodayItem[];
   caution: { icon: string; text: string }[];
-  opportunity: { icon: string; title: string; text: string; link?: string }[];
+  opportunity: { icon: string; title: string; text: string; link?: string; stocks?: { ticker: string; direction: "positive" | "negative"; reason: string; changePct: number | null }[] }[];
   portfolio: { ticker: string; flag: "warn" | "good"; text: string }[];
 }
 
@@ -115,21 +115,36 @@ export default function TodayBoard() {
             <div className="card p-4 border-accent/25">
               <h3 className="text-xs font-bold text-accent-soft mb-2">💎 โอกาสที่จับตา</h3>
               <div className="space-y-2.5">
-                {data.opportunity.map((o, i) =>
-                  o.link ? (
-                    <Link key={i} href={o.link} className="block group">
-                      <p className="text-xs font-bold text-zinc-100 group-hover:text-accent-soft">
-                        {o.icon} {o.title} <span className="text-accent-soft font-normal">→</span>
-                      </p>
-                      <p className="text-[11px] text-zinc-500 leading-snug">{o.text}</p>
-                    </Link>
-                  ) : (
-                    <div key={i}>
+                {data.opportunity.map((o, i) => (
+                  <div key={i}>
+                    {o.link ? (
+                      <Link href={o.link} className="block group">
+                        <p className="text-xs font-bold text-zinc-100 group-hover:text-accent-soft">
+                          {o.icon} {o.title} <span className="text-accent-soft font-normal">→</span>
+                        </p>
+                      </Link>
+                    ) : (
                       <p className="text-xs font-bold text-zinc-100">{o.icon} {o.title}</p>
-                      <p className="text-[11px] text-zinc-500 leading-snug">{o.text}</p>
-                    </div>
-                  )
-                )}
+                    )}
+                    <p className="text-[11px] text-zinc-500 leading-snug">{o.text}</p>
+                    {/* หุ้นในห่วงโซ่ของธีม — พูดธีมต้องบอก "หุ้นตัวไหน" เสมอ */}
+                    {o.stocks && o.stocks.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-1.5">
+                        {o.stocks.map((s) => (
+                          <Link
+                            key={s.ticker}
+                            href={`/stock/${s.ticker}`}
+                            title={s.reason}
+                            className={`chip text-[10px] border ${s.direction === "positive" ? "bg-up/10 text-up border-up/30" : "bg-down/10 text-down border-down/30"} hover:brightness-125`}
+                          >
+                            {s.direction === "positive" ? "✅" : "❌"} {s.ticker}
+                            {s.changePct !== null && <span className="num opacity-80"> {s.changePct >= 0 ? "+" : ""}{s.changePct.toFixed(1)}%</span>}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
           </div>
