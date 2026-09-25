@@ -7,6 +7,7 @@ import WatchlistStrip from "@/components/WatchlistStrip";
 import MarketHeatmap from "@/components/MarketHeatmap";
 import MoversByMarket from "@/components/MoversByMarket";
 import DailyPicks from "@/components/DailyPicks";
+import TodayBoard from "@/components/TodayBoard";
 import type { Quote } from "@/lib/types";
 
 interface DashboardData {
@@ -79,6 +80,9 @@ export default function HomePage() {
           ไม่มีการซื้อขายหุ้นแทนท่าน และจะไม่ขอรหัสบัญชี/รหัสโบรกเกอร์ใดๆ ทุกกรณี <Link href="/about" className="text-accent-soft underline underline-offset-2">ดูหลักการทำงาน</Link>
         </p>
       </section>
+
+      {/* 📋 วันนี้ควรรู้อะไร — ตอบ "วันนี้ทำอะไร" ในจอเดียว (เหนือสิ่งอื่นทั้งหมด) */}
+      <TodayBoard />
 
       {/* Daily Picks — ตอบคำถามแรกของคนเข้าใหม่: "ตัวไหนน่าสนใจวันนี้" */}
       <DailyPicks />
