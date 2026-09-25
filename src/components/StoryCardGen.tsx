@@ -12,6 +12,7 @@ interface Scene {
 
 interface StoryCardResult {
   engine: "ai" | "demo";
+  style?: string;
   ticker: string;
   name: string;
   caption: string;
@@ -22,22 +23,39 @@ interface StoryCardResult {
 
 const SUGGEST = ["MU", "NVDA", "TSM", "AVGO", "PTT.BK", "DEL"];
 
+// สไตล์คอนเทนต์ — แกะจากคลิปไวรัลจริง 4 สูตร
+const STYLES = [
+  { id: "classic", label: "🎬 เล่าหุ้น 30 วิ", desc: "hook→เฉลยเลขจริง→ทำไม→3 จุด" },
+  { id: "contrarian", label: "🧠 ทุกคนบอกแพง ผมว่าสนใจ", desc: "วาลูเอชั่นครบมุม PEG·3 ฉาก·แนวรับ" },
+  { id: "listicle", label: "🏆 5 บริษัท [ธีม] มาแรง", desc: "listicle ตามธีม (437K views)" },
+  { id: "story", label: "🕵️ ธุรกิจเบื้องหลัง+คูเมือง", desc: "เล่าเรื่อง→AI แทนได้ไหม?" },
+];
+
+const THEMES = ["พลังงาน", "AI", "อวกาศ", "อาวุธ", "ยานยนต์ไฟฟ้า", "ครึ่งตัวนำ"];
+
 // 🎬 Story Card Generator — ผลิตคอนเทนต์สไตล์ "เล่าหุ้น 30 วินาที" จากข้อมูลจริงของหุ้น
 // (ใช้ใน Admin console เป็นโรงงานคอนเทนต์ และในหน้าหุ้นแบบย่อ)
 export default function StoryCardGen({ defaultTicker = "", compact = false }: { defaultTicker?: string; compact?: boolean }) {
   const [ticker, setTicker] = useState(defaultTicker);
+  const [style, setStyle] = useState("classic");
+  const [theme, setTheme] = useState("พลังงาน");
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<StoryCardResult | null>(null);
   const [copied, setCopied] = useState<"caption" | "tags" | null>(null);
 
   const run = async (t?: string) => {
     const s = (t ?? ticker).trim().toUpperCase();
-    if (!s) return;
+    if (style === "listicle") {
+      if (!theme.trim()) return;
+    } else if (!s) return;
     setTicker(s);
     setBusy(true);
     setResult(null);
     try {
-      const res = await fetch(`/api/ai/story-card?s=${encodeURIComponent(s)}`);
+      const params = new URLSearchParams({ style });
+      if (style === "listicle") params.set("q", theme.trim());
+      else params.set("s", s);
+      const res = await fetch(`/api/ai/story-card?${params}`);
       setResult(await res.json());
     } catch {
       setResult(null);
@@ -59,25 +77,63 @@ export default function StoryCardGen({ defaultTicker = "", compact = false }: { 
         สูตรคอนเทนต์ไวรัล: hook คำถาม → เฉลยด้วยตัวเลขจริง → ทำไม? → 3 จุดที่ต้องรู้ → สรุป — ได้ทั้ง caption พร้อมโพสต์ และ storyboard ตัดวิดีโอ (6-7 ฉาก)
       </p>
 
-      <div className="flex gap-2 flex-wrap mb-2">
-        {!compact &&
-          SUGGEST.map((s) => (
-            <button key={s} className="chip bg-base-800 text-zinc-400 border border-base-700 hover:text-zinc-100" onClick={() => run(s)}>
-              {s}
+      {/* เลือกสไตล์ */}
+      <div className="flex gap-1.5 flex-wrap mb-2">
+        {STYLES.map((st) => (
+          <button
+            key={st.id}
+            title={st.desc}
+            className={`px-2.5 py-1 rounded-lg text-xs font-bold ${style === st.id ? "bg-accent text-zinc-950" : "bg-base-800 text-zinc-400 hover:bg-base-700"}`}
+            onClick={() => {
+              setStyle(st.id);
+              setResult(null);
+            }}
+          >
+            {st.label}
+          </button>
+        ))}
+      </div>
+
+      {style === "listicle" ? (
+        <div className="flex gap-2 flex-wrap mb-2">
+          {THEMES.map((t) => (
+            <button key={t} className={`chip border ${theme === t ? "bg-accent/15 text-accent-soft border-accent/40" : "bg-base-800 text-zinc-400 border-base-700 hover:text-zinc-100"}`} onClick={() => setTheme(t)}>
+              {t}
             </button>
           ))}
-      </div>
-      <div className="flex gap-2">
-        <div className="flex-1">
-          <TickerPicker
-            placeholder="🔍 ค้นหาหุ้น แล้วกดเลือก เช่น Micron / NVDA / PTT"
-            onSelect={(symbol) => setTicker(symbol)}
-          />
         </div>
-        <button className="btn-primary shrink-0" onClick={() => run()} disabled={busy || !ticker.trim()}>
-          {busy ? "กำลังเขียน…" : "🎬 สร้างคอนเทนต์"}
-        </button>
-      </div>
+      ) : (
+        !compact && (
+          <div className="flex gap-2 flex-wrap mb-2">
+            {SUGGEST.map((s) => (
+              <button key={s} className="chip bg-base-800 text-zinc-400 border border-base-700 hover:text-zinc-100" onClick={() => run(s)}>
+                {s}
+              </button>
+            ))}
+          </div>
+        )
+      )}
+
+      {style === "listicle" ? (
+        <div className="flex gap-2">
+          <input className="input" placeholder="ธีม เช่น พลังงาน, AI, อวกาศ, อาหาร" value={theme} onChange={(e) => setTheme(e.target.value)} onKeyDown={(e) => e.key === "Enter" && run()} />
+          <button className="btn-primary shrink-0" onClick={() => run()} disabled={busy || !theme.trim()}>
+            {busy ? "กำลังเขียน…" : "🏆 สร้างลิสต์ 5 บริษัท"}
+          </button>
+        </div>
+      ) : (
+        <div className="flex gap-2">
+          <div className="flex-1">
+            <TickerPicker
+              placeholder="🔍 ค้นหาหุ้น แล้วกดเลือก เช่น Micron / NVDA / PTT"
+              onSelect={(symbol) => setTicker(symbol)}
+            />
+          </div>
+          <button className="btn-primary shrink-0" onClick={() => run()} disabled={busy || !ticker.trim()}>
+            {busy ? "กำลังเขียน…" : "🎬 สร้างคอนเทนต์"}
+          </button>
+        </div>
+      )}
 
       {result && (
         <div className="mt-4 space-y-3">

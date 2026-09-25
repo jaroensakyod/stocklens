@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 
 const NAV = [
   { href: "/", label: "หน้าแรก" },
+  { href: "/surge", label: "🚀 หุ้นซิ่ง" },
   { href: "/radar", label: "Global Radar" },
   { href: "/screener", label: "คัดกรองหุ้น" },
   { href: "/portfolio", label: "พอร์ตของฉัน" },
