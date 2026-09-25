@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { chatOnce, hasAI, SYSTEM_EVENT } from "@/lib/ai";
 import { buildChainsForNodeIds, keywordAnalyze } from "@/lib/radar";
+import { getQuotes } from "@/lib/yahoo";
 import type { ChainResult, EventAnalysis } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -62,15 +63,35 @@ export async function POST(req: NextRequest) {
             direction: (s.direction === "negative" ? "negative" : "positive") as ChainResult["stocks"][number]["direction"],
             strength: (s.strength as ChainResult["stocks"][number]["strength"]) ?? "medium",
             reason: s.reason ?? "",
+            quote: undefined as ChainResult["stocks"][number]["quote"],
           })),
         };
       });
+      // เติมราคาสดให้ครบทุกตัว — batch + รอบสองลอง .BK สำหรับหุ้นไทยที่ AI พิมพ์ไม่มี suffix
+      const finalChains = merged.length ? merged : base.chains;
+      const attach = async (suffix: string) => {
+        const need = [...new Set(finalChains.flatMap((c) => c.stocks.filter((s) => !s.quote && (suffix === '' ? true : !s.ticker.includes('.'))).map((s) => s.ticker + suffix)))].slice(0, 30);
+        if (!need.length) return;
+        const qmap = await getQuotes(need).catch(() => ({}) as Record<string, never>);
+        for (const c of finalChains) {
+          for (const s of c.stocks) {
+            if (s.quote) continue;
+            const q = (qmap as Record<string, ChainResult["stocks"][number]["quote"]>)[s.ticker + suffix];
+            if (q && isFinite(q.price)) {
+              s.quote = q;
+              s.ticker = q.symbol; // แก้เป็น symbol จริง (DELTA → DELTA.BK) ให้ลิงก์หน้าหุ้นใช้ได้
+            }
+          }
+        }
+      };
+      await attach('');
+      await attach('.BK');
       return NextResponse.json({
         input: text,
         engine: "ai",
         headline: parsed.headline || base.headline,
         narrative: parsed.narrative || "",
-        chains: merged.length ? merged : base.chains,
+        chains: finalChains,
         note: "วิเคราะห์โดย AI บนฐานความรู้ StockLens + ราคาสดจาก Yahoo — เป็นกรอบวิเคราะห์ ไม่ใช่คำแนะนำการลงทุน",
       });
     } catch {

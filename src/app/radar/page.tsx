@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import MacroChain from "@/components/MacroChain";
+import ImpactGraph from "@/components/ImpactGraph";
 import type { EventAnalysis } from "@/lib/types";
 
 interface RadarData {
@@ -22,9 +23,12 @@ export default function RadarPage() {
   const [text, setText] = useState("");
   const [result, setResult] = useState<EventAnalysis | null>(null);
   const [busy, setBusy] = useState(false);
+  const [news, setNews] = useState<{ title: string; publisher: string }[]>([]);
 
   useEffect(() => {
     fetch("/api/radar").then((r) => r.json()).then(setData).catch(() => {});
+    // ข่าวสดวันนี้ — แตะปุ๊บวิเคราะห์กราฟความเชื่อมโยงได้ทันที
+    fetch("/api/news?q=oil&count=6").then((r) => r.json()).then((j) => setNews((j.news ?? []).slice(0, 5))).catch(() => {});
   }, []);
 
   const analyze = async (t?: string) => {
@@ -78,9 +82,33 @@ export default function RadarPage() {
             </button>
           ))}
         </div>
+
+        {/* ข่าวสดวันนี้ — แตะแล้วเห็นกราฟความเชื่อมโยงทันที */}
+        {news.length > 0 && (
+          <div className="mt-4 pt-3 border-t border-base-700/60">
+            <p className="text-xs text-zinc-500 mb-2">📰 เหตุการณ์จากข่าวจริงวันนี้ — กดเพื่อดู "ส่งผลถึงใคร":</p>
+            <div className="space-y-1.5">
+              {news.map((n, i) => (
+                <button
+                  key={i}
+                  className="w-full text-left text-[11px] text-zinc-400 hover:text-accent-soft leading-snug flex gap-1.5"
+                  onClick={() => { setText(n.title); analyze(n.title); }}
+                >
+                  <span className="text-zinc-600 shrink-0">⚡</span>
+                  <span>{n.title.length > 90 ? n.title.slice(0, 88) + "…" : n.title} <span className="text-zinc-600">({n.publisher})</span></span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </section>
 
-      {result && <MacroChain result={result} />}
+      {result && (
+        <div className="space-y-4">
+          <ImpactGraph result={result} />
+          <MacroChain result={result} />
+        </div>
+      )}
 
       {/* ความร้อน 8 ธีม */}
       <section>
