@@ -76,3 +76,9 @@ export function requireMember(req: NextRequest): { ok: boolean; tier: "free" | "
   const tier = getTierFromRequest(req);
   return { ok: tier !== "free", tier };
 }
+
+/** ฟีเจอร์เจาะลึกระดับ Pro — มุมมองกูรู 4 สไตล์ / AI ปรับพอร์ตส่วนตัว / แชทโหมดเจาะลึก */
+export function requirePro(req: NextRequest): { ok: boolean; tier: "free" | "starter" | "pro" } {
+  const tier = getTierFromRequest(req);
+  return { ok: tier === "pro", tier };
+}

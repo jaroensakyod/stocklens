@@ -34,12 +34,12 @@ export interface ChatMessage {
 }
 
 /** เรียก LLM แบบ stream — คืน ReadableStream ของข้อความ (text ตามลำดับ) */
-export async function chatStream(messages: ChatMessage[], temperature = 0.4): Promise<ReadableStream<Uint8Array>> {
+export async function chatStream(messages: ChatMessage[], temperature = 0.4, maxTokens?: number): Promise<ReadableStream<Uint8Array>> {
   const { baseUrl, apiKey, model } = aiConfig();
   const res = await fetch(baseUrl.replace(/\/$/, "") + "/chat/completions", {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
-    body: JSON.stringify({ model, messages, temperature, stream: true }),
+    body: JSON.stringify({ model, messages, temperature, stream: true, ...(maxTokens ? { max_tokens: maxTokens } : {}) }),
   });
   if (!res.ok || !res.body) {
     const errText = await res.text().catch(() => "");

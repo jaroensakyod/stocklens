@@ -83,6 +83,15 @@ body {
 .ai-chat strong {
   color: #fafafa;
 }
+.ai-chat .md-table {
+  @apply my-2 w-full text-left text-[11px] border-collapse;
+}
+.ai-chat .md-table th {
+  @apply px-1.5 py-1 border-b border-base-600 text-zinc-300 font-bold whitespace-nowrap;
+}
+.ai-chat .md-table td {
+  @apply px-1.5 py-1 border-b border-base-700/50 text-zinc-400;
+}
 
 /* ===== markdown ในบทวิเคราะห์ AI ===== */
 .ai-md h2 {

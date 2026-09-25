@@ -65,7 +65,7 @@ function rsi14(closes: number[]): number | null {
 // R3 ต่ำกว่า SMA200 และ RSI<45 → ลด 25% (สัญญาณเอียงลบทั้งระบบ)
 // R4 ติดลบเกิน 45% จากราคาเข้า → ตัดครึ่ง (stop-loss ที่ advisor แนะนำเสมอ)
 // R5 ถ้าตัวที่สัญญาณลบ ≥ ครึ่งพอร์ต → เก็บเงินสด 15% (de-risk เหมือน advisor)
-function applyAdvisorRules(
+export function applyAdvisorRules(
   holdings: { ticker: string; price: number; entryPrice: number; weight: number; rsi: number | null; sma200: number | null }[]
 ): { targets: Record<string, number>; actions: AdvisorAction[]; cashPct: number } {
   const actions: AdvisorAction[] = [];

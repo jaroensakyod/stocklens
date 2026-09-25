@@ -38,3 +38,14 @@ export async function kvSet(key: string, value: unknown): Promise<boolean> {
     return false;
   }
 }
+
+/** ลบ key ออกจาก Redis */
+export async function kvDel(key: string): Promise<boolean> {
+  if (!hasDB()) return false;
+  try {
+    const res = await fetch(`${URL_}/del/${key}`, { method: "POST", headers: { Authorization: `Bearer ${TOKEN}` } });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
