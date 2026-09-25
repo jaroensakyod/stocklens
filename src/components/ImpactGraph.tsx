@@ -1,200 +1,190 @@
 "use client";
 
-import type { EventAnalysis } from "@/lib/types";
+import { useMemo } from "react";
+import {
+  ReactFlow,
+  type Node,
+  type Edge,
+  type NodeProps,
+  Position,
+  Handle,
+  Background,
+  BackgroundVariant,
+} from "@xyflow/react";
+import "@xyflow/react/dist/style.css";
+import dagre from "dagre";
+import type { ChainResult, EventAnalysis } from "@/lib/types";
 
-// 🕸️ กราฟความเชื่อมโยงเหตุการณ์ — วาดเป็นโหนด+เส้นเชื่อม (SVG แท้ พิมพ์/แชร์ได้คมชัด)
-// โครง: เหตุการณ์ (ซ้าย) → ตัวกลางที่กระทบ (น้ำมัน/ดอกเบี้ย/อุตสาหกรรม) → หุ้นตัวไหนขึ้น✅/ลง❌ (ขวา พร้อมราคาสด)
+// 🕸️ กราฟความเชื่อมโยงเหตุการณ์ — สร้างบน React Flow + dagre (auto-layout ซ้าย→ขวา)
+// node เป็น HTML+Tailwind จริง: ตัวไทยเรียงสวย ใส่ chip/สี/animation ได้เต็มที่ + ลาก/ซูมได้
+
+type FlowData = Record<string, unknown>;
+
+const NODE_W = { event: 220, chain: 200, stock: 230 };
+const NODE_H = { event: 110, chain: 86, stock: 76 };
+
+// ---------- โหนด: เหตุการณ์ ----------
+function EventNode({ data }: NodeProps) {
+  const d = data as FlowData & { label: string };
+  return (
+    <div className="px-4 py-3 rounded-2xl bg-gradient-to-br from-amber-500/20 to-amber-600/5 border-2 border-amber-500/60 shadow-lg shadow-amber-500/10 max-w-[230px]">
+      <Handle type="source" position={Position.Right} className="!bg-amber-500 !border-amber-300" />
+      <p className="text-[10px] font-bold text-amber-400 tracking-wide">⚡ เหตุการณ์</p>
+      <p className="text-xs text-zinc-100 font-semibold leading-relaxed mt-1 break-words">{d.label}</p>
+    </div>
+  );
+}
+
+// ---------- โหนด: ตัวกลางที่กระทบ ----------
+function ChainNode({ data }: NodeProps) {
+  const d = data as FlowData & { label: string; reason?: string; up: boolean };
+  return (
+    <div className={`px-3.5 py-2.5 rounded-2xl border-2 max-w-[210px] ${d.up ? "bg-teal-500/10 border-teal-400/60" : "bg-rose-500/10 border-rose-400/60"}`}>
+      <Handle type="target" position={Position.Left} className={d.up ? "!bg-teal-400" : "!bg-rose-400"} />
+      <Handle type="source" position={Position.Right} className={d.up ? "!bg-teal-400" : "!bg-rose-400"} />
+      <p className={`text-[10px] font-bold tracking-wide ${d.up ? "text-teal-300" : "text-rose-300"}`}>{d.up ? "▲ หนุนราคา" : "▼ แรงกดดัน"}</p>
+      <p className="text-[13px] text-zinc-50 font-bold leading-snug mt-0.5">{d.label}</p>
+      {d.reason && <p className="text-[10px] text-zinc-500 leading-snug mt-1 line-clamp-2">{d.reason}</p>}
+    </div>
+  );
+}
+
+// ---------- โหนด: หุ้น (ได้/เสียประโยชน์) ----------
+function StockNode({ data }: NodeProps) {
+  const d = data as FlowData & { ticker: string; reason: string; pct: number | null; price: number | null; pos: boolean; strong: boolean };
+  return (
+    <a
+      href={`/stock/${encodeURIComponent(d.ticker)}`}
+      title={d.reason}
+      className={`block w-full h-full px-3 py-2 rounded-xl border transition-transform hover:scale-[1.04] ${
+        d.pos ? "bg-emerald-500/10 border-emerald-400/60 hover:border-emerald-300" : "bg-rose-500/10 border-rose-400/60 hover:border-rose-300"
+      }`}
+    >
+      <Handle type="target" position={Position.Left} className={d.pos ? "!bg-emerald-400" : "!bg-rose-400"} />
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-[13px] font-extrabold text-zinc-50 truncate">
+          {d.pos ? "✅" : "❌"} {d.ticker}
+        </span>
+        {d.pct !== null && (
+          <span className={`num text-[11px] font-extrabold shrink-0 px-1.5 py-0.5 rounded-md ${d.pct >= 0 ? "text-emerald-300 bg-emerald-500/15" : "text-rose-300 bg-rose-500/15"}`}>
+            {d.pct >= 0 ? "+" : ""}{d.pct.toFixed(1)}%
+          </span>
+        )}
+      </div>
+      {d.price !== null && <span className="num text-[9.5px] text-zinc-500">{d.price.toFixed(2)}</span>}
+      <p className="text-[10px] text-zinc-400 leading-tight mt-0.5 line-clamp-2">{d.reason}</p>
+      {d.strong && <span className="text-[9px] text-zinc-500">ผลกระทบแรง</span>}
+    </a>
+  );
+}
+
+const NODE_TYPES = { event: EventNode, chain: ChainNode, stock: StockNode };
+
+// ---------- dagre: จัด layout อัตโนมัติ ซ้าย→ขวา ----------
+function layoutNodes(nodes: Node[], edges: Edge[]): Node[] {
+  const g = new dagre.graphlib.Graph();
+  g.setGraph({ rankdir: "LR", ranksep: 110, nodesep: 18, edgesep: 24, marginx: 20, marginy: 20 });
+  g.setDefaultEdgeLabel(() => ({}));
+  for (const n of nodes) g.setNode(n.id, { width: NODE_W[n.type as keyof typeof NODE_W], height: NODE_H[n.type as keyof typeof NODE_H] });
+  for (const e of edges) g.setEdge(e.source, e.target);
+  dagre.layout(g);
+  return nodes.map((n) => {
+    const pos = g.node(n.id);
+    return { ...n, position: { x: pos.x - pos.width / 2, y: pos.y - pos.height / 2 } };
+  });
+}
+
 export default function ImpactGraph({ result }: { result: EventAnalysis }) {
-  const chains = result.chains.filter((c) => c.stocks.length > 0);
-  if (chains.length === 0) return null;
+  const { nodes, edges } = useMemo(() => {
+    const chains = result.chains.filter((c) => c.stocks.length > 0);
+    const nodes: Node<FlowData>[] = [];
+    const edges: Edge[] = [];
 
-  // ---------- จัด layout ----------
-  const STOCK_W = 168;
-  const STOCK_H = 40;
-  const STOCK_GAP = 10;
-  const CHAIN_W = 150;
-  const CHAIN_H = 54;
-  const CHAIN_GAP = 34;
-  const PAD = 24;
-  const EVENT_X = 90;
-  const CHAIN_X = 330;
-  const STOCK_X = 620;
-  const svgW = STOCK_X + STOCK_W + PAD;
+    const eventText = result.input.length > 110 ? result.input.slice(0, 107) + "…" : result.input;
+    nodes.push({
+      id: "event",
+      type: "event",
+      position: { x: 0, y: 0 },
+      data: { label: eventText },
+      draggable: true,
+    });
 
-  // ความสูงแต่ละ chain = จำนวนหุ้น (แยกบวก/ลบเป็นช่องเดียวกันเรียงตาม direction)
-  const chainDir = (c: (typeof chains)[number]) => (c.stocks.filter((s) => s.direction === "positive").length >= c.stocks.length / 2 ? "up" : "down");
-  const bands = chains.map((c) => {
-    const n = Math.max(c.stocks.length, 1);
-    return { chain: c, height: Math.max(n * (STOCK_H + STOCK_GAP) + 10, CHAIN_H + 12) };
-  });
-  const totalH = bands.reduce((a, b) => a + b.height + CHAIN_GAP, 0) + PAD * 2;
-  const svgH = Math.max(totalH, 260);
+    chains.forEach((c, ci) => {
+      const up = c.stocks.filter((s) => s.direction === "positive").length >= c.stocks.length / 2;
+      const cid = `chain-${ci}`;
+      nodes.push({
+        id: cid,
+        type: "chain",
+        position: { x: 0, y: 0 },
+        data: { label: c.name, reason: c.reason, up },
+        draggable: true,
+      });
+      edges.push({
+        id: `e-${ci}`,
+        source: "event",
+        target: cid,
+        style: { stroke: up ? "#2dd4bf" : "#fb7185", strokeWidth: 2, opacity: 0.8 },
+      });
 
-  let y = PAD;
-  const layout = bands.map((b) => {
-    const bandY = y;
-    const bandH = b.height;
-    const chainCy = bandY + bandH / 2;
-    const stocks = b.chain.stocks.map((s, i) => ({
-      s,
-      y: bandY + 5 + i * (STOCK_H + STOCK_GAP),
-    }));
-    y += bandH + CHAIN_GAP;
-    return { chain: b.chain, chainCy, stocks };
-  });
+      // จัดกลุ่มให้สวย: ได้ประโยชน์ ✅ ก่อน เสียประโยชน์ ❌ แล้วเรียงตามความแรง (แรง→เบา)
+      const sorted = [...c.stocks].sort((a, b) => {
+        if (a.direction !== b.direction) return a.direction === "positive" ? -1 : 1;
+        const w = { strong: 0, medium: 1, weak: 2 } as const;
+        return w[a.strength] - w[b.strength];
+      });
+      sorted.forEach((s, si) => {
+        const sid = `s-${ci}-${si}`;
+        const pct = s.quote && isFinite(s.quote.changePct) ? s.quote.changePct : null;
+        nodes.push({
+          id: sid,
+          type: "stock",
+          position: { x: 0, y: 0 },
+          data: { ticker: s.ticker, reason: s.reason, pct, price: s.quote && isFinite(s.quote.price) ? s.quote.price : null, pos: s.direction === "positive", strong: s.strength === "strong" },
+          draggable: true,
+        });
+        edges.push({
+          id: `se-${ci}-${si}`,
+          source: cid,
+          target: sid,
+          style: {
+            stroke: s.direction === "positive" ? "#34d399" : "#fb7185",
+            strokeWidth: s.strength === "strong" ? 2.4 : s.strength === "medium" ? 1.6 : 1.1,
+            opacity: 0.75,
+            strokeDasharray: s.strength === "weak" ? "5 5" : undefined,
+          },
+        });
+      });
+    });
 
-  const eventCy = svgH / 2;
-  const eventLabel = result.input.length > 60 ? result.input.slice(0, 57) + "…" : result.input;
-  const lines = splitLines(eventLabel, 14);
+    return { nodes: layoutNodes(nodes, edges), edges };
+  }, [result]);
+
+  if (nodes.length <= 1) return null;
 
   return (
     <div className="card p-4">
       <div className="flex items-center justify-between mb-2 flex-wrap gap-1">
         <h3 className="text-sm font-bold text-zinc-100">🕸️ กราฟความเชื่อมโยง — เหตุการณ์ส่งผลถึงใคร</h3>
-        <span className="text-[10px] text-zinc-600">คลิกหุ้นเพื่อเข้าหน้าวิเคราะห์ · เลื่อนดูได้ (มือถือ)</span>
+        <span className="text-[10px] text-zinc-600">ลากโหนดได้ · ซูมด้วยล้อเมาส์/นิ้ว · คลิกหุ้นเข้าหน้าวิเคราะห์</span>
       </div>
-      <div className="overflow-x-auto">
-        <svg viewBox={`0 0 ${svgW} ${svgH}`} width="100%" style={{ minWidth: 780 }} role="img" aria-label="กราฟความเชื่อมโยงเหตุการณ์">
-          <defs>
-            <marker id="arrowUp" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-              <path d="M0,6 L6,0 L12,6" fill="none" stroke="#34d399" strokeWidth="1.6" />
-            </marker>
-            <marker id="arrowDown" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-              <path d="M0,0 L6,6 L12,0" fill="none" stroke="#fb7185" strokeWidth="1.6" />
-            </marker>
-          </defs>
-
-          {/* เส้นเชื่อม: เหตุการณ์ → ตัวกลาง */}
-          {layout.map(({ chain, chainCy }, i) => {
-            const c = chainDir(chain) === "down" ? "#fb7185" : "#2dd4bf";
-            return (
-              <path
-                key={"e" + i}
-                d={`M ${EVENT_X + 66} ${eventCy} C ${EVENT_X + 120} ${eventCy}, ${CHAIN_X - 110} ${chainCy}, ${CHAIN_X - 12} ${chainCy}`}
-                fill="none"
-                stroke={c}
-                strokeWidth={2}
-                strokeOpacity={0.75}
-              />
-            );
-          })}
-
-          {/* เส้นเชื่อม: ตัวกลาง → หุ้น */}
-          {layout.map(({ chain, chainCy, stocks }, i) =>
-            stocks.map(({ s, y: sy }, j) => {
-              const pos = s.direction === "positive";
-              return (
-                <path
-                  key={`s${i}-${j}`}
-                  d={`M ${CHAIN_X + CHAIN_W / 2} ${chainCy} C ${CHAIN_X + CHAIN_W / 2 + 70} ${chainCy}, ${STOCK_X - 80} ${sy + STOCK_H / 2}, ${STOCK_X - 6} ${sy + STOCK_H / 2}`}
-                  fill="none"
-                  stroke={pos ? "#34d399" : "#fb7185"}
-                  strokeWidth={s.strength === "strong" ? 2.4 : s.strength === "medium" ? 1.7 : 1.1}
-                  strokeOpacity={0.7}
-                  strokeDasharray={s.strength === "weak" ? "4 4" : undefined}
-                  markerEnd={pos ? "url(#arrowUp)" : "url(#arrowDown)"}
-                />
-              );
-            })
-          )}
-
-          {/* โหนดเหตุการณ์ */}
-          <g>
-            <circle cx={EVENT_X} cy={eventCy} r={58} fill="#f59e0b" fillOpacity={0.14} stroke="#f59e0b" strokeWidth={2} />
-            <text x={EVENT_X} y={eventCy - lines.length * 8 + 4} textAnchor="middle" fill="#fbbf24" fontSize={11} fontWeight={700}>
-              ⚡ เหตุการณ์
-            </text>
-            {lines.map((ln, i) => (
-              <text key={i} x={EVENT_X} y={eventCy + 8 + i * 13} textAnchor="middle" fill="#e4e4e7" fontSize={11}>
-                {ln}
-              </text>
-            ))}
-          </g>
-
-          {/* โหนดตัวกลาง (สินค้า/มหภาค/อุตสาหกรรม) */}
-          {layout.map(({ chain, chainCy }, i) => {
-            const down = chainDir(chain) === "down";
-            const nameLines = splitLines(chain.name, 13);
-            return (
-              <g key={"c" + i}>
-                <rect
-                  x={CHAIN_X - CHAIN_W / 2}
-                  y={chainCy - CHAIN_H / 2}
-                  width={CHAIN_W}
-                  height={CHAIN_H}
-                  rx={14}
-                  fill={down ? "#fb7185" : "#2dd4bf"}
-                  fillOpacity={0.12}
-                  stroke={down ? "#fb7185" : "#2dd4bf"}
-                  strokeWidth={1.6}
-                />
-                <text x={CHAIN_X} y={chainCy - nameLines.length * 7 + 2} textAnchor="middle" fill={down ? "#fda4af" : "#5eead4"} fontSize={10.5} fontWeight={700}>
-                  {down ? "▼ แรงกดดัน" : "▲ หนุนราคา"}
-                </text>
-                {nameLines.map((ln, k) => (
-                  <text key={k} x={CHAIN_X} y={chainCy + 8 + k * 13} textAnchor="middle" fill="#e4e4e7" fontSize={12} fontWeight={700}>
-                    {ln}
-                  </text>
-                ))}
-              </g>
-            );
-          })}
-
-          {/* โหนดหุ้น (คลิกได้) */}
-          {layout.map(({ stocks }, i) =>
-            stocks.map(({ s, y: sy }, j) => {
-              const pos = s.direction === "positive";
-              const q = s.quote;
-              const pct = q && isFinite(q.changePct) ? q.changePct : null;
-              return (
-                <a key={`n${i}-${j}`} href={`/stock/${encodeURIComponent(s.ticker)}`}>
-                  <title>{`${s.ticker} — ${s.reason}`}</title>
-                  <rect
-                    x={STOCK_X}
-                    y={sy}
-                    width={STOCK_W}
-                    height={STOCK_H}
-                    rx={9}
-                    fill={pos ? "#34d399" : "#fb7185"}
-                    fillOpacity={0.1}
-                    stroke={pos ? "#34d399" : "#fb7185"}
-                    strokeWidth={1.4}
-                  />
-                  <text x={STOCK_X + 12} y={sy + 17} fill="#fafafa" fontSize={13} fontWeight={800}>
-                    {pos ? "✅" : "❌"} {s.ticker}
-                  </text>
-                  <text x={STOCK_X + 12} y={sy + 31} fill="#a1a1aa" fontSize={9.5}>
-                    {s.reason.length > 26 ? s.reason.slice(0, 25) + "…" : s.reason}
-                  </text>
-                  {pct !== null && (
-                    <text x={STOCK_X + STOCK_W - 10} y={sy + 24} textAnchor="end" fill={pct >= 0 ? "#34d399" : "#fb7185"} fontSize={11.5} fontWeight={800}>
-                      {pct >= 0 ? "+" : ""}
-                      {pct.toFixed(1)}%
-                    </text>
-                  )}
-                </a>
-              );
-            })
-          )}
-        </svg>
+      <div className="h-[560px] rounded-xl overflow-hidden bg-base-900/40">
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          nodeTypes={NODE_TYPES}
+          fitView
+          fitViewOptions={{ padding: 0.15, maxZoom: 1 }}
+          minZoom={0.25}
+          maxZoom={1.6}
+          nodesConnectable={false}
+          defaultEdgeOptions={{ type: "smoothstep" }}
+        >
+          <Background variant={BackgroundVariant.Dots} gap={22} size={1.4} color="#27272a" />
+        </ReactFlow>
       </div>
-      <p className="text-[10px] text-zinc-600 mt-1">
-        เส้นหนา = ผลกระทบแรง · เส้นประ = เบา · % คือราคาหุ้นวันนี้ (delay ~15 นาที) · เหตุผลเต็มดูในเมาส์-กดที่หุ้น
+      <p className="text-[10px] text-zinc-600 mt-1.5">
+        เส้นหนา = ผลกระทบแรง · เส้นประ = เบา · % คือราคาหุ้นวันนี้ (delay ~15 นาที) · เหตุผลเต็มเห็นตอนเอาเมาส์ชี้หุ้น
       </p>
     </div>
   );
-}
-
-function splitLines(text: string, maxChars: number): string[] {
-  const words = text.split(" ");
-  const out: string[] = [];
-  let cur = "";
-  for (const w of words) {
-    if ((cur + " " + w).trim().length > maxChars) {
-      if (cur) out.push(cur);
-      cur = w;
-    } else cur = (cur + " " + w).trim();
-  }
-  if (cur) out.push(cur);
-  return out.slice(0, 3);
 }
