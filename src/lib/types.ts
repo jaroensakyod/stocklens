@@ -50,6 +50,28 @@ export interface TechnicalRead {
   bollinger?: { upper: number; mid: number; lower: number; pctB: number };
   signal: SignalLevel;
   reasons: string[];
+  // ===== เทคนิคขั้นสูง =====
+  fib?: {
+    direction: "up" | "down";
+    from: number;
+    to: number;
+    legPct: number; // ขาเดิมกว้างกี่ %
+    retracedPct: number | null; // ปัจจุบันย่อไปแล้วกี่ % ของขา
+    levels: { ratio: number; price: number }[]; // 23.6/38.2/50/61.8/78.6
+    extensions: { ratio: number; price: number }[]; // 127.2/161.8
+    nearestSupport: { ratio: number; price: number } | null;
+    nearestResistance: { ratio: number; price: number } | null;
+  };
+  divergence?: { type: "bullish" | "bearish"; detail: string };
+  atr14?: number;
+  atrStop?: { long: number; short: number }; // จุดตัดขาดทุนอ้างอิง 2×ATR
+  elliott?: {
+    structure: string; // สรุปโครงสร้างภาษาไทย
+    waveLabel: string; // เช่น "กำลังเล่นเวฟ 4 (พักตัว)"
+    expectation: string; // ทฤษฎีบอกว่าต่อไปทำอะไร
+    invalidation: number | null; // ราคาที่ถ้าทะลุ = นับเวฟผิด
+    confidence: number; // 0-100
+  };
 }
 
 export interface StockAnalysis {

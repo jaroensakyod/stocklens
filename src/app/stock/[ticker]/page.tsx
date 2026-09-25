@@ -180,6 +180,60 @@ export default function StockPage() {
                 {t.macd && <Stat k="MACD hist" v={t.macd.hist.toFixed(2)} />}
                 {t.bollinger && <Stat k="%B (Bollinger)" v={(t.bollinger.pctB * 100).toFixed(0) + "%"} />}
               </div>
+
+              {/* 🧩 เทคนิคขั้นสูง: Fibonacci · Elliott Wave · Divergence · ATR */}
+              {(t.fib || t.elliott || t.divergence || t.atrStop) && (
+                <div className="border border-base-700 rounded-xl p-3.5 bg-base-850 mb-3 space-y-3">
+                  <h4 className="text-xs font-bold text-accent-soft">🧩 เทคนิคขั้นสูง</h4>
+
+                  {t.fib && (
+                    <div>
+                      <p className="text-[11px] text-zinc-300 font-semibold">
+                        📐 Fibonacci — ขา{t.fib.direction === "up" ? "ขึ้น" : "ลง"} {t.fib.from.toFixed(1)} → {t.fib.to.toFixed(1)} ({t.fib.legPct.toFixed(0)}%)
+                        {t.fib.retracedPct !== null && <> · ตอนนี้{t.fib.retracedPct < 0 ? `ทะลุปลายขาไปแล้ว ${Math.abs(t.fib.retracedPct).toFixed(0)}%` : t.fib.retracedPct > 100 ? `ย่อเกินต้นขา ${t.fib.retracedPct.toFixed(0)}%` : `ย่อ ${t.fib.retracedPct.toFixed(0)}% ของขา`}</>}
+                      </p>
+                      <div className="flex flex-wrap gap-1 mt-1.5">
+                        {t.fib.levels.map((l) => (
+                          <span key={l.ratio} className="chip text-[10px] bg-base-800 text-zinc-400 border border-base-700 num">
+                            {(l.ratio * 100).toFixed(1)}% → {l.price.toFixed(1)}
+                          </span>
+                        ))}
+                      </div>
+                      <p className="text-[10px] text-zinc-500 mt-1">
+                        {t.fib.nearestSupport && <>แนวรับย่อถัดไป: <span className="text-up num">{t.fib.nearestSupport.price.toFixed(1)}</span> ({(t.fib.nearestSupport.ratio * 100).toFixed(1)}%) · </>}
+                        {t.fib.nearestResistance && <>แนวต้าน: <span className="text-down num">{t.fib.nearestResistance.price.toFixed(1)}</span> · </>}
+                        เป้าส่วนขยาย: {t.fib.extensions.map((e) => `${(e.ratio * 100).toFixed(1)}%→${e.price.toFixed(1)}`).join(" / ")}
+                      </p>
+                    </div>
+                  )}
+
+                  {t.elliott && (
+                    <div>
+                      <p className="text-[11px] text-zinc-300 font-semibold">
+                        🌊 Elliott Wave — {t.elliott.structure} · ความเชื่อมั่น {t.elliott.confidence}%
+                      </p>
+                      <p className="text-[11px] text-zinc-400 leading-snug mt-0.5">{t.elliott.waveLabel}</p>
+                      <p className="text-[10px] text-zinc-500 leading-snug">{t.elliott.expectation}</p>
+                      {t.elliott.invalidation !== null && (
+                        <p className="text-[10px] text-amber-500/90 mt-0.5 num">จุดยกเลิกนับเวฟ: ทะลุ {t.elliott.invalidation.toFixed(2)}</p>
+                      )}
+                    </div>
+                  )}
+
+                  {t.divergence && (
+                    <p className={`text-[11px] font-semibold ${t.divergence.type === "bullish" ? "text-up" : "text-down"}`}>
+                      {t.divergence.type === "bullish" ? "🔀 Divergence บวก" : "🔀 Divergence ลบ"} — <span className="text-zinc-400 font-normal">{t.divergence.detail}</span>
+                    </p>
+                  )}
+
+                  {t.atr14 !== undefined && t.atrStop && (
+                    <p className="text-[10px] text-zinc-500 num">
+                      📏 ATR14 {t.atr14.toFixed(2)} ({((t.atr14 / q.price) * 100).toFixed(1)}% ของราคา) — จุดตัดขาดทุนอ้างอิง 2×ATR: กลับตัวลง {t.atrStop.long.toFixed(2)} / เบรกชั่วคราว {t.atrStop.short.toFixed(2)}
+                    </p>
+                  )}
+                </div>
+              )}
+
               <ul className="space-y-1.5">
                 {t.reasons.map((r, i) => (
                   <li key={i} className="text-xs text-zinc-400 flex gap-1.5"><span className="text-zinc-600">•</span>{r}</li>
