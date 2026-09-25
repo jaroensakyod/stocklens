@@ -11,7 +11,7 @@ const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML,
 
 type CacheEntry = { at: number; data: unknown };
 const cache = new Map<string, CacheEntry>();
-const TTL = { quote: 60_000, chart: 10 * 60_000, fundamentals: 6 * 60 * 60_000, news: 10 * 60_000, search: 24 * 60 * 60_000 };
+const TTL = { quote: 60_000, chart: 10 * 60_000, fundamentals: 6 * 60 * 60_000, news: 2 * 60_000, search: 24 * 60 * 60_000 };
 
 function getCached<T>(key: string, ttl: number): T | undefined {
   const e = cache.get(key);
