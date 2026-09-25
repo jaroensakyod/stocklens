@@ -33,7 +33,7 @@ function fmtMcap(v: number): string {
 }
 
 // Market Heatmap + Sector Strength — ภาพรวมทั้งตลาดในหน้าจอเดียว
-export default function MarketHeatmap() {
+export default function MarketHeatmap({ children }: { children?: React.ReactNode }) {
   const [region, setRegion] = useState("america");
   const [data, setData] = useState<Data | null>(null);
   const [loading, setLoading] = useState(false);
@@ -90,9 +90,9 @@ export default function MarketHeatmap() {
           </div>
 
           {/* แบ่งครึ่งซ้าย-ขวา: Sector Strength | Heatmap */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 items-start">
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 items-start">
             {/* ซ้าย: Sector strength bars */}
-            <div className="card p-4 sm:col-span-1 lg:col-span-2">
+            <div className="card p-4">
               <h3 className="text-xs font-bold text-zinc-400 mb-3">📊 Sector Strength — หมวดไหนวันนี้แรง/อ่อน</h3>
               <div className="space-y-1.5 max-h-80 overflow-y-auto pr-1">
                 {data.sectors.map((s) => {
@@ -100,7 +100,7 @@ export default function MarketHeatmap() {
                   const isUp = s.avgPct >= 0;
                   return (
                     <div key={s.sector} className="flex items-center gap-1.5 text-xs">
-                      <span className="text-zinc-400 w-28 md:w-32 shrink-0 truncate" title={s.sector}>{s.sector}</span>
+                      <span className="text-zinc-400 w-24 md:w-28 shrink-0 truncate" title={s.sector}>{s.sector}</span>
                       <div className="flex-1 flex items-center gap-1 relative min-w-0">
                         <div className="flex-1 h-4 bg-base-800 rounded relative overflow-hidden">
                           <div
@@ -119,8 +119,11 @@ export default function MarketHeatmap() {
               </div>
             </div>
 
+          {/* กลาง: Top Movers (ส่งมาจากหน้าแรก) */}
+          {children}
+
             {/* ขวา: Heatmap grid */}
-            <div className="card p-4 sm:col-span-1 lg:col-span-3">
+            <div className="card p-4">
               <h3 className="text-xs font-bold text-zinc-400 mb-1">🗺️ Heatmap — ยิ่งเขียว=ยิ่งขึ้น · ยิ่งแดง=ยิ่งลง · ขนาด=มูลค่าตลาด</h3>
               <p className="text-[10px] text-zinc-600 mb-3">80 หุ้นใหญ่สุดของตลาดนี้ (hover ดูรายละเอียด · คลิกเข้าหน้าวิเคราะห์)</p>
               <div className="grid gap-1" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(52px, 1fr))" }}>

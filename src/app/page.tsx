@@ -112,7 +112,9 @@ export default function HomePage() {
       {/* Watchlist ของผู้ใช้ (แสดงเมื่อมี) */}
       <WatchlistStrip />
 
-      <MarketHeatmap />
+      <MarketHeatmap>
+        <MoversByMarket />
+      </MarketHeatmap>
 
       {/* ดัชนี */}
       <section>
@@ -169,7 +171,6 @@ export default function HomePage() {
             </div>
           </section>
 
-          <MoversByMarket />
                 </div>
       </div>
     </div>
