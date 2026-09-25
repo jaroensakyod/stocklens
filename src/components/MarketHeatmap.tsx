@@ -75,72 +75,70 @@ export default function MarketHeatmap() {
 
       {data && (
         <div className="space-y-4">
-          {/* Market breadth bar */}
-          <div className="card px-4 py-3">
-            <div className="flex items-center gap-3 text-xs mb-2">
-              <span className="text-zinc-400">Market Breadth:</span>
-              <span className="text-up font-bold">{data.breadth.up} ตัวขึ้น</span>
-              <span className="text-zinc-600">/</span>
-              <span className="text-down font-bold">{data.breadth.down} ตัวลง</span>
-              <span className="text-zinc-600">/ ทั้งหมด {data.breadth.total}</span>
-            </div>
-            <div className="h-2 bg-base-800 rounded-full overflow-hidden flex">
+          {/* Market breadth — แถบเดียวกระชับ */}
+          <div className="card px-4 py-2.5 flex items-center gap-3 flex-wrap">
+            <span className="text-xs text-zinc-400 font-semibold shrink-0">🌡️ Breadth</span>
+            <div className="flex-1 min-w-40 h-2.5 bg-base-800 rounded-full overflow-hidden flex">
               <div className="bg-up h-full transition-all" style={{ width: `${data.breadth.ratio}%` }} />
               <div className="bg-down h-full transition-all" style={{ width: `${100 - data.breadth.ratio}%` }} />
             </div>
-            <p className="text-[10px] text-zinc-600 mt-1">{data.breadth.ratio}% ของตลาดขึ้น — {data.breadth.ratio > 60 ? "🟢 ตลาดแข็งแรง" : data.breadth.ratio > 40 ? "🟡 ผสม" : "🔴 ตลาดอ่อนแรง"}</p>
+            <span className="num text-xs shrink-0">
+              <span className="text-up font-bold">{data.breadth.up}↑</span> <span className="text-down font-bold">{data.breadth.down}↓</span>
+              <span className="text-zinc-500"> = {data.breadth.ratio}%</span>
+            </span>
+            <span className="text-[10px] shrink-0">{data.breadth.ratio > 60 ? "🟢 แข็งแรง" : data.breadth.ratio > 40 ? "🟡 ผสม" : "🔴 อ่อนแรง"}</span>
           </div>
 
-          {/* Sector strength bars */}
-          <div className="card p-4">
-            <h3 className="text-xs font-bold text-zinc-400 mb-3">📊 Sector Strength — หมวดไหนวันนี้แรง/อ่อน</h3>
-            <div className="space-y-1.5 max-h-64 overflow-y-auto">
-              {data.sectors.map((s) => {
-                const w = Math.min(100, Math.abs(s.avgPct) * 25); // scale bar
-                const isUp = s.avgPct >= 0;
-                return (
-                  <div key={s.sector} className="flex items-center gap-2 text-xs">
-                    <span className="text-zinc-400 w-36 sm:w-48 truncate" title={s.sector}>{s.sector}</span>
-                    <div className="flex-1 flex items-center gap-1 relative">
-                      <div className="flex-1 h-4 bg-base-800 rounded relative overflow-hidden">
-                        <div
-                          className={`absolute top-0 h-full rounded ${isUp ? "bg-up/50" : "bg-down/50"}`}
-                          style={{ width: `${w}%`, left: isUp ? "50%" : undefined, right: isUp ? undefined : "50%" }}
-                        />
-                        <div className="absolute left-1/2 top-0 w-px h-full bg-zinc-600" />
+          {/* แบ่งครึ่งซ้าย-ขวา: Sector Strength | Heatmap */}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 items-start">
+            {/* ซ้าย: Sector strength bars */}
+            <div className="card p-4 sm:col-span-1 lg:col-span-2">
+              <h3 className="text-xs font-bold text-zinc-400 mb-3">📊 Sector Strength — หมวดไหนวันนี้แรง/อ่อน</h3>
+              <div className="space-y-1.5 max-h-80 overflow-y-auto pr-1">
+                {data.sectors.map((s) => {
+                  const w = Math.min(100, Math.abs(s.avgPct) * 25); // scale bar
+                  const isUp = s.avgPct >= 0;
+                  return (
+                    <div key={s.sector} className="flex items-center gap-1.5 text-xs">
+                      <span className="text-zinc-400 w-28 md:w-32 shrink-0 truncate" title={s.sector}>{s.sector}</span>
+                      <div className="flex-1 flex items-center gap-1 relative min-w-0">
+                        <div className="flex-1 h-4 bg-base-800 rounded relative overflow-hidden">
+                          <div
+                            className={`absolute top-0 h-full rounded ${isUp ? "bg-up/50" : "bg-down/50"}`}
+                            style={{ width: `${w}%`, left: isUp ? "50%" : undefined, right: isUp ? undefined : "50%" }}
+                          />
+                          <div className="absolute left-1/2 top-0 w-px h-full bg-zinc-600" />
+                        </div>
+                        <span className={`num font-semibold w-11 text-right shrink-0 ${isUp ? "text-up" : "text-down"}`}>
+                          {isUp ? "+" : ""}{s.avgPct.toFixed(1)}%
+                        </span>
                       </div>
-                      <span className={`num font-semibold w-12 text-right ${isUp ? "text-up" : "text-down"}`}>
-                        {isUp ? "+" : ""}{s.avgPct.toFixed(1)}%
-                      </span>
-                      <span className="text-zinc-600 w-16 text-right hidden sm:inline">
-                        {s.up}↑{s.down}↓
-                      </span>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
-          </div>
 
-          {/* Heatmap grid */}
-          <div className="card p-4">
-            <h3 className="text-xs font-bold text-zinc-400 mb-1">🗺️ Heatmap — ยิ่งเขียว=ยิ่งขึ้น · ยิ่งแดง=ยิ่งลง · ขนาด=มูลค่าตลาด</h3>
-            <p className="text-[10px] text-zinc-600 mb-3">80 หุ้นใหญ่สุดของตลาดนี้ (hover ดูรายละเอียด · คลิกเข้าหน้าวิเคราะห์)</p>
-            <div className="grid gap-1" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(58px, 1fr))" }}>
-              {data.heatmap.map((c) => (
-                <Link
-                  key={c.symbol}
-                  href={`/stock/${encodeURIComponent(c.yahoo)}`}
-                  title={`${c.name} · ${c.sector} · $${c.price.toFixed(2)} · ${c.changePct >= 0 ? "+" : ""}${c.changePct}%${c.premarketPct !== null && Math.abs(c.premarketPct) > 0.5 ? ` · พรีมาร์เก็ต ${c.premarketPct}%` : ""}`}
-                  className="rounded px-1.5 py-2 text-center transition-transform hover:scale-110 hover:z-10 relative"
-                  style={{ background: heatColor(c.changePct) }}
-                >
-                  <div className="font-bold text-[10px] text-zinc-100 leading-tight">{c.symbol}</div>
-                  <div className={`num text-[9px] font-semibold ${c.changePct >= 0 ? "text-emerald-200" : "text-rose-200"}`}>
-                    {c.changePct >= 0 ? "+" : ""}{c.changePct.toFixed(1)}%
-                  </div>
-                </Link>
-              ))}
+            {/* ขวา: Heatmap grid */}
+            <div className="card p-4 sm:col-span-1 lg:col-span-3">
+              <h3 className="text-xs font-bold text-zinc-400 mb-1">🗺️ Heatmap — ยิ่งเขียว=ยิ่งขึ้น · ยิ่งแดง=ยิ่งลง · ขนาด=มูลค่าตลาด</h3>
+              <p className="text-[10px] text-zinc-600 mb-3">80 หุ้นใหญ่สุดของตลาดนี้ (hover ดูรายละเอียด · คลิกเข้าหน้าวิเคราะห์)</p>
+              <div className="grid gap-1" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(52px, 1fr))" }}>
+                {data.heatmap.map((c) => (
+                  <Link
+                    key={c.symbol}
+                    href={`/stock/${encodeURIComponent(c.yahoo)}`}
+                    title={`${c.name} · ${c.sector} · $${c.price.toFixed(2)} · ${c.changePct >= 0 ? "+" : ""}${c.changePct}%${c.premarketPct !== null && Math.abs(c.premarketPct) > 0.5 ? ` · พรีมาร์เก็ต ${c.premarketPct}%` : ""}`}
+                    className="rounded px-1 py-1.5 text-center transition-transform hover:scale-110 hover:z-10 relative"
+                    style={{ background: heatColor(c.changePct) }}
+                  >
+                    <div className="font-bold text-[10px] text-zinc-100 leading-tight">{c.symbol}</div>
+                    <div className={`num text-[9px] font-semibold ${c.changePct >= 0 ? "text-emerald-200" : "text-rose-200"}`}>
+                      {c.changePct >= 0 ? "+" : ""}{c.changePct.toFixed(1)}%
+                    </div>
+                  </Link>
+                ))}
+              </div>
             </div>
           </div>
         </div>
