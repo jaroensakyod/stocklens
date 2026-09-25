@@ -58,7 +58,7 @@ export default function MoversByMarket() {
       {loading && !data ? (
         <p className="text-xs text-zinc-600">กำลังโหลด… (ตลาดที่ยังไม่เคยโหลดจะช้าสักครู่)</p>
       ) : data ? (
-        <div className="grid md:grid-cols-2 gap-4">
+        <div className="grid sm:grid-cols-2 gap-4">
           {(["gainers", "losers"] as const).map((side) => (
             <div key={side} className="card divide-y divide-base-700/40">
               <div className={`px-4 py-2 text-xs font-bold ${side === "gainers" ? "text-up" : "text-down"}`}>
