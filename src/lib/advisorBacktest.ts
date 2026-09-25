@@ -147,11 +147,11 @@ function cagr(series: number[]): number {
 
 const TH_Q = ["ไตรมาส 1", "ไตรมาส 2", "ไตรมาส 3", "ไตรมาส 4"];
 
-export async function runAdvisorBacktest(tickers: string[]): Promise<AdvisorBacktestResult> {
+export async function runAdvisorBacktest(tickers: string[], opts?: { endDate?: string }): Promise<AdvisorBacktestResult> {
   const symbols = [...new Set(tickers.map((t) => t.trim().toUpperCase()).filter(Boolean))].slice(0, 12);
   if (symbols.length < 2) throw new Error("ต้องมีอย่างน้อย 2 ตัว");
 
-  // ข้อมูล 5 ปีรายวัน — เอา 3 ปีหลังสุดมาทดสอบ (SMA200 ต้องใช้ข้อมูลก่อนหน้า ~1 ปีจึงไม่แอบดูอนาคต)
+  // ข้อมูล 5 ปีรายวัน — เอา 3 ปีหลังสุด (หรือช่วงที่ระบุ endDate) มาทดสอบ
   // สำคัญ: ต้องใช้ "5YD" (แท่งรายวัน) — "5Y" เป็นแท่งรายสัปดาห์ (~263 แท่ง) คำนวณ SMA200/RSI รายวันไม่ได้
   const [spyC, ...charts] = await Promise.all([getChart("SPY", "5YD"), ...symbols.map((s) => getChart(s, "5YD"))]);
   const data: Record<string, Candle[]> = {};
@@ -159,10 +159,17 @@ export async function runAdvisorBacktest(tickers: string[]): Promise<AdvisorBack
   const valid = symbols.filter((s) => (data[s]?.length ?? 0) > 500); // ต้องมีประวัติยาวพอ
   if (valid.length < 2) throw new Error("หุ้นตัวเหล่านี้มีประวัติ < 5 ปี ย้อนหลังไม่พอ (เช่น IPO ใหม่)");
 
-  // จุดไตรมาส: ทุก ~63 วันซื้อขาย จำนวน 13 จุด (12 ช่วง = 3 ปี)
+  // จุดไตรมาส: ทุก ~63 วันซื้อขาย จำนวน 13 จุด (12 ช่วง = 3 ปี) — จบที่วันสุดท้าย หรือ ณ endDate ถ้าระบุ
   const spy = spyC.filter((c) => isFinite(c.close));
   const STEP = 63;
-  const lastIndex = spy.length - 1;
+  let lastIndex = spy.length - 1;
+  if (opts?.endDate) {
+    const endUnix = Date.parse(opts.endDate) / 1000;
+    if (!isNaN(endUnix)) {
+      const cut = spy.findIndex((c) => c.time > endUnix);
+      lastIndex = (cut > 0 ? cut - 1 : lastIndex);
+    }
+  }
   const idxs: number[] = [];
   for (let k = 12; k >= 0; k--) {
     const i = lastIndex - k * STEP;

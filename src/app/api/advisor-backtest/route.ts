@@ -20,12 +20,12 @@ const PRESETS: Record<string, { name: string; desc: string; tickers: string[] }>
 
 // POST /api/advisor-backtest { tickers?: string[], preset?: "normal"|"surge" }
 export async function POST(req: NextRequest) {
-  const body = (await req.json().catch(() => ({}))) as { tickers?: string[]; preset?: string };
+  const body = (await req.json().catch(() => ({}))) as { tickers?: string[]; preset?: string; endDate?: string };
   let tickers = body.tickers;
   if (!tickers && body.preset && PRESETS[body.preset]) tickers = PRESETS[body.preset].tickers;
   if (!tickers?.length) return NextResponse.json({ error: "ต้องมี tickers หรือ preset" }, { status: 400 });
   try {
-    const result = await runAdvisorBacktest(tickers);
+    const result = await runAdvisorBacktest(tickers, body.endDate ? { endDate: body.endDate } : undefined);
     return NextResponse.json({ preset: body.preset ? PRESETS[body.preset]?.name : null, ...result });
   } catch (e) {
     return NextResponse.json({ error: (e as Error).message.slice(0, 200) }, { status: 400 });
