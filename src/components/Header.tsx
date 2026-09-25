@@ -87,7 +87,7 @@ export default function Header() {
 
         <div className="flex-1 max-w-sm ml-auto relative">
           <input
-            className="input pl-8"
+            className="input"
             placeholder="ค้นหาหุ้น เช่น AAPL, PTT.BK, 0700.HK"
             value={q}
             onChange={(e) => setQ(e.target.value)}
@@ -102,7 +102,6 @@ export default function Header() {
               if (e.key === "Escape") setOpen(false);
             }}
           />
-          <span className="absolute left-2.5 top-2.5 text-zinc-500 text-sm">🔍</span>
           {open && results.length > 0 && (
             <div className="absolute top-full mt-1 w-full card overflow-hidden z-50" onMouseLeave={() => setOpen(false)}>
               {results.map((r) => (
