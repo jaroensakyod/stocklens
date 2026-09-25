@@ -93,7 +93,8 @@ export default function HomePage() {
           &ldquo;เหตุการณ์โลก&rdquo; เป็นห่วงโซ่หุ้นที่ได้/เสียประโยชน์ — พร้อมบอกว่าซื้อหุ้นตัวไหนจาก Dime! / โบรกเกอร์ไหน
         </p>
         <div className="flex gap-3 justify-center mt-5 flex-wrap">
-          <Link href="/radar" className="btn-primary">🌍 ลอง Global Radar</Link>
+          <Link href="/starter" className="btn-primary">🧑‍🎓 มือใหม่? ดูพอร์ตตัวอย่างรายวัน</Link>
+          <Link href="/radar" className="btn-ghost">🌍 ลอง Global Radar</Link>
           <Link href="/screener" className="btn-ghost">🔎 คัดกรองหุ้น</Link>
         </div>
         {/* ประโยคสร้างความเชื่อใจ — กับความกลัว "เว็บการเงินหลอกโอนเงิน" ของคนไทย */}
