@@ -8,9 +8,25 @@ import AlertWatcher from "@/components/AlertWatcher";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 
 export const metadata: Metadata = {
-  title: "StockLens — วิเคราะห์หุ้น + Global Radar ด้วย AI",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
+  title: {
+    default: "StockLens — วิเคราะห์หุ้น + Global Radar ด้วย AI",
+    template: "%s | StockLens",
+  },
   description:
     "เว็บวิเคราะห์หุ้นสหรัฐฯ/ไทย/ฮ่องกง/ญี่ปุ่น/ยุโรป พร้อมคะแนนปัจจัย 5 มิติ สัญญาณเทคนิค AI วิเคราะห์ภาษาไทย และ Global Radar ที่แปลงเหตุการณ์โลกเป็นหุ้นที่ได้/เสียประโยชน์",
+  openGraph: {
+    type: "website",
+    locale: "th_TH",
+    siteName: "StockLens",
+    title: "StockLens — วิเคราะห์หุ้น + Global Radar ด้วย AI",
+    description: "คะแนนปัจจัย 5 มิติจากงบจริง · Global Radar แปลงเหตุการณ์โลกเป็นหุ้น · AI วิเคราะห์ภาษาไทย · 30 ตลาด · ซื้อผ่าน Dime ได้",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "StockLens — Global Stock Intelligence",
+    description: "AI stock analysis in Thai · Global Radar · 30 markets",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
