@@ -172,7 +172,7 @@ const TTL = 12 * 3600_000;
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /** fetch พร้อม retry — EDGAR บางครั้งตอบ 403/เพี้ยนชั่วขณะเมื่อเรียกถี่ */
-async function fetchRetry(url: string, tries = 3): Promise<Response> {
+export async function fetchRetry(url: string, tries = 3): Promise<Response> {
   let lastErr: unknown;
   for (let t = 0; t < tries; t++) {
     try {

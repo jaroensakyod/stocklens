@@ -73,9 +73,12 @@ export default function GurusPage() {
                 {g.totalValueUsd && g.totalValueUsd > 1e8 ? <span className="num text-accent-soft font-semibold">พอร์ต ${(g.totalValueUsd / 1e9).toFixed(1) + "B$"}</span> : null}
               </div>
             </div>
-            <button className="btn-ghost text-xs !py-1.5" onClick={() => askWhy(g.id)} disabled={busyWhy === g.id}>
-              {busyWhy === g.id ? "AI กำลังถอดรหัส…" : "🧠 ทำไมเขาถึงเลือก (AI)"}
-            </button>
+            <div className="flex gap-2 flex-wrap">
+              <button className="btn-ghost text-xs !py-1.5" onClick={() => askWhy(g.id)} disabled={busyWhy === g.id}>
+                {busyWhy === g.id ? "AI กำลังถอดรหัส…" : "🧠 ทำไมเขาถึงเลือก (AI)"}
+              </button>
+              <CloneTestButton guruId={g.id} />
+            </div>
           </div>
 
           {g.qoq && (
@@ -158,6 +161,106 @@ export default function GurusPage() {
         ข้อมูล: SEC EDGAR 13F-HR filings (ดึงสด cache 12 ชม.) · 13F ล่าช้าสูงสุด 45 วันหลังสิ้นไตรมาส และเห็นเฉพาะตำแหน่งหุ้นสหรัฐฯ ·
         เหตุผล 💡 เป็นความรู้สาธารณะเกี่ยวกับสไตล์การลงทุน ไม่ใช่ข้อมูลจากกูรูโดยตรง · เชิงการศึกษา ไม่ใช่คำแนะนำการลงทุน
       </p>
+    </div>
+  );
+}
+
+// ===== 🧪 ก๊อปปี้กูรูแบบมีหลักฐาน — ตาม top-10 ทุกไตรมาส ย้อนหลัง ~3 ปี เทียบ SPY =====
+const GRADE_STYLE: Record<string, string> = {
+  S: "text-emerald-400 border-emerald-500/50 bg-emerald-500/10",
+  A: "text-up border-up/50 bg-up/10",
+  B: "text-accent-soft border-accent/50 bg-accent/10",
+  C: "text-amber-400 border-amber-500/50 bg-amber-500/10",
+  D: "text-down border-down/50 bg-down/10",
+};
+
+function CloneTestButton({ guruId }: { guruId: string }) {
+  const CLONABLE = new Set(["buffett", "ackman", "druckenmiller", "tepper", "klarman"]);
+  const [result, setResult] = useState<null | {
+    name: string; firm: string; emoji: string;
+    clone: { totalPct: number; cagrPct: number; maxDrawdownPct: number };
+    spy: { totalPct: number; cagrPct: number };
+    grade: string; beatsSpy: boolean; turnoverNote: string; currentTop: string[];
+    quarters: { filedAt: string; holdings: string[]; quarterPct: number; spyPct: number; cumClone: number; cumSpy: number }[];
+    note: string; error?: string;
+  }>(null);
+  const [busy, setBusy] = useState(false);
+
+  if (!CLONABLE.has(guruId)) return null; // multi-strategy พัน holdings → top-10 ไม่แทนตัว
+
+  const run = async () => {
+    if (result) {
+      setResult(null);
+      return;
+    }
+    setBusy(true);
+    try {
+      const res = await fetch(`/api/guru-backtest?guru=${guruId}`);
+      setResult(await res.json());
+    } catch {
+      setResult(null);
+    }
+    setBusy(false);
+  };
+
+  return (
+    <div className="w-full space-y-3">
+      <button className="btn-primary text-xs !py-1.5" onClick={run} disabled={busy}>
+        {busy ? "กำลังย้อน 12 ไตรมาสจาก SEC… (~30-60 วิ)" : result ? "ซ่อนผลทดสอบ" : "🧪 ตามเขาแล้วรวยไหม? (ย้อนหลัง 3 ปี)"}
+      </button>
+
+      {result && !result.error && (
+        <div className="border border-base-700 rounded-xl p-4 bg-base-850 space-y-3">
+          <div className="grid grid-cols-3 gap-2 text-center">
+            <div className={`rounded-lg border p-2.5 ${GRADE_STYLE[result.grade] || ""}`}>
+              <div className="text-[10px] opacity-70">ตามกูรูแล้วเทียบ SPY</div>
+              <div className="text-3xl font-black">{result.grade}</div>
+            </div>
+            <div className="rounded-lg border border-base-700 p-2.5">
+              <div className="text-[10px] text-zinc-500">👥 ก๊อปปี้ top-10 ทุกไตรมาส</div>
+              <div className={`num text-xl font-bold ${result.clone.totalPct >= 0 ? "text-up" : "text-down"}`}>
+                {result.clone.totalPct >= 0 ? "+" : ""}{result.clone.totalPct}%
+              </div>
+              <div className="text-[10px] text-zinc-600 num">CAGR {result.clone.cagrPct}% · ลดลงสูงสุด {result.clone.maxDrawdownPct}%</div>
+            </div>
+            <div className="rounded-lg border border-base-700 p-2.5">
+              <div className="text-[10px] text-zinc-500">📊 SPY ถือยาวช่วงเดียวกัน</div>
+              <div className="num text-xl font-bold text-zinc-200">{result.spy.totalPct >= 0 ? "+" : ""}{result.spy.totalPct}%</div>
+              <div className="text-[10px] text-zinc-600 num">CAGR {result.spy.cagrPct}%</div>
+            </div>
+          </div>
+
+          <p className="text-xs text-zinc-300 leading-relaxed">
+            {result.beatsSpy ? "🏆 ตามเขาชนะตลาด" : "📉 ตามเขาแพ้ตลาด"} — {result.turnoverNote}
+          </p>
+
+          <div>
+            <p className="text-[11px] font-semibold text-zinc-400 mb-1">🗓️ ทำตามได้เลยวันนี้ — top-10 ล่าสุดของเขา:</p>
+            <div className="flex flex-wrap gap-1.5">
+              {result.currentTop.map((t) => (
+                <Link key={t} href={`/stock/${t}`} className="chip bg-accent/10 text-accent-soft border border-accent/30 hover:bg-accent/20">
+                  {t} →
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          <details className="text-xs">
+            <summary className="cursor-pointer text-zinc-400">ดูบันทึกทุกไตรมาส ({result.quarters.length} ไตรมาส)</summary>
+            <div className="mt-2 space-y-1 max-h-56 overflow-y-auto">
+              {result.quarters.map((q) => (
+                <p key={q.filedAt} className="text-[11px] text-zinc-500 num">
+                  ยื่น {q.filedAt} · [{q.holdings.slice(0, 6).join(", ")}{q.holdings.length > 6 ? "…" : ""}] →{" "}
+                  <span className={q.quarterPct >= q.spyPct ? "text-up" : "text-down"}>{q.quarterPct >= 0 ? "+" : ""}{q.quarterPct}%</span>
+                  {" vs SPY "}<span className="text-zinc-400">{q.spyPct >= 0 ? "+" : ""}{q.spyPct}%</span>
+                </p>
+              ))}
+            </div>
+          </details>
+          <p className="text-[10px] text-zinc-600 leading-relaxed">⚠️ {result.note}</p>
+        </div>
+      )}
+      {result?.error && <p className="text-xs text-down">{result.error}</p>}
     </div>
   );
 }
