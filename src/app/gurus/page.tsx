@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useAuth } from "@/lib/authContext";
 import BrokerBadge from "@/components/BrokerBadge";
 import type { Quote } from "@/lib/types";
 
@@ -175,6 +176,7 @@ const GRADE_STYLE: Record<string, string> = {
 };
 
 function CloneTestButton({ guruId }: { guruId: string }) {
+  const { tier } = useAuth();
   const CLONABLE = new Set(["buffett", "ackman", "druckenmiller", "tepper", "klarman"]);
   const [result, setResult] = useState<null | {
     name: string; firm: string; emoji: string;
@@ -205,9 +207,13 @@ function CloneTestButton({ guruId }: { guruId: string }) {
 
   return (
     <div className="w-full space-y-3">
-      <button className="btn-primary text-xs !py-1.5" onClick={run} disabled={busy}>
-        {busy ? "กำลังย้อน 12 ไตรมาสจาก SEC… (~30-60 วิ)" : result ? "ซ่อนผลทดสอบ" : "🧪 ตามเขาแล้วรวยไหม? (ย้อนหลัง 3 ปี)"}
-      </button>
+      {tier === "pro" ? (
+        <button className="btn-primary text-xs !py-1.5" onClick={run} disabled={busy}>
+          {busy ? "กำลังย้อน 12 ไตรมาสจาก SEC… (~30-60 วิ)" : result ? "ซ่อนผลทดสอบ" : "🧪 ตามเขาแล้วรวยไหม? (ย้อนหลัง 3 ปี)"}
+        </button>
+      ) : (
+        <span className="chip bg-base-800 text-zinc-500 border border-base-700 text-[10px]">🔒 ทดสอบตามกูรู = สิทธิ์ Pro</span>
+      )}
 
       {result && !result.error && (
         <div className="border border-base-700 rounded-xl p-4 bg-base-850 space-y-3">

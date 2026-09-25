@@ -182,6 +182,8 @@ export interface Member {
   startedAt: string;
   paidUntil: string;
   note?: string;
+  /** รหัสสมาชิกสำหรับ login (SL-XXXXXX) — แอดมินออกให้ในหน้า /admin */
+  accessCode?: string;
   /** LINE User ID (U...) — สำหรับส่งข้อความส่วนตัว เช่น Flash Pro / สรุปวอตช์ลิสต์ */
   lineUserId?: string;
   /** หุ้นที่สมาชิกอยากติดตาม (yahoo symbol เช่น MU, PTT.BK) — ใช้ทำสรุปส่วนตัวผ่าน LINE */

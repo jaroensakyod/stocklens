@@ -33,7 +33,7 @@ function fmtMcap(v: number): string {
 }
 
 // Market Heatmap + Sector Strength — ภาพรวมทั้งตลาดในหน้าจอเดียว
-export default function MarketHeatmap({ children }: { children?: React.ReactNode }) {
+export default function MarketHeatmap({ renderMovers }: { renderMovers?: (region: string) => React.ReactNode }) {
   const [region, setRegion] = useState("america");
   const [data, setData] = useState<Data | null>(null);
   const [loading, setLoading] = useState(false);
@@ -90,7 +90,7 @@ export default function MarketHeatmap({ children }: { children?: React.ReactNode
           </div>
 
           {/* Top Movers — เหนือทั้งสองการ์ด เต็มความกว้าง (เรียงแนวนอน) */}
-          {children}
+          {renderMovers?.(region)}
 
           {/* แบ่งครึ่งซ้าย-ขวา: Sector Strength | Heatmap */}
           <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 items-start">

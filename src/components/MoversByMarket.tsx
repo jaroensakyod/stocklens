@@ -18,8 +18,9 @@ const TABS = [
 ];
 
 // Top Movers แยกตามตลาด — บนหน้าแรก
-export default function MoversByMarket() {
-  const [region, setRegion] = useState("america");
+export default function MoversByMarket({ controlledRegion }: { controlledRegion?: string }) {
+  const [ownRegion, setOwnRegion] = useState("america");
+  const region = controlledRegion ?? ownRegion;
   const [data, setData] = useState<{ gainers: Mover[]; losers: Mover[] } | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -42,12 +43,12 @@ export default function MoversByMarket() {
   return (
     <section>
       <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-        <h2 className="text-sm font-bold text-zinc-400">📊 Top Movers ตามตลาด</h2>
-        <div className="flex gap-1 flex-wrap">
+        <h2 className="text-sm font-bold text-zinc-400">📊 Top Movers</h2>
+        <div className={"flex gap-1 flex-wrap " + (controlledRegion ? "hidden" : "")}>
           {TABS.map((t) => (
             <button
               key={t.id}
-              onClick={() => setRegion(t.id)}
+              onClick={() => setOwnRegion(t.id)}
               className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-colors ${region === t.id ? "bg-accent text-zinc-950" : "bg-base-800 text-zinc-400 hover:bg-base-700"}`}
             >
               {t.label}

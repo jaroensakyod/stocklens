@@ -112,9 +112,7 @@ export default function HomePage() {
       {/* Watchlist ของผู้ใช้ (แสดงเมื่อมี) */}
       <WatchlistStrip />
 
-      <MarketHeatmap>
-        <MoversByMarket />
-      </MarketHeatmap>
+      <MarketHeatmap renderMovers={(region) => <MoversByMarket controlledRegion={region} />} />
 
       {/* ดัชนี */}
       <section>

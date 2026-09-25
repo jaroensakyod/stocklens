@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { useAuth } from "@/lib/authContext";
 
 const NAV = [
   { href: "/", label: "หน้าแรก" },
@@ -123,6 +124,7 @@ export default function Header() {
           )}
         </div>
 
+        <MemberChip />
         <button className="lg:hidden btn-ghost !px-3 !py-1.5" onClick={() => setMenuOpen((v) => !v)} aria-label="เมนู">
           ☰
         </button>
@@ -137,5 +139,28 @@ export default function Header() {
         </nav>
       )}
     </header>
+  );
+}
+// ป้ายสมาชิก: login แล้วแสดงชื่อ+tier+ปุ่มออก / ยังไม่ login = ปุ่มเข้าสู่ระบบ
+function MemberChip() {
+  const { member, logout, loading } = useAuth();
+  if (loading) return null;
+  if (!member)
+    return (
+      <Link href="/login" className="btn-ghost !py-1.5 !px-3 text-xs whitespace-nowrap">
+        🔐 สมาชิก
+      </Link>
+    );
+  return (
+    <div className="flex items-center gap-1.5">
+      <Link
+        href="/login"
+        title={`หมดอายุ ${member.paidUntil} · รหัส ${member.code}`}
+        className={`chip text-[10px] border whitespace-nowrap ${member.tier === "pro" ? "bg-accent/15 text-accent-soft border-accent/40" : "bg-zinc-500/15 text-zinc-300 border-base-600"}`}
+      >
+        {member.tier === "pro" ? "🥇" : "🥉"} {member.name.split(" ")[0]}
+      </Link>
+      <button className="text-zinc-600 hover:text-down text-xs" onClick={() => logout()} title="ออกจากระบบ">ออก</button>
+    </div>
   );
 }

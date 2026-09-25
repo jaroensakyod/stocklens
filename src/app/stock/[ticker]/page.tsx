@@ -9,6 +9,8 @@ import BrokerBadge from "@/components/BrokerBadge";
 import BudgetCalc from "@/components/BudgetCalc";
 import StarButton from "@/components/StarButton";
 import QuickAlert from "@/components/QuickAlert";
+import LockGate from "@/components/LockGate";
+import { useCan } from "@/lib/authContext";
 import TrustPanel from "@/components/TrustPanel";
 import ThesisLogger from "@/components/ThesisLogger";
 import ScenarioPanel from "@/components/ScenarioPanel";
@@ -19,6 +21,7 @@ import type { StockAnalysis } from "@/lib/types";
 export default function StockPage() {
   const routeParams = useParams<{ ticker: string }>();
   const ticker = Array.isArray(routeParams.ticker) ? routeParams.ticker[0] : routeParams.ticker;
+  const can = useCan();
   const [a, setA] = useState<(StockAnalysis & { usdThb?: number; confidence?: { score: number; coveredCount: number; totalCount: number; missing: string[]; hasTechnicals: boolean; hasNews: boolean; priceSource: string; fundamentalsSource: string }; scenarios?: Scenarios }) | null>(null);
   const [err, setErr] = useState("");
   const [sectorInfo, setSectorInfo] = useState<{ sector: string | null; industry?: string | null } | null>(null);
@@ -153,7 +156,7 @@ export default function StockPage() {
               </div>
 
               {/* 🧩 เทคนิคขั้นสูง: Fibonacci · Elliott Wave · Divergence · ATR */}
-              {(t.fib || t.elliott || t.divergence || t.atrStop) && (
+              {(t.fib || t.elliott || t.divergence || t.atrStop) && (can.pro ? (
                 <div className="border border-base-700 rounded-xl p-3.5 bg-base-850 mb-3 space-y-3">
                   <h4 className="text-xs font-bold text-accent-soft">🧩 เทคนิคขั้นสูง</h4>
 
@@ -203,7 +206,9 @@ export default function StockPage() {
                     </p>
                   )}
                 </div>
-              )}
+              ) : (
+                <LockGate need="pro" title="เทคนิคขั้นสูง: Fibonacci · Elliott Wave · Divergence · ATR" desc="ระดับราคา Fib / นับเวฟ / สัญญาณกลับตัว / จุดตัดขาดทุน — สิทธิ์สมาชิก🥇 Pro" />
+              ))}
 
               <ul className="space-y-1.5">
                 {t.reasons.map((r, i) => (

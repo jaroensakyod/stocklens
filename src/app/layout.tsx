@@ -6,6 +6,8 @@ import TickerTape from "@/components/TickerTape";
 import ChatWidget from "@/components/ChatWidget";
 import AlertWatcher from "@/components/AlertWatcher";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
+import { AuthProvider } from "@/lib/authContext";
+import UserWatermark from "@/components/UserWatermark";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
@@ -41,12 +43,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="min-h-screen flex flex-col">
-        <Header />
-        <TickerTape />
-        <main className="flex-1 w-full max-w-7xl mx-auto px-4 py-6">{children}</main>
-        <Footer />
-        <ChatWidget />
-        <AlertWatcher />
+        <AuthProvider>
+          <Header />
+          <TickerTape />
+          <main className="flex-1 w-full max-w-7xl mx-auto px-4 py-6">{children}</main>
+          <Footer />
+          <ChatWidget />
+          <AlertWatcher />
+          <UserWatermark />
+        </AuthProvider>
         <ServiceWorkerRegister />
       </body>
     </html>

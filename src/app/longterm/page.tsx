@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useAuth } from "@/lib/authContext";
+import LockGate from "@/components/LockGate";
 
 interface LTRow {
   ticker: string;
@@ -30,6 +32,7 @@ interface LTData {
 
 // 💤 หุ้นระยะยาว & ปันผล — สำหรับคนที่ไม่ได้เล่นซิ่ง: ถือยาว กินปันผล งบแข็ง
 export default function LongTermPage() {
+  const { tier } = useAuth();
   const [data, setData] = useState<LTData | null>(null);
   const [err, setErr] = useState("");
 
@@ -40,6 +43,16 @@ export default function LongTermPage() {
       .catch(() => setErr("โหลดไม่สำเร็จ"));
   }, []);
 
+  if (tier === "free")
+    return (
+      <div className="space-y-4">
+        <div>
+          <h1 className="text-2xl font-bold text-zinc-50">💤 หุ้นระยะยาว &amp; ปันผล</h1>
+          <p className="text-sm text-zinc-400 mt-1">ลิสต์หุ้นใหญ่นิ่ง ปันผลสม่ำเสมอ งบแข็ง — สิทธิ์สมาชิก</p>
+        </div>
+        <LockGate need="starter" title="ลิสต์ปันผลน่าถือ + โตสะสม 5 ปี" />
+      </div>
+    );
   return (
     <div className="space-y-6">
       <div>

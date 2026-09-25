@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useAuth } from "@/lib/authContext";
+import LockGate from "@/components/LockGate";
 import Link from "next/link";
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend,
@@ -47,6 +49,7 @@ const GRADE_STYLE: Record<string, string> = {
 // 🧪 ทดสอบย้อนหลัง: "AI ปรับพอร์ตของเราแม่นจริงไหม?" — สมมติถือหุ้น 10 ตัว 3 ปี
 // ให้กฎเดียวกับ AI Advisor ทำงานทุกไตรมาส เทียบกับถือเฉยๆ และตลาด (SPY)
 export default function AdvisorTestPage() {
+  const { tier } = useAuth();
   const [result, setResult] = useState<Result | null>(null);
   const [busy, setBusy] = useState("");
   const [custom, setCustom] = useState("");
@@ -74,6 +77,16 @@ export default function AdvisorTestPage() {
     spy: q.spyValue,
   })) ?? [];
 
+  if (tier !== "pro")
+    return (
+      <div className="space-y-4">
+        <div>
+          <h1 className="text-2xl font-bold text-zinc-50">🧪 ทดสอบย้อนหลัง: AI ปรับพอร์ตแม่นจริงไหม?</h1>
+          <p className="text-sm text-zinc-400 mt-1">เครื่องมือพิสูจน์ด้วยข้อมูลย้อนหลัง 3 ปีจริง — สิทธิ์สมาชิก 🥇 Pro</p>
+        </div>
+        <LockGate need="pro" title="เครื่องมือทดสอบ AI ปรับพอร์ต + ก๊อปปี้กูรูย้อนหลัง" />
+      </div>
+    );
   return (
     <div className="space-y-6">
       <div>

@@ -29,6 +29,29 @@ const AI_PATHS = ["/api/chat", "/api/ai/", "/api/gurus/why", "/api/radar/analyze
 
 export function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
+
+  // 🚪 โหมดปิดเว็บส่วนตัว: ตั้ง SITE_REQUIRE_LOGIN=true ใน .env.local → ทุกหน้าต้อง login ก่อน
+  // (ค่า default = false เพื่อให้หน้าฟรียังดึงคนเข้าเว็บได้ — เปิดเมื่อพร้อมปิดระบบเต็มตัว)
+  if (process.env.SITE_REQUIRE_LOGIN === "true") {
+    const isPublic =
+      path.startsWith("/login") ||
+      path.startsWith("/api/auth") ||
+      path.startsWith("/_next") ||
+      path === "/favicon.ico" ||
+      path === "/manifest.webmanifest" ||
+      path === "/sw.js" ||
+      path.startsWith("/icons/");
+    const hasSession = !!req.cookies.get("sl_token")?.value;
+    if (!isPublic && !hasSession) {
+      if (path.startsWith("/api/")) {
+        return NextResponse.json({ error: "ต้องเข้าสู่ระบบสมาชิกก่อน" }, { status: 401 });
+      }
+      const url = req.nextUrl.clone();
+      url.pathname = "/login";
+      return NextResponse.redirect(url);
+    }
+  }
+
   if (!path.startsWith("/api/")) return NextResponse.next();
   // /api/admin/* ยกเว้น (มีรหัสคุมอยู่แล้ว) และไฟล์ static
   if (path.startsWith("/api/admin")) return NextResponse.next();
@@ -45,5 +68,5 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/api/:path*"],
+  matcher: ["/((?!_next/static|_next/image).*)"],
 };

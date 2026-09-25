@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useAuth } from "@/lib/authContext";
 
 // แสดงบทวิเคราะห์ AI แบบ stream + แปลง markdown ขั้นต้ำเป็น HTML
 function mdToHtml(md: string): string {
@@ -30,14 +31,16 @@ function mdToHtml(md: string): string {
 }
 
 const PERSONAS = [
-  { id: "", label: "🤖 นักวิเคราะห์" },
-  { id: "burry", label: "🦈 Burry" },
-  { id: "buffett", label: "🍦 Buffett" },
-  { id: "lynch", label: "🕵️ Lynch" },
-  { id: "geo", label: "🌏 ภูมิรัฐศาสตร์" },
+  { id: "", label: "🤖 นักวิเคราะห์", pro: false },
+  { id: "burry", label: "🦈 Burry", pro: true },
+  { id: "buffett", label: "🍦 Buffett", pro: true },
+  { id: "lynch", label: "🕵️ Lynch", pro: true },
+  { id: "geo", label: "🌏 ภูมิรัฐศาสตร์", pro: true },
 ];
 
 export default function AIAnalysis({ ticker }: { ticker: string }) {
+  const { tier } = useAuth();
+  const [lockMsg, setLockMsg] = useState("");
   const [text, setText] = useState("");
   const [mode, setMode] = useState<"idle" | "loading" | "streaming" | "done" | "error">("idle");
   const [aiMode, setAiMode] = useState("");
@@ -78,20 +81,24 @@ export default function AIAnalysis({ ticker }: { ticker: string }) {
     <div className="card p-5">
       <div className="flex items-center justify-between gap-3 mb-2 flex-wrap">
         <h2 className="text-lg font-bold text-zinc-50">บทวิเคราะห์ {ticker}</h2>
-        <div className="flex gap-1">
-          {PERSONAS.map((p) => (
-            <button
-              key={p.id}
-              onClick={() => run(p.id)}
-              disabled={mode === "loading" || mode === "streaming"}
-              className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-colors ${persona === p.id && mode !== "idle" ? "bg-accent text-zinc-950" : "bg-base-800 text-zinc-400 hover:bg-base-700"}`}
-              title={p.id ? `วิเคราะห์ในสไตล์${p.label.slice(2)}` : "นักวิเคราะห์ปกติ"}
-            >
-              {p.label}
-            </button>
-          ))}
+        <div className="flex gap-1 flex-wrap">
+          {PERSONAS.map((p) => {
+            const locked = p.pro && tier !== "pro";
+            return (
+              <button
+                key={p.id}
+                onClick={() => (locked ? setLockMsg("🔒 มุมมองกูรูทั้ง 4 เป็นสิทธิ์สมาชิก 🥇 Pro — เข้าสู่ระบบ/อัปเกรดที่หน้าแพ็กเกจ") : run(p.id))}
+                disabled={mode === "loading" || mode === "streaming"}
+                className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-colors ${locked ? "opacity-50 cursor-not-allowed" : persona === p.id && mode !== "idle" ? "bg-accent text-zinc-950" : "bg-base-800 text-zinc-400 hover:bg-base-700"}`}
+                title={locked ? "สิทธิ์สมาชิก Pro" : p.id ? `วิเคราะห์ในสไตล์${p.label.slice(2)}` : "นักวิเคราะห์ปกติ"}
+              >
+                {locked ? "🔒 " : ""}{p.label.replace("🦈 ", "").replace("🍦 ", "").replace("🕵️ ", "").replace("🌏 ", "")}
+              </button>
+            );
+          })}
         </div>
       </div>
+      {lockMsg && <p className="text-[11px] text-amber-400/90 mb-2">{lockMsg}</p>}
       {(mode === "streaming" || mode === "done") && (
         <>
           {aiMode === "demo" && (

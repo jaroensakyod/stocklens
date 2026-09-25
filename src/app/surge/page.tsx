@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useAuth } from "@/lib/authContext";
+import LockGate from "@/components/LockGate";
 import type { Quote } from "@/lib/types";
 
 interface SurgeRow {
@@ -24,6 +26,7 @@ interface SurgeRow {
 // 🚀 เรดาร์หุ้นซิ่ง — ขยับแรง + วอลุ่มพุ่ง + ใกล้/ทะลุจุดสูงสุด 52 สัปดาห์ (ทั้งหมดจากข้อมูลจริง)
 // หุ้นซิ่ง = ความเสี่ยงสูง หน้านี้เป็น "สื่อแสดงข้อมูล" ไม่ใช่คำแนะนำให้ซื้อตาม
 export default function SurgePage() {
+  const { tier } = useAuth();
   const [rows, setRows] = useState<SurgeRow[] | null>(null);
   const [asOf, setAsOf] = useState("");
   const [err, setErr] = useState("");
@@ -67,7 +70,7 @@ export default function SurgePage() {
 
       {rows && rows.length > 0 && (
         <div className="grid md:grid-cols-2 gap-3">
-          {rows.map((r, i) => (
+          {(tier === "free" ? rows.slice(0, 3) : rows).map((r, i) => (
             <Link key={r.ticker} href={`/stock/${r.ticker}`} className="card p-4 hover:border-accent/40 transition-colors">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
@@ -101,6 +104,9 @@ export default function SurgePage() {
             </Link>
           ))}
         </div>
+      )}
+      {tier === "free" && rows && rows.length > 3 && (
+        <LockGate need="starter" title={`ยังมีอีก ${rows.length - 3} ตัวที่ผ่านเกณฑ์ซิ่งพร้อมหลักฐาน`} desc="ดูครบทั้งหมด + คะแนนซิ่ง + วอลุ่ม vs เฉลี่ย 20 วัน — สิทธิ์สมาชิก Starter/Pro" />
       )}
 
       <div className="card p-4 border-amber-500/30">

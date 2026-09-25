@@ -71,6 +71,19 @@ export default function AdminPage() {
     load(code);
   };
 
+  // ออกรหัสสมาชิก (SL-XXXXXX) — ส่งรหัสนี้ให้สมาชิกคนนั้น login ผ่าน /login
+  const issueCode = async (m: MemberRow) => {
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    const c = "SL-" + Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+    await fetch("/api/admin/members", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", "x-admin-code": code },
+      body: JSON.stringify({ id: m.id, accessCode: c }),
+    });
+    load(code);
+    setMsg(`รหัสของ ${m.name}: ${c} (คัดลอกส่งให้เขาแล้วกดคัดลอกอีกครั้งจากตาราง)`);
+  };
+
   const remove = async (id: string) => {
     if (!confirm("ลบสมาชิกคนนี้?")) return;
     await fetch(`/api/admin/members?id=${id}`, { headers: { "x-admin-code": code }, method: "DELETE" });
@@ -178,6 +191,11 @@ export default function AdminPage() {
                 <td className="px-4 py-2 num text-zinc-300">{m.paidUntil}</td>
                 <td className={`px-4 py-2 num ${m.daysLeft <= 7 ? "text-down font-bold" : "text-zinc-400"}`}>{m.daysLeft} วัน</td>
                 <td className="px-4 py-2 text-right whitespace-nowrap">
+                  {m.accessCode ? (
+                    <span className="chip bg-emerald-500/10 text-emerald-400 text-[10px] mr-1 num" title="รหัส login ของสมาชิก (ส่งให้เขาครั้งเดียว)">{m.accessCode}</span>
+                  ) : (
+                    <button className="btn-ghost !py-1 !px-2 text-[10px] mr-1" onClick={() => issueCode(m)} title="ออกรหัสสมาชิกส่งให้เขาเพื่อ login">🔑 ออกรหัส</button>
+                  )}
                   <button className="btn-ghost !py-1 !px-2 text-xs mr-1" onClick={() => renew(m, 30)}>+30 วัน</button>
                   <button className="btn-ghost !py-1 !px-2 text-xs mr-1" onClick={() => renew(m, 365)}>+1 ปี</button>
                   <button className="btn-ghost !py-1 !px-2 text-xs !text-down" onClick={() => remove(m.id)}>ลบ</button>
