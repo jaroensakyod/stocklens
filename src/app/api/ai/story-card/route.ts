@@ -20,6 +20,8 @@ interface StoryCard {
   style?: string;
   ticker: string;
   name: string;
+  script?: string;
+  sources?: string[];
   hook: string;
   reveal: string;
   why: string;
@@ -77,11 +79,28 @@ const SYSTEM_LISTICLE = `คุณคือนักเขียน listicle ห
 ตอบ JSON เท่านั้น:
 {"hook":"…","reveal":"…","why":"…","points":["บริษัทที่ 1 — …","…","…","…","…"],"close":"…","hashtags":"#หุ้น #การลงทุน #<ธีมอังกฤษ>","scenes":[{"dur":"0-3s","text":"…","visual":"…"},... 6-7 ฉาก]}`;
 
+// สไตล์ narration — 🎙️ บทเล่าเสียงพากษ์เต็ม 60-90 วินาที (สไตล์นักเล่าเรื่องหุ้นที่เล่าเก่งจริง)
+// หลักการเล่าเรื่องที่ฝังไว้ใน prompt: 1 คลิป 1 คำถาม · ประโยคสั้น พูดออกเสียงได้จริง ·
+// ตัวเลขเป็น "ตัวละคร" (เกือบ 8 ใน 10 ของรายได้) · ช่องว่างความอยากรู้ · จังหวะหยุด
+const SYSTEM_NARRATION = `คุณคือนักเล่าเรื่องหุ้น (voice-over scriptwriter) ของ StockLens — เขียน "บทพูดพากษ์เสียง" สำหรับคลิปหุ้น 60-90 วินาที ภาษาไทยพูด
+เทคนิคการเล่าที่ต้องใช้ (แบบนักเล่าเรื่องที่มียอดวิวแสน):
+- หนึ่งคลิป = หนึ่งคำถามเท่านั้น ห้ามเพี้ยนเรื่อง
+- ประโยคสั้น 8-15 คำ พูดออกเสียงแล้วเป็นธรรมชาติ หนึ่งประโยค = หนึ่งความคิด
+- ตัวเลขต้องกลายเป็นตัวละคร: ไม่พูด "รายได้โต 92.8%" ลอยๆ แต่พูด "เกือบเท่าตัวจากปีก่อน" แล้วตามด้วยตัวเลขจริงในวงเล็บ
+- เปิดด้วยคำถามชวนสงสัย กลางเรื่องมีประโยค "แต่เดี๋ยวก่อน…" หรือ "ทีนี้พาร์ตี่ที่สนุก…" สลับจังหวะ 1 ครั้ง
+- ใส่ [หยุด 1 วิ] กำกับจังหวะเงียบ 2-3 จุด
+- ห้ามศัพท์การเงินหนักๆ เกิน 2 คำในเรื่องเดียว ถ้าจำเป็นให้ขยายความทันที ("มาร์จิ้น คือกำไรที่เหลือจริงๆ ต่อการขายหนึ่งบาท")
+โครงสร้างบท: เปิดคำถาม (2 ประโยค) → เฉลยตัวเลขเด็ด (3-4 ประโยค) → ทำไมมันเป็นแบบนี้/เชื่อมโลกภายนอก (3-4 ประโยค) → แง่มุมที่ต้องระวัง 1 ประโยค → ปิดชวนติดตาม (1-2 ประโยค)
+กติกาข้อมูล: ตัวเลขทุกตัวต้องมาจาก [ข้อมูลจริง] เท่านั้น ห้ามเดา · เล่าผลิตภัณฑ์/ลูกค้า/คู่แข่งจากความรู้ทั่วไปได้แต่ห้ามแต่งตัวเลข
+ตอบ JSON เท่านั้น:
+{"hook":"ประโยคเปิดคำถาม 1 ประโยค","script":"บทพูดเต็มพร้อม [หยุด 1 วิ] (~170-230 คำ)","sources":["งบไตรมาสล่าสุด — <ตัวเลขที่ใช้>","ราคา ณ วันนี้ — <ราคา>","ข่าวล่าสุด — <หัวขื่อน>","คะแนนปัจจัย StockLens — <ค่า>"],"hashtags":"#หุ้น #การลงทุน #<TICKER>","scenes":[{"dur":"0-5s","text":"ประโยคที่พูดช่วงนี้ (ตัดจากบท)","visual":"ภาพที่ควรขึ้นจอ"},... 7-9 ฉากครอบคลุมทั้งบท]}`;
+
 const SYSTEMS: Record<string, string> = {
   classic: SYSTEM_STORY,
   contrarian: SYSTEM_CONTRARIAN,
   story: SYSTEM_STORYMOAT,
   listicle: SYSTEM_LISTICLE,
+  narration: SYSTEM_NARRATION,
 };
 
 const CURRENCY_TH: Record<string, string> = { USD: "ดอลลาร์", THB: "บาท", HKD: "ดอลลาร์ฮ่องกง", JPY: "เยน", EUR: "ยูโร", GBP: "ปอนด์", TWD: "ดอลลาร์ไต้หวัน", KRW: "วอน", SGD: "ดอลลาร์สิงคโปร์", AUD: "ดอลลาร์ออสเตรเลีย", CAD: "ดอลลาร์แคนาดา", INR: "รูปี", IDR: "รูเปีย", VND: "ดอง", MYR: "ริงกิต", PHP: "เปโซ", CNY: "หยวน" };
@@ -194,6 +213,19 @@ function demoCard(a: Awaited<ReturnType<typeof buildAnalysis>>): StoryCard {
 const NUM_EMOJI = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"];
 
 function assembleCaption(c: StoryCard): string {
+  // สไตล์ narration — ตัวเมืองคือ "บทพูด" + ที่มาข้อมูลให้ตรวจสอบได้
+  if (c.script) {
+    return [
+      c.script,
+      "",
+      "📚 ข้อมูลมาจากไหน (ตรวจสอบได้):",
+      ...(c.sources ?? []).map((s) => "· " + s),
+      "",
+      "⚠️ บทวิเคราะห์เชิงข้อมูล ไม่ใช่คำแนะนำการลงทุน การลงทุนมีความเสี่ยง",
+      "",
+      c.hashtags,
+    ].join("\n");
+  }
   const points = c.points.slice(0, 5).map((p, i) => `${NUM_EMOJI[i] || "•"} ${p}`);
   return [
     c.hook,
@@ -279,6 +311,8 @@ export async function GET(req: NextRequest) {
       style,
       ticker: a.quote.symbol,
       name: a.quote.name,
+      script: typeof j.script === "string" ? j.script : undefined,
+      sources: Array.isArray(j.sources) ? j.sources.slice(0, 8) : undefined,
       hook: j.hook || `ใครสงสัยบ้างว่าเบื้องหลังหุ้น ${a.quote.symbol} มีอะไร?`,
       reveal: j.reveal || `ราคาตอนนี้ ${a.quote.price.toFixed(2)} ${a.quote.currency} (${a.quote.changePct >= 0 ? "+" : ""}${a.quote.changePct.toFixed(2)}%)`,
       why: j.why || "",

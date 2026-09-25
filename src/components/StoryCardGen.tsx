@@ -15,6 +15,8 @@ interface StoryCardResult {
   style?: string;
   ticker: string;
   name: string;
+  script?: string;
+  sources?: string[];
   caption: string;
   hashtags: string;
   scenes: Scene[];
@@ -25,6 +27,7 @@ const SUGGEST = ["MU", "NVDA", "TSM", "AVGO", "PTT.BK", "DEL"];
 
 // สไตล์คอนเทนต์ — แกะจากคลิปไวรัลจริง 4 สูตร
 const STYLES = [
+  { id: "narration", label: "🎙️ บทเล่าเต็ม 60-90 วิ", desc: "สคริปต์พากษ์เสียง + ที่มาข้อมูล" },
   { id: "classic", label: "🎬 เล่าหุ้น 30 วิ", desc: "hook→เฉลยเลขจริง→ทำไม→3 จุด" },
   { id: "contrarian", label: "🧠 ทุกคนบอกแพง ผมว่าสนใจ", desc: "วาลูเอชั่นครบมุม PEG·3 ฉาก·แนวรับ" },
   { id: "listicle", label: "🏆 5 บริษัท [ธีม] มาแรง", desc: "listicle ตามธีม (437K views)" },
@@ -138,6 +141,28 @@ export default function StoryCardGen({ defaultTicker = "", compact = false }: { 
       {result && (
         <div className="mt-4 space-y-3">
           {result.error && <p className="text-[11px] text-yellow-500">⚠️ AI ขัดข้อง ({result.error}) — แสดงฉบับเทมเพลตจากข้อมูลจริงแทน</p>}
+
+          {/* 🎙️ บทเล่าเต็ม — สคริปต์พากษ์เสียงพร้อมที่มาข้อมูล */}
+          {result.script && (
+            <div className="card !bg-base-850 border-accent/30 p-4">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-bold text-accent-soft">🎙️ บทพูดพากษ์เสียง ({result.script.length.toLocaleString()} อักขระ ≈ {Math.max(30, Math.round(result.script.replace(/\[หยุด 1 วิ\]/g, "").length / 11))} วินาที)</p>
+                <button className="btn-ghost !py-1 !px-2.5 text-xs" onClick={() => copy("caption")}>
+                  {copied === "caption" ? "คัดลอกแล้ว ✓" : "📋 คัดลอกบทพูด"}
+                </button>
+              </div>
+              <p className="text-sm text-zinc-200 leading-8 whitespace-pre-wrap">{result.script}</p>
+              {result.sources && result.sources.length > 0 && (
+                <div className="mt-3 pt-3 border-t border-base-700/60">
+                  <p className="text-[11px] font-semibold text-zinc-400 mb-1">📚 ข้อมูลมาจากไหน (ตรวจสอบได้จริง)</p>
+                  {result.sources.map((src, i) => (
+                    <p key={i} className="text-[11px] text-zinc-500 leading-relaxed">· {src}</p>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           <div className="flex items-center justify-between">
             <p className="text-xs text-zinc-400">
               {result.ticker} · {result.name}{" "}
