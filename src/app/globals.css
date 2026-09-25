@@ -1,0 +1,311 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-base-950 text-zinc-200 antialiased;
+  font-feature-settings: "tnum";
+}
+
+/* ===== scrollbar ===== */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #111114;
+}
+::-webkit-scrollbar-thumb {
+  background: #3a3a44;
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #4b4b57;
+}
+
+/* ===== component classes ===== */
+.card {
+  @apply bg-base-900 border border-base-700/60 rounded-xl;
+}
+.card-hover {
+  @apply transition-colors hover:border-base-600;
+}
+.chip {
+  @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium;
+}
+.btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+}
+.btn-primary {
+  @apply btn bg-accent text-zinc-950 hover:bg-accent-soft;
+}
+.btn-ghost {
+  @apply btn bg-base-800 text-zinc-200 hover:bg-base-700 border border-base-700;
+}
+.input {
+  @apply w-full rounded-lg bg-base-800 border border-base-700 px-3 py-2 text-sm placeholder-zinc-500 focus:outline-none focus:border-accent/70;
+}
+.num {
+  font-variant-numeric: tabular-nums;
+}
+.link {
+  @apply text-accent-soft hover:underline;
+}
+
+/* ===== ticker tape ===== */
+.tape {
+  @apply overflow-hidden whitespace-nowrap;
+}
+.tape-inner {
+  @apply inline-flex animate-marquee;
+  will-change: transform;
+}
+.tape-item {
+  @apply inline-flex items-center gap-1.5 px-4 text-xs;
+}
+
+/* ===== markdown ในแชท ===== */
+.ai-chat p {
+  margin-bottom: 4px;
+}
+.ai-chat ul {
+  margin: 2px 0 4px 14px;
+  list-style: disc;
+}
+.ai-chat strong {
+  color: #fafafa;
+}
+
+/* ===== markdown ในบทวิเคราะห์ AI ===== */
+.ai-md h2 {
+  @apply mt-5 mb-2 text-base font-bold text-accent-soft;
+}
+.ai-md p {
+  @apply mb-3 leading-relaxed;
+}
+.ai-md ul {
+  @apply mb-3 ml-5 list-disc space-y-1;
+}
+.ai-md strong {
+  @apply text-zinc-50;
+}
+
+/* ===== markdown ในรายงาน PDF (พื้นขาว) ===== */
+.ai-report h2 {
+  font-weight: 700;
+  font-size: 13px;
+  margin: 10px 0 4px;
+  color: #18181b;
+}
+.ai-report h3 {
+  font-weight: 700;
+  font-size: 12px;
+  margin: 8px 0 3px;
+}
+.ai-report p {
+  margin-bottom: 6px;
+}
+.ai-report ul {
+  margin: 0 0 6px 16px;
+  list-style: disc;
+}
+.ai-report strong {
+  font-weight: 700;
+}
+
+/* ===== หน้ารายงาน (พิมพ์ PDF) — มาตรฐานสิ่งพิมพ์ A4 ===== */
+.report-page {
+  width: 210mm;
+  min-height: 297mm;
+  margin: 0 auto;
+  background: #fff;
+  color: #18181b;
+  padding: 0; /* padding ย้ายไปที่ .rp-body เพื่อให้ header เต็มความกว้าง */
+  position: relative;
+  overflow: hidden;
+  font-size: 11px;
+  line-height: 1.6;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+/* หัวกระดาษแบรนด์ — แถบสีตามระดับสมาชิก */
+.rp-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  color: #fff;
+  padding: 10mm 14mm 7mm;
+}
+.rp-header.tier-pro {
+  background: linear-gradient(135deg, #1a1a2e 0%, #3d2f00 55%, #7a5c00 100%);
+}
+.rp-header.tier-starter {
+  background: linear-gradient(135deg, #1a1a2e 0%, #17203a 55%, #2b3f6b 100%);
+}
+.rp-header h1 {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  line-height: 1.15;
+}
+.rp-header .rp-sub {
+  font-size: 12px;
+  opacity: 0.85;
+  margin-top: 2px;
+}
+.rp-meta {
+  text-align: right;
+  font-size: 10px;
+  opacity: 0.9;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+}
+.rp-tier-badge {
+  display: inline-block;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 1px;
+}
+/* ตัวรายงาน */
+.rp-body {
+  padding: 7mm 14mm 14mm;
+}
+.rp-body h2 {
+  font-size: 15px;
+  font-weight: 700;
+  color: #18181b;
+  border-bottom: 2px solid #e4e4e7;
+  padding-bottom: 4px;
+  margin: 14px 0 8px;
+}
+.rp-body h2:first-child {
+  margin-top: 0;
+}
+.rp-body section {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+.rp-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 4px 0 8px;
+}
+.rp-body th {
+  font-size: 9.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #71717a;
+  text-align: left;
+  padding: 5px 8px;
+  border-bottom: 1.5px solid #d4d4d8;
+}
+.rp-body td {
+  padding: 6px 8px;
+  border-bottom: 1px solid #ececef;
+  vertical-align: top;
+}
+.rp-body thead {
+  display: table-header-group; /* ตารางยาวข้ามหน้า พิมพ์หัวตารางซ้ำทุกหน้า */
+}
+.rp-body tr {
+  break-inside: avoid;
+}
+/* กล่องข้อมูล */
+.rp-callout {
+  border-left: 3px solid #c8a200;
+  background: #fdfaf0;
+  padding: 8px 12px;
+  margin: 8px 0;
+  border-radius: 0 6px 6px 0;
+}
+.rp-lock {
+  border: 1.5px dashed #a1a1aa;
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+  color: #52525b;
+  background: #fafafa;
+}
+.rp-quote {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+.num {
+  font-variant-numeric: tabular-nums;
+}
+/* footer ทุกหน้า — บนจออยู่ท้ายกระดาษ / ตอนพิมพ์ Chrome พิมพ์ fixed ซ้ำทุกหน้า */
+.rp-footer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 3mm 14mm 5mm;
+  font-size: 8.5px;
+  color: #a1a1aa;
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid #e4e4e7;
+  background: #fff;
+}
+.watermark {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: space-around;
+  justify-content: space-around;
+  transform: rotate(-24deg);
+  opacity: 0.05;
+  font-weight: 700;
+  font-size: 15px;
+  color: #000;
+}
+.watermark span {
+  padding: 16px 30px;
+  white-space: nowrap;
+}
+@media print {
+  @page {
+    size: A4;
+    margin: 0;
+  }
+  body {
+    background: #fff !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .report-page {
+    box-shadow: none !important;
+    margin: 0;
+    width: auto;
+    min-height: auto;
+  }
+  .page-break {
+    break-before: page;
+  }
+  .rp-footer {
+    position: fixed;
+  }
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

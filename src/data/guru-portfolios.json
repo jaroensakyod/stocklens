@@ -1,0 +1,74 @@
+{
+  "_note": "Snapshot พอร์ตกูรู — ข้อมูลรวบรวมจาก 13F/สื่อสาธารณะ จะมีการล้าหลังและเปลี่ยนแปลงเสมอ อ่าน cautions ประกอบทุกครั้ง แก้ไขไฟล์นี้เมื่อมี 13F ใหม่",
+  "gurus": [
+    {
+      "id": "burry",
+      "name": "Michael Burry",
+      "firm": "Scion Asset Management",
+      "emoji": "🦈",
+      "asOf": "อ้างอิง 13F ไตรมาส 3/2025 + รายงานสื่อช่วงปี 2026 (ตรวจสอบ ก.ย. 2026)",
+      "thesis": "สไตล์คลาสสิกของเขา: ซื้อหุ้น Value ที่ถูกเท คู่กับ short หุ้นโมเมนตัมแพง โดยเฉพาะกลุ่ม AI ที่เขามองว่า overvalued แบบปี 1999-2000",
+      "holdings": [
+        { "ticker": "LULU", "name": "Lululemon", "action": "long", "note": "หุ้น Value ที่ถูกเทขาย" },
+        { "ticker": "MELI", "name": "MercadoLibre", "action": "long", "note": "แพงตัวลงจากจุดสูงสุด" },
+        { "ticker": "MOH", "name": "Molina Healthcare", "action": "long", "note": "สุขภาพแบบคุ้มค่า" },
+        { "ticker": "UNH", "name": "UnitedHealth", "action": "long", "note": "เปิดพอร์ตช่วงกลางปี 2025" },
+        { "ticker": "REGN", "name": "Regeneron", "action": "long", "note": "เปิดพอร์ตช่วงกลางปี 2025" },
+        { "ticker": "PLTR", "name": "Palantir", "action": "put", "note": "short เจ้าหุ้น AI ที่แพงที่สุด (notional ~$900M)" },
+        { "ticker": "NVDA", "name": "NVIDIA", "action": "put", "note": "short ตามธีสิส AI bubble" },
+        { "ticker": "MU", "name": "Micron", "action": "put", "note": "กังวล chip supply glut" },
+        { "ticker": "NBIS", "name": "Nebius", "action": "put", "note": "short neocloud ที่ใช้ leverage สูง" },
+        { "ticker": "SMH", "name": "Semiconductor ETF", "action": "put", "note": "short ทั้งกลุ่มเซมิผ่าน ETF" }
+      ],
+      "caution": "13F ล่าหลังถึง 45 วัน · มูลค่า put ใน 13F เป็น notional ไม่ใช่เงินจริงที่ลงไป · Burry เปลี่ยนพอร์ตถี่ · เขาเคยกล่าวชัดว่า 'ไม่' short CoreWeave (เรียกว่าหุ้น memesville) · ตำแหน่งอาจปิดไปแล้ว · ตามเขาไม่ได้แปลว่าจะรวย — ปีที่แล้ว NBIS/PLTR วิ่งสวนทางสถานะ short ของเขา"
+    },
+    {
+      "id": "buffett",
+      "name": "Warren Buffett",
+      "firm": "Berkshire Hathaway",
+      "emoji": "🍦",
+      "asOf": "อ้างอิง 13F ล่าสุดที่เปิดเผย (ประมาณ โดยประมาณจากข้อมูลสาธารณะ ปี 2026)",
+      "thesis": "ซื้อบริษัทคุณภาพราคาสมเหตุผลถือยาว ชอบกระแสเงินสดแข็งแรง ช่วงหลังถือเงินสดสูงเป็นประวัติการณ์รอจังหวะ",
+      "holdings": [
+        { "ticker": "AAPL", "name": "Apple", "action": "long", "note": "ขายไปบางส่วนแล้วแต่ยังเป็นหุ้นใหญ่สุด" },
+        { "ticker": "BAC", "name": "Bank of America", "action": "long", "note": "ธนาคารหลัก" },
+        { "ticker": "KO", "name": "Coca-Cola", "action": "long", "note": "ถือยาวหลายสิบปี" },
+        { "ticker": "AXP", "name": "American Express", "action": "long", "note": "ถือยาวเช่นกัน" },
+        { "ticker": "OXY", "name": "Occidental", "action": "long", "note": "พนันน้ำมัน+คาร์บอน" },
+        { "ticker": "CVX", "name": "Chevron", "action": "long", "note": "พลังงาน" }
+      ],
+      "caution": "Berkshire แทบไม่ขายหุ้นหลัก (tax) — พอร์ตเปลี่ยนช้า · 13F บอกแค่ฝั่ง long ไม่เห็นเงินสด/พันธบัตรที่ถือเยอะมากตอนนี้ · ค่าตามเขาไม่เท่ากับจังหวะเข้า"
+    },
+    {
+      "id": "ark",
+      "name": "Cathie Wood",
+      "firm": "ARK Invest",
+      "emoji": "🚀",
+      "asOf": "อ้างอิงการเปิดเผยประจำของ ARK (โดยประมาณ ปี 2026)",
+      "thesis": "Invest in Innovation — AI, จีโนมิกส์, หุ่นยนต์, อวกาศ, พลังงานใหม่ เชื่อ deflation จากเทคโนโลยี",
+      "holdings": [
+        { "ticker": "TSLA", "name": "Tesla", "action": "long", "note": "เดิมพันใหญ่สุด มองเป็นบริษัท AI/หุ่นยนต์" },
+        { "ticker": "ROKU", "name": "Roku", "action": "long", "note": "สตรีมมิง" },
+        { "ticker": "COIN", "name": "Coinbase", "action": "long", "note": "คริปโต infrastructure" },
+        { "ticker": "SHOP", "name": "Shopify", "action": "long", "note": "คอมเมิร์ซ" },
+        { "ticker": "RKLB", "name": "Rocket Lab", "action": "long", "note": "อวกาศ" }
+      ],
+      "caution": "สไตล์ high-beta — ขึ้นแรงตอมาโครดี ตกแรงตอมาโครแย่ · เทียบ benchmark ตามหลัง S&P หลายปี · เหมาะอ่านเป็นแหล่งไอเดียธีมเทค"
+    },
+    {
+      "id": "dalio",
+      "name": "Ray Dalio",
+      "firm": "Bridgewater Associates",
+      "emoji": "⚖️",
+      "asOf": "อ้างอิง 13F ล่าสุด (โดยประมาณ ปี 2026)",
+      "thesis": "All Weather / กระจายความเสี่ยงข้ามสินทรัพย์ ช่วงหลังพูดเรื่อง 'Big Cycle' หนี้สหรัฐฯ และทองคำ",
+      "holdings": [
+        { "ticker": "IVV", "name": "S&P 500 ETF", "action": "long", "note": "แกนหลัก passive" },
+        { "ticker": "GLD", "name": "Gold ETF", "action": "long", "note": "ทองคำ — hedge หนี้โลก" },
+        { "ticker": "VWO", "name": "Emerging Markets ETF", "action": "long", "note": "ตลาดเกิดใหม่" },
+        { "ticker": "IWM", "name": "Small Cap ETF", "action": "long", "note": "หุ้นเล็กสหรัฐฯ" }
+      ],
+      "caution": "Bridgewater ใช้ derivative เยอะ 13F เห็นไม่ครบ · พอร์ตจริงเป็น macro/อนุพันธ์เป็นหลัก อ่านเป็นแนวโน้มความเชื่อมั่นพอประมาณ"
+    }
+  ]
+}

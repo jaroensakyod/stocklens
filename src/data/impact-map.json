@@ -1,0 +1,1274 @@
+{
+  "_note": "ห่วงโซ่ผลกระทบ: สินค้าโภคภัณฑ์/เหตุการณ์ → หุ้นที่ได้ (positive) / เสีย (negative) ประโยชน์เมื่อราคาสินค้าหรือความรุนแรงของเหตุการณ์ 'ขึ้น' — เพิ่ม/แก้ได้เรื่อยๆ ไม่ต้องแตะโค้ด",
+  "nodes": [
+    {
+      "id": "oil",
+      "type": "commodity",
+      "name": "น้ำมันดิบ",
+      "yahoo": "CL=F",
+      "upReason": "น้ำมันแพงขึ้นเมื่อซัพพลายตึง (สงคราม/OPEC ตัดผลผลิต/คว่ำบัตร) หรือดีมานด์แรง",
+      "stocks": [
+        {
+          "ticker": "XOM",
+          "market": "US",
+          "direction": "positive",
+          "strength": "strong",
+          "reason": "ผู้ผลิตน้ำมันรายใหญ่ ราคาขายแพงขึ้น = รายได้/กำไรเพิ่มโดยตรง"
+        },
+        {
+          "ticker": "CVX",
+          "market": "US",
+          "direction": "positive",
+          "strength": "strong",
+          "reason": "บริษัทน้ำมันบูรณะการผลิต ได้ประโยชน์เต็มๆ จากราคาน้ำมันสูง"
+        },
+        {
+          "ticker": "COP",
+          "market": "US",
+          "direction": "positive",
+          "strength": "strong",
+          "reason": "หุ้น E&P บริสุทธิ์ ราคาน้ำมันขึ้นผลตอบแทนเชิงปฏิบัติการ (operating leverage) สูง"
+        },
+        {
+          "ticker": "OXY",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "ผู้ผลิตสหรัฐฯ มีหนี้จากการซื้อ Anadarko — น้ำมันแพงช่วยกระแสเงินสดโดยตรง"
+        },
+        {
+          "ticker": "SLB",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "บริการในอุตสาหกรรมน้ำมัน งานสำรวจ/เจาะเพิ่มเมื่อราคาน้ำมันสูงต่อเนื่อง"
+        },
+        {
+          "ticker": "PTT.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "ปตท. มีรายได้จากก๊าซธรรมชาติและส่งออก — ราคาพลังงานสูงช่วยรายได้รวม"
+        },
+        {
+          "ticker": "PTTEP.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "strong",
+          "reason": "ผู้ผลิต E&P ของไทย ขายน้ำมัน/ก๊าซตามราคาตลาดโลกโดยตรง"
+        },
+        {
+          "ticker": "DAL",
+          "market": "US",
+          "direction": "negative",
+          "strength": "strong",
+          "reason": "สายการบิน — น้ำมันคือต้นทุนใหญ่อันดับ 2 ราคาสูงบีบกำไรทันที"
+        },
+        {
+          "ticker": "UAL",
+          "market": "US",
+          "direction": "negative",
+          "strength": "strong",
+          "reason": "สายการบิน ต้นทุนเชื้อเพลิงสูง ต้องขึ้นค่าโดยสารซึ่งกระทบยอดโหลด"
+        },
+        {
+          "ticker": "BA.BK",
+          "market": "TH",
+          "direction": "negative",
+          "strength": "medium",
+          "reason": "การบินไทย — ต้นทุนเชื้อเพลิงแพงขึ้นกระทบผลประกอบการที่เพิ่งฟื้น"
+        },
+        {
+          "ticker": "DOW",
+          "market": "US",
+          "direction": "negative",
+          "strength": "medium",
+          "reason": "เคมีภัณฑ์ใช้น้ำมัน/ก๊าซเป็นวัตถุดิบหลัก ต้นทุนขึ้นบีบมาร์จิ้น"
+        },
+        {
+          "ticker": "LYB",
+          "market": "US",
+          "direction": "negative",
+          "strength": "medium",
+          "reason": "ปิโตรเคมี — วัตถุดิบ naphtha แพงขึ้นตามน้ำมัน"
+        },
+        {
+          "ticker": "IVL.BK",
+          "market": "TH",
+          "direction": "negative",
+          "strength": "medium",
+          "reason": "อินดอรามา — ต้นทุนปิโตรเคมีสัมพันธ์กับราคาน้ำมัน"
+        }
+      ]
+    },
+    {
+      "id": "gas",
+      "type": "commodity",
+      "name": "ก๊าซธรรมชาติ",
+      "yahoo": "NG=F",
+      "upReason": "ก๊าซแพงเมื่อฤดูหนาวรุนแรง/ความตึงเครียดรัสเซีย-ยุโรป/LNG แข่งกัน",
+      "stocks": [
+        {
+          "ticker": "EQT",
+          "market": "US",
+          "direction": "positive",
+          "strength": "strong",
+          "reason": "ผู้ผลิตก๊าซบริสุทธิ์รายใหญ่สุดของสหรัฐฯ"
+        },
+        {
+          "ticker": "EOG",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "ผู้ผลิตน้ำมัน+ก๊าซ สัดส่วนก๊าซสูงขึ้นเรื่อยๆ"
+        },
+        {
+          "ticker": "KMI",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "ท่อส่งก๊าซ — ปริมาณขนส่งเพิ่มเมื่อดีมานด์แรง"
+        },
+        {
+          "ticker": "DOW",
+          "market": "US",
+          "direction": "negative",
+          "strength": "medium",
+          "reason": "ใช้ก๊าซเป็นทั้งวัตถุดิบและพลังงาน ต้นทุนขึ้น"
+        },
+        {
+          "ticker": "CF",
+          "market": "US",
+          "direction": "negative",
+          "strength": "medium",
+          "reason": "ผลิตปุ๋ยแอมโมเนียจากก๊าซ — ต้นทุนแพงขึ้น (แต่ราคาปุ๋ยมักตามขึ้นด้วย)"
+        }
+      ]
+    },
+    {
+      "id": "gold",
+      "type": "commodity",
+      "name": "ทองคำ",
+      "yahoo": "GC=F",
+      "upReason": "ทองแพงเมื่อความเสี่ยงสูง (สงคราม/เศรษฐกิจ) เฟ้อ หรือคาด Fed ลดดอกเบี้ย",
+      "stocks": [
+        {
+          "ticker": "NEM",
+          "market": "US",
+          "direction": "positive",
+          "strength": "strong",
+          "reason": "เหมืองทองรายใหญ่สุดโลก กำไรเชิงปฏิบัติการเพิ่มตามราคาทองแบบทวีคูณ"
+        },
+        {
+          "ticker": "GOLD",
+          "market": "US",
+          "direction": "positive",
+          "strength": "strong",
+          "reason": "Barrick Gold — ต้นทุนต่อออนซ์คงที่ ราคาขึ้นคือกำไรส่วนเกิน"
+        },
+        {
+          "ticker": "AEM",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "เหมืองทองคุณภาพสูง ต้นทุนต่ำ"
+        }
+      ]
+    },
+    {
+      "id": "copper",
+      "type": "commodity",
+      "name": "ทองแดง",
+      "yahoo": "HG=F",
+      "upReason": "ทองแดงแพงเมื่อ AI/ไฟฟ้า/สร้างโครงสร้างพื้นฐานดึงดีมานด์ ขณะที่ซัพพลายเปิดเหมืองใหม่ยาก",
+      "stocks": [
+        {
+          "ticker": "FCX",
+          "market": "US",
+          "direction": "positive",
+          "strength": "strong",
+          "reason": "Freeport — ผู้ผลิตทองแดงรายใหญ่สุดโลก ราคาขึ้นคือกำไรตรง"
+        },
+        {
+          "ticker": "BHP",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "เหมืองรายใหญ่ สัดส่วนทองแดงเยอะ"
+        }
+      ]
+    },
+    {
+      "id": "cocoa",
+      "type": "commodity",
+      "name": "โกโก้",
+      "yahoo": "CC=F",
+      "upReason": "โกโก้แพงเมื่อฝนมาก/โรคพืช/ความไม่สงบที่แอฟริกาตะวันตก (ไอวอรีโสต์+กานา = 60% ผลผลิตโลก)",
+      "stocks": [
+        {
+          "ticker": "HSY",
+          "market": "US",
+          "direction": "negative",
+          "strength": "strong",
+          "reason": "Hershey — ต้นทุนโกโก้คือหัวใจ ราคาพุ่งบีบกำไรหนัก เคยเกิดจริงปี 2024"
+        },
+        {
+          "ticker": "MDLZ",
+          "market": "US",
+          "direction": "negative",
+          "strength": "medium",
+          "reason": "Mondelez (Cadbury/Oreo) — ต้นทุนช็อกโกแลตขึ้น ต้องขึ้นราคา/ลดขนาด"
+        },
+        {
+          "ticker": "GIS",
+          "market": "US",
+          "direction": "negative",
+          "strength": "weak",
+          "reason": "อาหารรวมหลายแบรนด์ กระทบบ้างจากต้นทุนโกโก้"
+        }
+      ]
+    },
+    {
+      "id": "coffee",
+      "type": "commodity",
+      "name": "กาแฟ",
+      "yahoo": "KC=F",
+      "upReason": "กาแฟแพงเมื่อภัยแล้ง/น้ำแข็งที่บราซิล (อาราบิก้า) หรือเวียดนาม (โรบัสตา)",
+      "stocks": [
+        {
+          "ticker": "SBUX",
+          "market": "US",
+          "direction": "negative",
+          "strength": "medium",
+          "reason": "สตาร์บักส์ — เมล็ดกาแฟคือต้นทุนหลัก แพงขึ้นบีบ margin (มิลค์ก็เกี่ยว)"
+        },
+        {
+          "ticker": "MCD",
+          "market": "US",
+          "direction": "negative",
+          "strength": "weak",
+          "reason": "ขายกาแฟจำนวนมาก กระทบเล็กน้อย"
+        },
+        {
+          "ticker": "KDP",
+          "market": "US",
+          "direction": "negative",
+          "strength": "weak",
+          "reason": "Keurig Dr Pepper — K-Cup ต้นทุนเมล็ดกาแฟสูงตาม"
+        }
+      ]
+    },
+    {
+      "id": "wheat",
+      "type": "commodity",
+      "name": "ข้าวสาลี",
+      "yahoo": "ZW=F",
+      "upReason": "ข้าวสาลีแพงเมื่อสงครามยูเครน/รัสเซีย (30% ส่งออกโลก) หรือภัยแล้ง",
+      "stocks": [
+        {
+          "ticker": "ADM",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "ค้า/แปรรูปธัญพืช — ความผันผวนสูงคือโอกาสเทรดดิ้ง (บางจุด margin ดีขึ้น)"
+        },
+        {
+          "ticker": "BG",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "Bunge — ผู้เล่นหลักตลาดธัญพืชโลก"
+        },
+        {
+          "ticker": "GIS",
+          "market": "US",
+          "direction": "negative",
+          "strength": "medium",
+          "reason": "ซีเรียล/เบเกอรี่ — ต้นทุนข้าวสาลีแพงขึ้น"
+        },
+        {
+          "ticker": "K",
+          "market": "US",
+          "direction": "negative",
+          "strength": "medium",
+          "reason": "Kellanova (Kellogg) — ธัญพืชเป็นวัตถุดิบหลัก"
+        },
+        {
+          "ticker": "STZ",
+          "market": "US",
+          "direction": "negative",
+          "strength": "weak",
+          "reason": "เบียร์ใช้ข้าวบาร์เลย์ กระทบบ้าง"
+        }
+      ]
+    },
+    {
+      "id": "corn",
+      "type": "commodity",
+      "name": "ข้าวโพด",
+      "yahoo": "ZC=F",
+      "upReason": "ข้าวโพดแพงเมื่อภัยแล้งสหรัฐฯ/ใช้ทำเอทานอลมาก/สงครามยูเครน",
+      "stocks": [
+        {
+          "ticker": "ADM",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "แปรรูปข้าวโพดรายใหญ่"
+        },
+        {
+          "ticker": "NTR",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "ปุ๋ย — ราคาพืชแพงชวนให้เพาะปลูกเพิ่ม ใช้ปุ๋ยมากขึ้น"
+        },
+        {
+          "ticker": "MOS",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "ปุ๋ยโพแทช/ฟอสเฟต ดีมานด์ตามราคาพืช"
+        },
+        {
+          "ticker": "TSN",
+          "market": "US",
+          "direction": "negative",
+          "strength": "medium",
+          "reason": "อาหารสัตว์ใช้ข้าวโพดเป็นส่วนผสมหลัก ต้นทุนขึ้น"
+        },
+        {
+          "ticker": "CPF.BK",
+          "market": "TH",
+          "direction": "negative",
+          "strength": "medium",
+          "reason": "ซีพีเอฟ — อาหารสัตว์ (ข้าวโพด/ถั่วเหลือง) คือต้นทุนหลัก"
+        },
+        {
+          "ticker": "MILL.BK",
+          "market": "TH",
+          "direction": "negative",
+          "strength": "weak",
+          "reason": "อาหารสัตว์ไทย ต้นทุนวัตถุดิบข้าวโพดนำเข้า/ในประเทศแพงขึ้น"
+        }
+      ]
+    },
+    {
+      "id": "soy",
+      "type": "commodity",
+      "name": "ถั่วเหลือง",
+      "yahoo": "ZS=F",
+      "upReason": "แพงเมื่อสภาพอากาศอเมริกาใต้/การค้าจีน-สหรัฐฯ กระทบ",
+      "stocks": [
+        {
+          "ticker": "BG",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "ผู้ค้าถั่วเหลืองโลกรายใหญ่"
+        },
+        {
+          "ticker": "CPF.BK",
+          "market": "TH",
+          "direction": "negative",
+          "strength": "medium",
+          "reason": "อาหารสัตว์ — ถั่วเหลืองคือโปรตีนหลัก"
+        }
+      ]
+    },
+    {
+      "id": "sugar",
+      "type": "commodity",
+      "name": "น้ำตาล",
+      "yahoo": "SB=F",
+      "upReason": "น้ำตาลแพงเมื่อฝน/เอลนีโญที่บราซิล-อินเดีย หรือบราซิลหันไปทำเอทานอลมาก",
+      "stocks": [
+        {
+          "ticker": "MDLZ",
+          "market": "US",
+          "direction": "negative",
+          "strength": "medium",
+          "reason": "ขนมหวานหลายแบรนด์ ต้นทุนน้ำตาล+โกโก้พร้อมกันได้"
+        },
+        {
+          "ticker": "KDP",
+          "market": "US",
+          "direction": "negative",
+          "strength": "weak",
+          "reason": "เครื่องดื่มหวาน ต้นทุนน้ำตาลขึ้น"
+        }
+      ]
+    },
+    {
+      "id": "oj",
+      "type": "commodity",
+      "name": "น้ำส้มคั้น",
+      "yahoo": "JO=F",
+      "upReason": "แพงเมื่อพายุเฮอริเคน/โรคใบเหลือง (citrus greening) ที่ฟลอริดา/บราซิล",
+      "stocks": [
+        {
+          "ticker": "COKE",
+          "market": "US",
+          "direction": "negative",
+          "strength": "weak",
+          "reason": "น้ำผลไม้เป็นหนึ่งใน product line ต้นทุนขึ้น"
+        }
+      ]
+    },
+    {
+      "id": "cotton",
+      "type": "commodity",
+      "name": "ฝ้าย",
+      "yahoo": "CT=F",
+      "upReason": "ฝ้ายแพงเมื่อภัยแล้ง/น้ำท่วมแถบเท็กซัส-อินเดีย หรือสงครามการค้า",
+      "stocks": [
+        {
+          "ticker": "NKE",
+          "market": "US",
+          "direction": "negative",
+          "strength": "medium",
+          "reason": "เสื้อผ้า — ฝ้าย/ใยสังเคราะห์เป็นต้นทุนวัตถุดิบ"
+        },
+        {
+          "ticker": "VFC",
+          "market": "US",
+          "direction": "negative",
+          "strength": "medium",
+          "reason": "แบรนด์เสื้อผ้าหลายค่าย ต้นทุนใยสังเคราะห์ตามน้ำมัน+ฝ้าย"
+        }
+      ]
+    },
+    {
+      "id": "fertilizer",
+      "type": "theme",
+      "name": "ปุ๋ย",
+      "yahoo": "NTR",
+      "upReason": "ราคาปุ๋ยแพงเมื่อก๊าซธรรมชาติแพง (ผลิตแอมโมเนีย) หรือคว่ำบัตรรัสเซีย-เบลารุส (โพแทช)",
+      "stocks": [
+        {
+          "ticker": "NTR",
+          "market": "US",
+          "direction": "positive",
+          "strength": "strong",
+          "reason": "Nutrien — ปุ๋ยครบชุดรายใหญ่สุดโลก ราคาปุ๋ยขึ้นคือกำไร"
+        },
+        {
+          "ticker": "MOS",
+          "market": "US",
+          "direction": "positive",
+          "strength": "strong",
+          "reason": "Mosaic — โพแทช/ฟอสเฟต ได้ประโยชน์ตรง"
+        },
+        {
+          "ticker": "CF",
+          "market": "US",
+          "direction": "positive",
+          "strength": "strong",
+          "reason": "CF — ไนโตรเจน ราคาขายตามต้นทุนก๊าซ+ดีมานด์เกษตร"
+        }
+      ]
+    },
+    {
+      "id": "defense",
+      "type": "theme",
+      "name": "อุตสาหกรรมกลาโหม",
+      "yahoo": "LMT",
+      "upReason": "กลาโหมร้อนเมื่อสงคราม/ความตึงเครียด/งบ NATO ขยับขึ้น (เป้า 5% GDP)",
+      "stocks": [
+        {
+          "ticker": "LMT",
+          "market": "US",
+          "direction": "positive",
+          "strength": "strong",
+          "reason": "Lockheed — F-35, ขีปนาวุธ สัญญาค้างชำระ (backlog) ยักษ์"
+        },
+        {
+          "ticker": "RTX",
+          "market": "US",
+          "direction": "positive",
+          "strength": "strong",
+          "reason": "RTX — ขีปนาวุษป้องกัน + ระบบอิเล็กทรอนิกส์ สัญญายุโรปเพิ่ม"
+        },
+        {
+          "ticker": "NOC",
+          "market": "US",
+          "direction": "positive",
+          "strength": "strong",
+          "reason": "Northrop — B-21, อวกาศกลาโหม ได้งบต่อเนื่อง"
+        },
+        {
+          "ticker": "GD",
+          "market": "US",
+          "direction": "positive",
+          "strength": "strong",
+          "reason": "General Dynamics — เรือดำน้ำ, กระสุน สั่งซื้อเร่ง"
+        },
+        {
+          "ticker": "HWM",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "Howmet — ชิ้นส่วนเครื่องยนต์การบิน/กลาโหม ขาดแคลนซัพพลายเก่า"
+        },
+        {
+          "ticker": "LDOS",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "Leidos — ไอทีกลาโหม/AI สัญญาราชการ"
+        }
+      ]
+    },
+    {
+      "id": "drones",
+      "type": "theme",
+      "name": "โดรน & ระบบไร้คนขับ",
+      "yahoo": "AVAV",
+      "upReason": "สงครามยูเครนพิสูจน์ค่าโดรน งบโดรนทั่วโลกเพิ่ม",
+      "stocks": [
+        {
+          "ticker": "AVAV",
+          "market": "US",
+          "direction": "positive",
+          "strength": "strong",
+          "reason": "AeroVironment — โดรน Switchblade สัญญาทหารเพิ่มต่อเนื่อง"
+        },
+        {
+          "ticker": "KTOS",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "Kratos — โดรนต่อสู้ราคาถูก/target drones"
+        }
+      ]
+    },
+    {
+      "id": "space",
+      "type": "theme",
+      "name": "อวกาศ & ปล่อยจรวด",
+      "yahoo": "RKLB",
+      "upReason": "ธีมร้อนเมื่อมีสัญญา NASA/กลาโหมใหญ่ หรือ Electron/Neutron ความสำเร็จ",
+      "stocks": [
+        {
+          "ticker": "RKLB",
+          "market": "US",
+          "direction": "positive",
+          "strength": "strong",
+          "reason": "Rocket Lab — ปล่อยจรวดอันดับ 2 รอง SpaceX + ส่วนประกอบดาวเทียม"
+        },
+        {
+          "ticker": "LUNR",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "Intuitive Machines — ยานลงดวงจันทร์ สัญญา NASA CLPS"
+        },
+        {
+          "ticker": "RDW",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "Redwire — โครงสร้าง/อุปกรณ์อวกาศ"
+        },
+        {
+          "ticker": "LMT",
+          "market": "US",
+          "direction": "positive",
+          "strength": "weak",
+          "reason": "ฝ่ายอวกาศของ Lockheed ได้สัญญาบ้าง"
+        }
+      ]
+    },
+    {
+      "id": "satellite",
+      "type": "theme",
+      "name": "ดาวเทียม & กลุ่มดาวเทียม",
+      "yahoo": "ASTS",
+      "upReason": "ธีมร้อนเมื่อกลุ่มดาวเทียมใหญ่ออนไลน์/สัญญากับผู้ให้บริการมือถือ",
+      "stocks": [
+        {
+          "ticker": "ASTS",
+          "market": "US",
+          "direction": "positive",
+          "strength": "strong",
+          "reason": "AST SpaceMobile — ดาวเทียมคุยโดยตรงกับมือถือทั่วไป ทำข้อตกลงกับ AT&T/Verizon"
+        },
+        {
+          "ticker": "IRDM",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "Iridium — เครือข่ายดาวเทียบเสียง/IoT มีรายได้จริง"
+        },
+        {
+          "ticker": "GSAT",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "Globalstar — ผู้ให้บริการดาวเทียม Apple"
+        },
+        {
+          "ticker": "SAT.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "weak",
+          "reason": "ไทยคม — ดาวเทียมไทย (แต่เผชิญการแข่งขัน Starlink)"
+        }
+      ]
+    },
+    {
+      "id": "rareearth",
+      "type": "theme",
+      "name": "หายาก & วัสดุเชิงกลยุทธ์",
+      "yahoo": "MP",
+      "upReason": "ร้อนเมื่อจีนคว่ำบัตรส่งออก rare earth/แกลเลียม (ใช้ในชิป แม่เหล็ก อาวุธ)",
+      "stocks": [
+        {
+          "ticker": "MP",
+          "market": "US",
+          "direction": "positive",
+          "strength": "strong",
+          "reason": "MP Materials — เหมือง rare earth นอกจีนแห่งเดียวของสหรัฐฯ ได้ประโยชน์จากมาตรการจีน"
+        },
+        {
+          "ticker": "FCX",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "ทองแดง/วัสดุเชิงกลยุทธ์อื่น ดีมานด์นอกจีนเพิ่ม"
+        }
+      ]
+    },
+    {
+      "id": "steel",
+      "type": "theme",
+      "name": "เหล็ก & ภาษีนำเข้า",
+      "yahoo": "NUE",
+      "upReason": "เหล็กในประเทศแพงเมื่อสหรัฐฯ ขึ้นภาษี/มาตรการป้องกันเหล็กนำเข้า",
+      "stocks": [
+        {
+          "ticker": "X",
+          "market": "US",
+          "direction": "positive",
+          "strength": "strong",
+          "reason": "U.S. Steel — ผู้ผลิตในประเทศ ได้คุ้มกันจากภาษีนำเข้า"
+        },
+        {
+          "ticker": "NUE",
+          "market": "US",
+          "direction": "positive",
+          "strength": "strong",
+          "reason": "Nucor — เหล็กไฟฟ้า ต้นทุนต่ำ ได้ประโยชน์จากราคาในประเทศสูง"
+        },
+        {
+          "ticker": "STLD",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "Steel Dynamics — เหล็กไฟฟ้าเช่นกัน"
+        }
+      ]
+    },
+    {
+      "id": "chinaexposed",
+      "type": "theme",
+      "name": "หุ้นที่พึ่งจีน",
+      "yahoo": "AAPL",
+      "upReason": "ความเสี่ยงขึ้นเมื่อสงครามการค้า/ภาษีนำเข้าจากจีน หรือจีนคว่ำบัตรบริษัทสหรัฐฯ",
+      "stocks": [
+        {
+          "ticker": "AAPL",
+          "market": "US",
+          "direction": "negative",
+          "strength": "medium",
+          "reason": "สายการผลิต+ตลาดจีนสำคัญ — ภาษี/บอยคอตกระทบทั้งต้นทุนและยอดขาย"
+        },
+        {
+          "ticker": "TSLA",
+          "market": "US",
+          "direction": "negative",
+          "strength": "medium",
+          "reason": "โรงงานเซี่ยงไฮ้+ตลาดจีนใหญ่ ความตึงเครียดกระทบโดยตรง"
+        },
+        {
+          "ticker": "BABA",
+          "market": "US",
+          "direction": "negative",
+          "strength": "medium",
+          "reason": "หุ้นจีน ADR — ความเสี่ยง delisting/มาตรการเป็นหลักความเสี่ยงต่อเนื่อง"
+        },
+        {
+          "ticker": "DELTA.BK",
+          "market": "TH",
+          "direction": "negative",
+          "strength": "medium",
+          "reason": "สัดส่วนลูกค้าจีนสูง — สงครามการค้ากระทบตรง"
+        }
+      ]
+    },
+    {
+      "id": "chips",
+      "type": "theme",
+      "name": "เซมิคอนดักเตอร์ & สงครามชิป",
+      "yahoo": "NVDA",
+      "upReason": "เรื่องใหญ่ขึ้นเมื่อมีมาตรการส่งออกชิป AI / ข่าวสงครามเทคโนโลยี",
+      "stocks": [
+        {
+          "ticker": "NVDA",
+          "market": "US",
+          "direction": "negative",
+          "strength": "medium",
+          "reason": "ขายชิป AI ให้จีนถูกจำกัด — เสียรายได้ส่วนหนึ่ง (แต่ดีมานด์อื่นแรง)"
+        },
+        {
+          "ticker": "AMAT",
+          "market": "US",
+          "direction": "negative",
+          "strength": "medium",
+          "reason": "อุปกรณ์เจ้าของเทคโนโลยีสหรัฐฯ ถูกจำกัดขายให้จีน"
+        },
+        {
+          "ticker": "TSM",
+          "market": "US",
+          "direction": "negative",
+          "strength": "weak",
+          "reason": "โรงงานในไต้หวันเสี่ยงภูมิรัฐศาสตร์ + ลูกค้าจีน"
+        }
+      ]
+    },
+    {
+      "id": "insurers",
+      "type": "theme",
+      "name": "ประกันภัย & พายุ",
+      "yahoo": "PGR",
+      "upReason": "พายุเฮอริเคนใหญ่ = ค่าเคลมมหาศาล",
+      "stocks": [
+        {
+          "ticker": "PGR",
+          "market": "US",
+          "direction": "negative",
+          "strength": "medium",
+          "reason": "Progressive — เคลมรถ/บ้านจากพายุกระทบไตรมาสนั้น (ปกติปรับเบี้ยตามทัน)"
+        },
+        {
+          "ticker": "ALL",
+          "market": "US",
+          "direction": "negative",
+          "strength": "medium",
+          "reason": "Allstate — กรมธรรม์บ้านในแถบพายุเยอะ"
+        },
+        {
+          "ticker": "HD",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "Home Depot — ขายของซ่อมบ้านเพิ่มหลังภัยพิบัติ"
+        },
+        {
+          "ticker": "LOW",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "Lowe's — ซ่อมแซมหลังพายุเช่นกัน"
+        }
+      ]
+    },
+    {
+      "id": "renewables",
+      "type": "theme",
+      "name": "พลังงานสะอาด & นโยบาย",
+      "yahoo": "FSLR",
+      "upReason": "ร้อนเมื่อนโยบายสนับสนุน/ราคาน้ำมันแพง/ดีมานด์ data center ต้องการไฟสะอาด",
+      "stocks": [
+        {
+          "ticker": "FSLR",
+          "market": "US",
+          "direction": "positive",
+          "strength": "strong",
+          "reason": "First Solar — แผงโซลาร์สหรัฐฯ ได้เปรียบจากมาตรการต้านจีน"
+        },
+        {
+          "ticker": "ENPH",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "Enphase — อินเวอร์เตอร์/แบตเตอรี่บ้าน"
+        },
+        {
+          "ticker": "NEE",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "NextEra — ผู้ผลิตไฟลม/โซลาร์รายใหญ่สุด"
+        }
+      ]
+    },
+    {
+      "id": "water",
+      "type": "theme",
+      "name": "ธุรกิจน้ำ",
+      "yahoo": "AWK",
+      "upReason": "วิกฤตน้ำทำให้การลงทุนโครงสร้างพื้นฐานน้ำ/เทคโนโลยีน้ำถูกจับตา",
+      "stocks": [
+        {
+          "ticker": "AWK",
+          "market": "US",
+          "direction": "positive",
+          "strength": "strong",
+          "reason": "American Water — สาธารณูปโภคน้ำรายใหญ่สุดสหรัฐฯ รายได้นิ่งขยายตามการลงทุน"
+        },
+        {
+          "ticker": "XYL",
+          "market": "US",
+          "direction": "positive",
+          "strength": "strong",
+          "reason": "Xylem — เทคโนโลยีน้ำ/มิเตอร์/บำบัด ขายตามปัญหาน้ำ"
+        },
+        {
+          "ticker": "WTRG",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "Essential Utilities — น้ำ+ก๊าซ"
+        }
+      ]
+    },
+    {
+      "id": "irrigation",
+      "type": "theme",
+      "name": "ชลประทาน & เกษตรแม่นยำ",
+      "yahoo": "VMI",
+      "upReason": "ภัยแล้งทำให้เกษตรกรลงทุนระบบน้ำ/เทคโนโลยีเกษตร",
+      "stocks": [
+        {
+          "ticker": "VMI",
+          "market": "US",
+          "direction": "positive",
+          "strength": "strong",
+          "reason": "Valmont — เครื่องชลประทานกลาง + เสาโครงสร้าง"
+        },
+        {
+          "ticker": "DE",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "John Deere — เกษตรแม่นยำ/เครื่องจักร ตามราคาพืชที่สูง"
+        }
+      ]
+    },
+    {
+      "id": "aicloud",
+      "type": "theme",
+      "name": "สัญญา AI & Data Center",
+      "yahoo": "CRWV",
+      "upReason": "ดีลใหญ่ประกาศ — ผู้ให้บริการคลาวด์ AI ได้สัญญา capacity",
+      "stocks": [
+        {
+          "ticker": "NVDA",
+          "market": "US",
+          "direction": "positive",
+          "strength": "strong",
+          "reason": "ทุก data center ใหม่ = ดีมานด์ GPU โดยตรง"
+        },
+        {
+          "ticker": "ORCL",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "Oracle Cloud — สัญญา capacity มหาศาลจากลูกค้า AI"
+        },
+        {
+          "ticker": "CRWV",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "CoreWeave — คลาวด์ GPU เฉพาะทาง สัญญาสำคัญต่อรายได้"
+        },
+        {
+          "ticker": "VST",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "Vistra — ขายไฟให้ data center ดีมานด์ไฟเพิ่ม"
+        },
+        {
+          "ticker": "ETN",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "Eaton — อุปกรณ์ไฟฟ้า/พลังงาน data center"
+        },
+        {
+          "ticker": "MSFT",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "Azure + ผู้ถือหุ้นใหญ่ OpenAI — ทุกกระแส AI ไหลผ่านคลาวด์"
+        },
+        {
+          "ticker": "AMD",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "ชิป AI คู่แข่งตรงของ NVIDIA"
+        },
+        {
+          "ticker": "SMH",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "ETF เซมิทั้งกลุ่มได้ลมทั้งอุตสาหกรรม"
+        }
+      ]
+    },
+    {
+      "id": "pharma",
+      "type": "theme",
+      "name": "ยาใหม่ & FDA",
+      "yahoo": "LLY",
+      "upReason": "การอนุมัติยาใหม่/ผลวิจัยดี = ตัวเร่งรายบริษัท",
+      "stocks": [
+        {
+          "ticker": "LLY",
+          "market": "US",
+          "direction": "positive",
+          "strength": "strong",
+          "reason": "Eli Lilly — GLP-1 (จักรวาลลดน้ำหนัก) โตต่อเนื่องจากข้อมูลใหม่"
+        },
+        {
+          "ticker": "NVO",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "Novo Nordisk — เดินกับธีมเดียวกัน แข่งกับ Lilly"
+        },
+        {
+          "ticker": "MRNA",
+          "market": "US",
+          "direction": "positive",
+          "strength": "weak",
+          "reason": "ได้ประโยชน์ถ้าเป็นทางวัคซีน/สาย mRNA"
+        }
+      ]
+    },
+    {
+      "id": "ev",
+      "type": "theme",
+      "name": "EV & ผลิตภัณฑ์ยานยนต์ใหม่",
+      "yahoo": "TSLA",
+      "upReason": "รุ่นใหม่/นโยบายสนับสนุน EV เป็นตัวเร่ง",
+      "stocks": [
+        {
+          "ticker": "TSLA",
+          "market": "US",
+          "direction": "positive",
+          "strength": "strong",
+          "reason": "เปิดตัวรุ่นใหม่/โรบอตแท็กซี่ กระทบราคาหุ้นแรง"
+        },
+        {
+          "ticker": "RIVN",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "EV สตาร์ทอัพ ข่าวรุ่นใหม่/การร่วมทุนสำคัญ"
+        },
+        {
+          "ticker": "F",
+          "market": "US",
+          "direction": "positive",
+          "strength": "weak",
+          "reason": "สาย EV ดั้งเดิมขยับตาม"
+        }
+      ]
+    },
+    {
+      "id": "shipping",
+      "type": "theme",
+      "name": "ค่าระวางเรือ",
+      "yahoo": "ZIM",
+      "upReason": "เส้นทางเดินเรือโลกสะดุด/ค่าระวางแพงขึ้น",
+      "stocks": [
+        {
+          "ticker": "ZIM",
+          "market": "US",
+          "direction": "positive",
+          "strength": "strong",
+          "reason": "เรือคอนเทนเนอร์ — ค่าระวางพุ่งแบบเห็นๆ ช่วงทะเลแดง"
+        },
+        {
+          "ticker": "MATX",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "ขนส่งทางทะเลสหรัฐฯ ได้ราคาขนส่งดี"
+        }
+      ]
+    },
+    {
+      "id": "semis-shock",
+      "type": "theme",
+      "name": "ห่วงโซ่เซมิสะดุด",
+      "yahoo": "SMH",
+      "upReason": "ภัยพิบัติ/เหตุไม่คาดฝันกระทบโรงงานผลิตเวเฟอร์",
+      "stocks": [
+        {
+          "ticker": "TSM",
+          "market": "US",
+          "direction": "negative",
+          "strength": "medium",
+          "reason": "ผู้ผลิตเวเฟอร์หลักโลก — หยุดไลน์กระทบตรง"
+        },
+        {
+          "ticker": "SMH",
+          "market": "US",
+          "direction": "negative",
+          "strength": "medium",
+          "reason": "ETF เซมิโดยรวมกดดันระยะสั้น"
+        },
+        {
+          "ticker": "NVDA",
+          "market": "US",
+          "direction": "negative",
+          "strength": "weak",
+          "reason": "ต้นทุน/ความล่าช้าซัพพลาย (มักกลับตัวถ้าไม่ถาวร)"
+        },
+        {
+          "ticker": "INTC",
+          "market": "US",
+          "direction": "positive",
+          "strength": "weak",
+          "reason": "คู่แข่งอาจได้โอกาสแทนที่ชั่วคราว"
+        },
+        {
+          "ticker": "DELTA.BK",
+          "market": "TH",
+          "direction": "negative",
+          "strength": "weak",
+          "reason": "อิเล็กทรอนิกส์ไทยที่ผูกกับห่วงโซ่เซมิโลก"
+        },
+        {
+          "ticker": "HANA.BK",
+          "market": "TH",
+          "direction": "negative",
+          "strength": "weak",
+          "reason": "ประกอบ/ทดสอบชิปให้ลูกค้าเทคโนโลยีรายใหญ่"
+        }
+      ]
+    },
+    {
+      "id": "ratescycle",
+      "type": "theme",
+      "name": "วัฏจักรดอกเบี้ย (ลดดอกเบี้ย)",
+      "yahoo": "^TNX",
+      "upReason": "Fed ปรับลดดอกเบี้ย — สินทรัพย์อ่อนไหวดอกเบี้ยได้ลม",
+      "stocks": [
+        {
+          "ticker": "XLU",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "ยูทิลิตี้หนี้เยอะ+ปันผลแข่งพันธบัตรได้ดีขึ้นเมื่อดอกเบี้ยลง"
+        },
+        {
+          "ticker": "NEE",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "โครงการลงทุนพลังงานคุ้มขึ้นเมื่อต้นทุนเงินลด"
+        },
+        {
+          "ticker": "TLT",
+          "market": "US",
+          "direction": "positive",
+          "strength": "strong",
+          "reason": "พันธบัตรยาวบวกตรงเมื่อ yield ลง"
+        }
+      ]
+    },
+    {
+      "id": "banking-stress",
+      "type": "theme",
+      "name": "ความเครียดธนาคาร",
+      "yahoo": "KRE",
+      "upReason": "ธนาคารล่ม/วิกฤตความเชื่อมั่นกดทั้งกลุ่ม",
+      "stocks": [
+        {
+          "ticker": "KRE",
+          "market": "US",
+          "direction": "negative",
+          "strength": "strong",
+          "reason": "ETF ธนาคาร regional — โดนขายหนักที่สุดตอนวิกฤตแบบ SVB"
+        },
+        {
+          "ticker": "XLF",
+          "market": "US",
+          "direction": "negative",
+          "strength": "medium",
+          "reason": "กลุ่มการเงินสหรัฐฯ โดยรวมกดดัน"
+        }
+      ]
+    },
+    {
+      "id": "travel-thai",
+      "type": "theme",
+      "name": "ท่องเที่ยวไทย",
+      "yahoo": "AOT.BK",
+      "upReason": "นักท่องเที่ยว (โดยเฉพาะจีน) กลับมา / มาตรการอำนวยความสะดวก — ปลายทางและโรงแรมไทยรับรายได้ตรง",
+      "stocks": [
+        {
+          "ticker": "AOT.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "strong",
+          "reason": "สนามบินคุมประตูนักท่องเที่ยว — ยอดผู้โดยสารเพิ่มตรงผลประกอบการ"
+        },
+        {
+          "ticker": "MINT.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "โรงแรม+ร้านอาหารนักท่องเที่ยว (โดยเฉพาะจีน/รัสเซีย)"
+        },
+        {
+          "ticker": "CENTEL.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "โรงแรมไทย+ต่างประเทศ รับไฮซีซัน"
+        },
+        {
+          "ticker": "ERW.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "โรงแรมริมทะเล พึ่งพานักท่องเที่ยวจีนสูง"
+        }
+      ]
+    },
+    {
+      "id": "travel-global",
+      "type": "theme",
+      "name": "ท่องเที่ยวโลก",
+      "yahoo": "RCL",
+      "upReason": "การเดินทางโลกฟื้น/ข้อจำกัดคลาย — สายการบิน ครูสิส โรงแรม รับดีมานด์กลับมา",
+      "stocks": [
+        {
+          "ticker": "RCL",
+          "market": "US",
+          "direction": "positive",
+          "strength": "strong",
+          "reason": "เรือสำราญ — ยอดจองกลับมาแรงหลังข้อจำกัดคลาย"
+        },
+        {
+          "ticker": "MAR",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "โรงแรมทั่วโลก RevPAR ฟื้น"
+        },
+        {
+          "ticker": "BKNG",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "จองที่พัก/ตั๋วออนไลน์"
+        },
+        {
+          "ticker": "EXPE",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "OTA คู่แข่ง — ได้ลมเดียวกัน"
+        },
+        {
+          "ticker": "BA.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "การบินไทย รับผู้โดยสารเที่ยวบินระหว่างประเทศกลับมา"
+        }
+      ]
+    },
+    {
+      "id": "china-stim",
+      "type": "theme",
+      "name": "จีนกระตุ้นเศรษฐกิจ",
+      "yahoo": "BABA",
+      "upReason": "ปักกิ่งปล่อยมาตรการกระตุ้น (ดอกเบี้ย/สินเชื่อ/ตลาดหุ้น) — หุ้นผูกจีนและโลจิสติกส์ดีดกลับ",
+      "stocks": [
+        {
+          "ticker": "BABA",
+          "market": "US",
+          "direction": "positive",
+          "strength": "strong",
+          "reason": "ตัวแทนหุ้นจีน ADR รับเงินไหลกลับเข้าตลาดจีน"
+        },
+        {
+          "ticker": "JD",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "ค้าปลีกออนไลน์จีน ผูกกำลังซื้อในประเทศ"
+        },
+        {
+          "ticker": "PDD",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "สินค้าราคาถูกยิ่งได้ประโยชน์เมื่อกำลังซื้อฟื้น"
+        },
+        {
+          "ticker": "LI",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "EV ในประเทศรับสินเชื่อถูกลง"
+        },
+        {
+          "ticker": "PTT.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "weak",
+          "reason": "น้ำมัน/ปิโตรเคมีรับดีมานด์จีนกลับมา"
+        }
+      ]
+    },
+    {
+      "id": "ai-cost-shock",
+      "type": "theme",
+      "name": "AI ถูกลงแบบพลิกโต๊ะ",
+      "yahoo": "NVDA",
+      "upReason": "โมเดล AI สมรรถนะสูงต้นทุนต่ำ (แบบ DeepSeek) — ตั้งคำถามดีมานด์ชิประดับบิลเลียน ผู้ใช้ AI ต้นทุนต่ำได้ประโยชน์",
+      "stocks": [
+        {
+          "ticker": "NVDA",
+          "market": "US",
+          "direction": "negative",
+          "strength": "strong",
+          "reason": "เจ้าของธีสิสชิปแพง — โดน reprice หนักสุดระยะสั้น"
+        },
+        {
+          "ticker": "AVGO",
+          "market": "US",
+          "direction": "negative",
+          "strength": "medium",
+          "reason": "ชิปเครือข่าย/กำหนดเองสำหรับดาต้าเซ็นเตอร์โดนกระทบตาม"
+        },
+        {
+          "ticker": "MSFT",
+          "market": "US",
+          "direction": "positive",
+          "strength": "weak",
+          "reason": "ผู้ใช้ชิปรายใหญ่ — ต้นทุนต่ำลง = margin ดีขึ้น"
+        },
+        {
+          "ticker": "SMH",
+          "market": "US",
+          "direction": "negative",
+          "strength": "medium",
+          "reason": "ETF เซมิโดยรวมกดดันช่วง reprice"
+        }
+      ]
+    }
+  ]
+}
