@@ -1,0 +1,19 @@
+{
+  "_note": "รายชื่อหุ้น/ETF ที่จ่ายปันผล 'รายเดือน' ยอดนิยมในตลาดสหรัฐฯ (คนไทยซื้อได้ผ่าน Dime/โบรกต่างประเทศ) · approxYieldPct = ค่าโดยประมาณไว้ก่อน ระบบจะดึง yield สดจาก TradingView ทับเสมอเมื่อเจอ symbol · yield/ความถี่การจ่ายเปลี่ยนได้เสมอ — ตรวจอีกครั้งก่อนซื้อ · หุ้นไทยจ่ายสูงสุดปีละ 2 ครั้ง (ดูหน้า /longterm)",
+  "list": [
+    { "symbol": "O", "name": "Realty Income", "type": "REIT", "approxYieldPct": 5.6, "risk": "กลาง", "note": "ต้นตำรับ 'The Monthly Dividend Company' — ค้าปลีก/โลจิสติกส์ 15,000+ สาขา จ่ายรายเดือนต่อเนื่องมา 600 เดือน+" },
+    { "symbol": "JEPI", "name": "JPMorgan Equity Premium Income ETF", "type": "ETF", "approxYieldPct": 7.4, "risk": "กลาง", "note": "ETF ยอดฮิตสายเงินสด — ถือหุ้นคุณภาพดี + ขายควอลล์ (covered call) เพื่อจ่ายเดือนละครั้ง" },
+    { "symbol": "JEPQ", "name": "JPMorgan Nasdaq Equity Premium ETF", "type": "ETF", "approxYieldPct": 9.2, "risk": "กลาง", "note": "เวอร์ชัน Nasdaq/เทคของ JEPI — ผันผวนกว่าแต่จ่ายหนากว่า" },
+    { "symbol": "STAG", "name": "STAG Industrial", "type": "REIT", "approxYieldPct": 3.9, "risk": "กลาง", "note": "โกดังอุตสาหกรรมทั่วอเมริกา — จ่ายรายเดือนต่อเนื่อง yield น้อยแต่โตดี" },
+    { "symbol": "MAIN", "name": "Main Street Capital", "type": "BDC", "approxYieldPct": 5.7, "risk": "กลาง", "note": "ปันผลเดือนละครั้ง + โบนัสพิเศษท้ายปี — ให้ธุรกิจขนาดกลางกู้ยืม/ถือหุ้น" },
+    { "symbol": "LTC", "name": "LTC Properties", "type": "REIT", "approxYieldPct": 6.4, "risk": "กลาง", "note": "อสังหาฯ เพื่อการแพทย์ — โรงพยาบาล/บ้านพักคนชรา (เดโมกราฟิกสนับสนุนระยะยาว)" },
+    { "symbol": "EPR", "name": "EPR Properties", "type": "REIT", "approxYieldPct": 7.6, "risk": "กลาง", "note": "อสังหาฯ สถานบันเทิง — โรงหนัง/สวนน้ำ/สกีรีสอร์ต" },
+    { "symbol": "GAIN", "name": "Gladstone Investment", "type": "BDC", "approxYieldPct": 7.0, "risk": "กลาง", "note": "ลงทุนในธุรกิจขนาดกลาง จ่ายรายเดือนนิ่งเป็นเวลานาน" },
+    { "symbol": "SPHD", "name": "Invesco S&P 500 High Div Low Vol", "type": "ETF", "approxYieldPct": 4.0, "risk": "ต่ำ", "note": "หุ้นปันผลสูง+ผันผวนต่ำใน S&P 500 — yield น้อยสุดในกลุ่มแต่หลับสบายสุด" },
+    { "symbol": "QYLD", "name": "Global X Nasdaq 100 Covered Call", "type": "ETF", "approxYieldPct": 12.0, "risk": "สูง", "note": "ขาย call รายสัปดาห์ จ่ายเดือนละครั้งแบบหนาๆ — แลกมาด้วยมูลค่าพอร์ตที่มักลดลงเรื่อยๆ" },
+    { "symbol": "XYLD", "name": "Global X S&P 500 Covered Call", "type": "ETF", "approxYieldPct": 11.0, "risk": "สูง", "note": "พี่ชาย QYLD บนตลาดรวม S&P 500 — แนวคิดเดียวกัน เนียนกว่านิด" },
+    { "symbol": "SVOL", "name": "Simplify Volatility Premium", "type": "ETF", "approxYieldPct": 13.0, "risk": "สูง", "note": "short VIX — จ่ายหวานมากในช่วงตลาดสงบ แต่พีคตลาดตื่นตระหนกพองตัวแรง" },
+    { "symbol": "AGNC", "name": "AGNC Investment", "type": "mREIT", "approxYieldPct": 14.0, "risk": "สูง", "note": "กองทุนพันธบัตรจำนองแรงงอน — จ่ายเดือนละครั้งหนามาก แต่ราคาหุ้นลดลงต่อเนื่องหลายปี (กินปันผลอย่างเดียว)" },
+    { "symbol": "ARR", "name": "ARMOUR Residential REIT", "type": "mREIT", "approxYieldPct": 13.0, "risk": "สูง", "note": "แนวเดียวกับ AGNC — อ่อนไหวต่อดอกเบี้ยมาก" }
+  ]
+}

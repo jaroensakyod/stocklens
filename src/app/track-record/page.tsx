@@ -33,6 +33,10 @@ export default function TrackRecordPage() {
         <p className="text-sm text-zinc-400 mt-1 max-w-3xl leading-relaxed">
           เราบันทึกทุกสมมติฐานที่เคยเขียนไว้ — ถูกก็บอกว่าถูก ผิดก็บอกว่าผิด ไม่ลบ ไม่แก้ นี่คือเหตุผลที่คุณควรเชื่อ (หรือไม่เชื่อ) เรา
         </p>
+        <Link href="/model-portfolio" className="inline-flex items-center gap-2 mt-3 card !py-2 !px-4 border-accent/40 hover:border-accent transition-colors">
+          💼 <span className="text-sm font-bold text-zinc-100">ดูพอร์ตจำลองสด: AI ปรับรายสัปดาห์ + บันทึกผลจริงทุกสัปดาห์</span>
+          <span className="text-accent text-sm">→</span>
+        </Link>
       </div>
 
       <div className="grid grid-cols-3 gap-3 max-w-lg">

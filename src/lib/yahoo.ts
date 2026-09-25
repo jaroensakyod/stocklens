@@ -140,6 +140,22 @@ export async function getChart(symbol: string, range = "1Y"): Promise<Candle[]> 
   return candles;
 }
 
+/** ปันผลรวมที่จ่าย "จริง" ใน 12 เดือนล่าสุด (บาท/ดอลลาร์ต่อหุ้น) — จาก events=div ของ chart endpoint (ไม่ต้องมี crumb) */
+export async function getTrailingDividends(symbol: string): Promise<number | null> {
+  const key = "div:" + symbol.toUpperCase();
+  const hit = getCached<number>(key, 6 * 60 * 60_000);
+  if (hit !== undefined) return hit;
+  const json = (await jget(`/v8/finance/chart/${encodeURIComponent(symbol)}?range=1y&interval=1mo&events=div`)) as
+    | { chart?: { result?: { events?: { dividends?: Record<string, { amount?: number }> } }[] } }
+    | null;
+  const divs = json?.chart?.result?.[0]?.events?.dividends;
+  if (!divs) return null;
+  const sum = Object.values(divs).reduce((a, d) => a + Number(d.amount ?? 0), 0);
+  if (!isFinite(sum) || sum <= 0) return null;
+  setCached(key, sum);
+  return sum;
+}
+
 // ---------- Fundamentals (timeseries จาก filings จริง) ----------
 const TS_TYPES = [
   "quarterlyTotalRevenue", "quarterlyGrossProfit", "quarterlyOperatingIncome", "quarterlyNetIncome", "quarterlyDilutedEPS", "quarterlyDilutedAverageShares", "quarterlyNormalizedEBITDA",
