@@ -14,6 +14,7 @@ const NAV = [
 
 // เครื่องมือวิเคราะห์ — รวมเป็น dropdown เพื่อไม่ให้แถบบนแน่น
 const TOOLS = [
+  { href: "/longterm", label: "💤 ระยะยาว & ปันผล" },
   { href: "/backtest", label: "📊 Backtest กลยุทธ์" },
   { href: "/timemachine", label: "🕰️ ไทม์แมชชีน" },
   { href: "/advisor-test", label: "🧪 ทดสอบ AI ปรับพอร์ต" },

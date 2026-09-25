@@ -12,6 +12,8 @@ export interface TvRow {
   exchange: string;
   ipoDate: string | null;
   premarketPct: number | null;
+  /** % ปันผลล่าสุด (จาก TV — ใช้คัดก่อน ค่าจริงยืนยันด้วย Yahoo ใน buildAnalysis) */
+  dividendYield: number | null;
   country: string;
 }
 
@@ -108,7 +110,7 @@ async function usdRate(region: string): Promise<number> {
 const CACHE_KEY = "tvuniverse:";
 const cache = new Map<string, { at: number; rows: TvRow[] }>();
 const TTL = 6 * 3600_000;
-const FIELDS = ["name", "close", "change", "market_cap_basic", "sector", "industry", "exchange", "ipo_date", "premarket_change", "country"];
+const FIELDS = ["name", "close", "change", "market_cap_basic", "sector", "industry", "exchange", "ipo_date", "premarket_change", "country", "dividends_yield"];
 
 async function scanBatch(region: string, minCap: number, from: number, count: number): Promise<TvRow[]> {
   const body = {
@@ -140,6 +142,7 @@ async function scanBatch(region: string, minCap: number, from: number, count: nu
     ipoDate: x.d[7] ? String(x.d[7]).slice(0, 10) : null,
     premarketPct: x.d[8] !== null && x.d[8] !== undefined ? Number(x.d[8]) : null,
     country: String(x.d[9] ?? ""),
+    dividendYield: x.d[10] !== null && x.d[10] !== undefined && Number(x.d[10]) > 0 ? Number(x.d[10]) : null,
   }));
 }
 
