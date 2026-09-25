@@ -45,7 +45,7 @@ export default function PortfolioAdvisor() {
       <div className="flex items-center justify-between gap-3 flex-wrap mb-3">
         <div>
           <h2 className="text-sm font-bold text-zinc-100">🤖 AI Portfolio Advisor — ให้ AI ปรับพอร์ตให้</h2>
-          <p className="text-[11px] text-zinc-500 mt-0.5">ดึงข้อมูลจริงทั้งพอร์ต (sector/ปัจจัย/เทคนิค/Radar) → วิเคราะห์ความเสี่ยง → แนะนำ "ลด/เพิ่ม/กระจาย" เป็นข้อๆ พร้อมเหตุผล</p>
+          <p className="text-[11px] text-zinc-500 mt-0.5">ดึงข้อมูลจริงทั้งพอร์ต (sector/ปัจจัย/เทคนิค/Radar) → วิเคราะห์ความเสี่ยง → แนะนำ "ลด/เพิ่ม/กระจาย" เป็นข้อๆ พร้อมเหตุผล · <a href="/advisor-test" className="text-accent-soft underline underline-offset-2">🧪 ดูผลทดสอบย้อนหลัง 3 ปี</a></p>
         </div>
         <button className="btn-primary" onClick={run} disabled={busy || holdings.length < 2}>
           {busy ? "กำลังวิเคราะห์… (~20 วิ)" : "▶ ให้ AI ปรับพอร์ต"}
