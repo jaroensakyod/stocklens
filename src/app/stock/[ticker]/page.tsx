@@ -11,7 +11,6 @@ import StarButton from "@/components/StarButton";
 import QuickAlert from "@/components/QuickAlert";
 import TrustPanel from "@/components/TrustPanel";
 import ThesisLogger from "@/components/ThesisLogger";
-import StoryCardGen from "@/components/StoryCardGen";
 import ScenarioPanel from "@/components/ScenarioPanel";
 import type { Scenarios } from "@/lib/scenarios";
 import { formatBig } from "@/lib/factors";
@@ -140,34 +139,6 @@ export default function StockPage() {
             </div>
           )}
 
-          {/* AI */}
-          <AIAnalysis ticker={q.symbol} />
-        </div>
-
-        {/* Sidebar */}
-        <div className="space-y-6">
-          <div className="card p-5">
-            <h3 className="text-sm font-bold text-zinc-100 mb-3">📋 ข้อมูลหลัก</h3>
-            <dl className="text-sm divide-y divide-base-700/50">
-              {[
-                ["มูลค่าตลาด", p?.marketCap ? formatBig(p.marketCap) + " USD" : "—"],
-                ["P/E (trailing)", p?.trailingPE?.toFixed(1) ?? "—"],
-                ["P/E (forward)", p?.forwardPE?.toFixed(1) ?? "—"],
-                ["P/B", p?.priceToBook?.toFixed(1) ?? "—"],
-                ["EV/EBITDA", p?.evToEbitda?.toFixed(1) ?? "—"],
-                ["EPS", p?.eps?.toFixed(2) ?? "—"],
-                ["เงินปันผล", p?.dividendYield ? (p.dividendYield * 100).toFixed(2) + "%" : "—"],
-                ["ช่วง 52 สัปดาห์", p?.fiftyTwoLow && p?.fiftyTwoHigh ? `${p.fiftyTwoLow.toFixed(1)} – ${p.fiftyTwoHigh.toFixed(1)}` : "—"],
-                ["Beta", p?.beta?.toFixed(2) ?? "—"],
-              ].map(([k, v]) => (
-                <div key={k as string} className="flex justify-between py-1.5">
-                  <dt className="text-zinc-500">{k}</dt>
-                  <dd className="num text-zinc-200">{v}</dd>
-                </div>
-              ))}
-            </dl>
-          </div>
-
           {/* เทคนิค */}
           {t && (
             <div className="card p-5">
@@ -242,6 +213,34 @@ export default function StockPage() {
             </div>
           )}
 
+          {/* AI */}
+          <AIAnalysis ticker={q.symbol} />
+        </div>
+
+        {/* Sidebar */}
+        <div className="space-y-6">
+          <div className="card p-5">
+            <h3 className="text-sm font-bold text-zinc-100 mb-3">📋 ข้อมูลหลัก</h3>
+            <dl className="text-sm divide-y divide-base-700/50">
+              {[
+                ["มูลค่าตลาด", p?.marketCap ? formatBig(p.marketCap) + " USD" : "—"],
+                ["P/E (trailing)", p?.trailingPE?.toFixed(1) ?? "—"],
+                ["P/E (forward)", p?.forwardPE?.toFixed(1) ?? "—"],
+                ["P/B", p?.priceToBook?.toFixed(1) ?? "—"],
+                ["EV/EBITDA", p?.evToEbitda?.toFixed(1) ?? "—"],
+                ["EPS", p?.eps?.toFixed(2) ?? "—"],
+                ["เงินปันผล", p?.dividendYield ? (p.dividendYield * 100).toFixed(2) + "%" : "—"],
+                ["ช่วง 52 สัปดาห์", p?.fiftyTwoLow && p?.fiftyTwoHigh ? `${p.fiftyTwoLow.toFixed(1)} – ${p.fiftyTwoHigh.toFixed(1)}` : "—"],
+                ["Beta", p?.beta?.toFixed(2) ?? "—"],
+              ].map(([k, v]) => (
+                <div key={k as string} className="flex justify-between py-1.5">
+                  <dt className="text-zinc-500">{k}</dt>
+                  <dd className="num text-zinc-200">{v}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+
           {/* งบการเงิน */}
           {a.financials && Object.values(a.financials).some((v) => v !== undefined) && (
             <div className="card p-5">
@@ -275,27 +274,25 @@ export default function StockPage() {
           {a.scenarios && <ScenarioPanel scenarios={a.scenarios} price={q.price} currency={q.currency} />}
 
           <ThesisLogger ticker={q.symbol} prefilled={`${q.symbol} — ${t ? (t.signal === "bullish" ? "สัญญาณเทคนิคเอียงบวก" : t.signal === "bearish" ? "สัญญาณเทคนิคเอียงลบ" : "สัญญาณเป็นกลาง") : "ยังไม่มีสัญญาณ"}${f ? ` · คะแนนรวม ${f.overall}/100` : ""} — `} />
-
-          <StoryCardGen defaultTicker={q.symbol} compact />
-
-          {/* ข่าวของหุ้น */}
-          {a.news.length > 0 && (
-            <div className="card p-5">
-              <h3 className="text-sm font-bold text-zinc-100 mb-3">📰 ข่าวล่าสุดของ {q.symbol}</h3>
-              <ul className="space-y-2.5">
-                {a.news.slice(0, 5).map((n, i) => (
-                  <li key={i}>
-                    <a href={n.link} target="_blank" rel="noopener noreferrer" className="text-xs text-zinc-300 hover:text-accent-soft leading-snug">
-                      {n.title}
-                    </a>
-                    <span className="text-[10px] text-zinc-600 block">{n.publisher}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
         </div>
       </div>
+
+      {/* ข่าวของหุ้น — เต็มกว้างใต้ grid */}
+      {a.news.length > 0 && (
+        <div className="card p-5 mt-6">
+          <h3 className="text-sm font-bold text-zinc-100 mb-3">📰 ข่าวล่าสุดของ {q.symbol}</h3>
+          <ul className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {a.news.slice(0, 6).map((n, i) => (
+              <li key={i} className="border-l-2 border-base-700 pl-3">
+                <a href={n.link} target="_blank" rel="noopener noreferrer" className="text-xs text-zinc-300 hover:text-accent-soft leading-snug">
+                  {n.title}
+                </a>
+                <span className="text-[10px] text-zinc-600 block">{n.publisher}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }
