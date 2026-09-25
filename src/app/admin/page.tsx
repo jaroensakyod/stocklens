@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import FlashMonitor from "@/components/FlashMonitor";
 import StoryCardGen from "@/components/StoryCardGen";
+import StorageBar from "@/components/StorageBar";
 import type { Member } from "@/lib/types";
 
 type MemberRow = Member & { daysLeft: number };
@@ -14,12 +15,14 @@ export default function AdminPage() {
   const [brief, setBrief] = useState<{ thDate: string; fbStarter: string; fbPro: string } | null>(null);
   const [form, setForm] = useState({ name: "", contact: "", tier: "starter", paidUntil: "", lineUserId: "", watch: "" });
   const [msg, setMsg] = useState("");
+  const [storage, setStorage] = useState("file");
 
   const load = useCallback(async (c: string) => {
     const res = await fetch("/api/admin/members", { headers: { "x-admin-code": c } });
     if (res.ok) {
       const j = await res.json();
       setMembers(j.members ?? []);
+      setStorage(j.storage ?? "file");
       setAuthed(true);
     } else {
       setAuthed(false);
@@ -124,6 +127,9 @@ export default function AdminPage() {
         <Stat k="รายได้โดยประมาณ/เดือน" v={mrr.toLocaleString() + " ฿"} />
         <Stat k="ใกล้หมดอายุ (≤7 วัน)" v={String(expiringSoon.length)} warn={expiringSoon.length > 0} />
       </div>
+
+      {/* ไฟสถานะที่เก็บข้อมูล + ปุ่มย้ายขึ้น DB */}
+      <StorageBar storage={storage} code={code} />
 
       <DailyOps members={members} code={code} />
 

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminCode, daysLeft, readMembers, writeMembers } from "@/lib/admin";
+import { hasDB } from "@/lib/storage";
 import type { Member } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -14,6 +15,7 @@ export async function GET(req: NextRequest) {
   const members = await readMembers();
   return NextResponse.json({
     members: members.map((m) => ({ ...m, daysLeft: daysLeft(m.paidUntil) })),
+    storage: hasDB() ? "db" : "file",
   });
 }
 
