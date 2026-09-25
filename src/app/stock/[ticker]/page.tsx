@@ -20,15 +20,18 @@ import type { StockAnalysis } from "@/lib/types";
 
 export default function StockPage() {
   const routeParams = useParams<{ ticker: string }>();
-  const ticker = Array.isArray(routeParams.ticker) ? routeParams.ticker[0] : routeParams.ticker;
+  // useParams คืนค่ายัง encode (BML%2FPL) — decode ให้ก่อนใช้ทั้งแสดงผลและค้นหา
+  const ticker = decodeURIComponent(Array.isArray(routeParams.ticker) ? routeParams.ticker[0] : routeParams.ticker ?? "");
   const can = useCan();
   const [a, setA] = useState<(StockAnalysis & { usdThb?: number; confidence?: { score: number; coveredCount: number; totalCount: number; missing: string[]; hasTechnicals: boolean; hasNews: boolean; priceSource: string; fundamentalsSource: string }; scenarios?: Scenarios }) | null>(null);
   const [err, setErr] = useState("");
+  const [suggestions, setSuggestions] = useState<{ symbol: string; name: string; exchange: string }[]>([]);
   const [sectorInfo, setSectorInfo] = useState<{ sector: string | null; industry?: string | null } | null>(null);
 
   useEffect(() => {
     setA(null);
     setErr("");
+    setSuggestions([]);
     fetch(`/api/sector?s=${encodeURIComponent(ticker)}`).then((r) => r.json()).then(setSectorInfo).catch(() => {});
     fetch(`/api/analysis?s=${encodeURIComponent(ticker)}`)
       .then(async (r) => {
@@ -36,7 +39,22 @@ export default function StockPage() {
         if (!j.quote || typeof j.quote.price !== "number" || !isFinite(j.quote.price)) throw new Error(j.error || "ไม่พบสัญลักษณ์นี้");
         setA(j);
       })
-      .catch((e) => setErr(e.message));
+      .catch((e) => {
+        setErr(e.message);
+        // ไม่พบ → เสนอตัวใกล้เคียง: ลอง 2 แบบ — สลับ / เป็น - (Yahoo ใช้ขีด เช่น BML-PL หุ้น preference) + แบบที่พิมพ์
+        const queries = [...new Set([ticker.replace(/\//g, "-"), ticker.replace(/[\/=]/g, " ").trim()].filter((q) => q.length >= 2))];
+        Promise.all(queries.map((q) => fetch(`/api/search?q=${encodeURIComponent(q)}`).then((r) => r.json()).catch(() => ({ results: [] }))))
+          .then((all) => {
+            const seen = new Set<string>();
+            const merged = all.flatMap((j: { results?: { symbol: string; name: string; exchange: string; type?: string }[] }) => j.results ?? []).filter((x) => {
+              if (!/equity|stock/i.test(x.type ?? "") || seen.has(x.symbol)) return false;
+              seen.add(x.symbol);
+              return true;
+            });
+            setSuggestions(merged.slice(0, 6));
+          })
+          .catch(() => {});
+      });
   }, [ticker]);
 
   if (err) {
@@ -44,7 +62,21 @@ export default function StockPage() {
       <div className="card p-10 text-center">
         <p className="text-2xl mb-2">🤔</p>
         <p className="text-zinc-300">ไม่พบข้อมูลสำหรับ <span className="font-bold text-zinc-100">{ticker}</span></p>
-        <p className="text-xs text-zinc-500 mt-2">ตรวจสอบสัญลักษณ์ เช่น AAPL (สหรัฐฯ), PTT.BK (ไทย), 0700.HK (ฮ่องกง)</p>
+        <p className="text-xs text-zinc-500 mt-2 leading-relaxed">{err}</p>
+        {suggestions.length > 0 ? (
+          <div className="mt-5">
+            <p className="text-xs text-zinc-500 mb-2">🔍 ตัวที่ใกล้เคียงกับที่พิมพ์มา — กดเข้าไปดูได้เลย:</p>
+            <div className="flex flex-wrap gap-2 justify-center">
+              {suggestions.map((sg) => (
+                <a key={sg.symbol} href={`/stock/${encodeURIComponent(sg.symbol)}`} className="chip bg-base-800 text-zinc-300 border border-base-700 hover:text-zinc-50 hover:border-accent/40">
+                  <b>{sg.symbol}</b> <span className="text-zinc-500">{sg.name.slice(0, 22)}</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <p className="text-xs text-zinc-600 mt-4">ตรวจสอบสัญลักษณ์ เช่น AAPL (สหรัฐฯ), PTT.BK (ไทย), 0700.HK (ฮ่องกง) — หรือค้นหาจากชื่อบริษัทที่ช่องค้นหาด้านบน</p>
+        )}
       </div>
     );
   }
