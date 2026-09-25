@@ -7,16 +7,22 @@ import { useEffect, useRef, useState } from "react";
 const NAV = [
   { href: "/", label: "หน้าแรก" },
   { href: "/surge", label: "🚀 หุ้นซิ่ง" },
-  { href: "/radar", label: "Global Radar" },
-  { href: "/screener", label: "คัดกรองหุ้น" },
-  { href: "/portfolio", label: "พอร์ตของฉัน" },
-  { href: "/backtest", label: "Backtest" },
-  { href: "/timemachine", label: "🕰️ ไทม์แมชชีน" },
-  { href: "/gurus", label: "พอร์ตกูรู" },
-  { href: "/compare", label: "เปรียบเทียบ" },
-  { href: "/pricing", label: "VIP" },
-  { href: "/track-record", label: "Track Record" },
+  { href: "/radar", label: "Radar" },
+  { href: "/screener", label: "คัดกรอง" },
+  { href: "/portfolio", label: "พอร์ต" },
 ];
+
+// เครื่องมือวิเคราะห์ — รวมเป็น dropdown เพื่อไม่ให้แถบบนแน่น
+const TOOLS = [
+  { href: "/backtest", label: "📊 Backtest กลยุทธ์" },
+  { href: "/timemachine", label: "🕰️ ไทม์แมชชีน" },
+  { href: "/advisor-test", label: "🧪 ทดสอบ AI ปรับพอร์ต" },
+  { href: "/gurus", label: "🐋 พอร์ตกูรู 13F" },
+  { href: "/compare", label: "⚖️ เปรียบเทียบหุ้น" },
+  { href: "/track-record", label: "📜 Track Record" },
+];
+
+const ALL_LINKS = [...NAV, ...TOOLS, { href: "/pricing", label: "VIP" }];
 
 export default function Header() {
   const [q, setQ] = useState("");
@@ -52,12 +58,30 @@ export default function Header() {
           </span>
         </Link>
 
-        <nav className="hidden lg:flex items-center gap-1 text-sm">
+        <nav className="hidden lg:flex items-center gap-0.5 text-sm">
           {NAV.map((n) => (
-            <Link key={n.href} href={n.href} className="px-2.5 py-1.5 rounded-lg text-zinc-300 hover:text-zinc-50 hover:bg-base-800">
+            <Link key={n.href} href={n.href} className="px-2.5 py-1.5 rounded-lg text-zinc-300 hover:text-zinc-50 hover:bg-base-800 whitespace-nowrap">
               {n.label}
             </Link>
           ))}
+          {/* -dropdown เครื่องมือวิเคราะห์ */}
+          <div className="relative group">
+            <button className="px-2.5 py-1.5 rounded-lg text-zinc-300 hover:text-zinc-50 hover:bg-base-800 whitespace-nowrap flex items-center gap-1">
+              🧰 เครื่องมือ <span className="text-[10px] opacity-60">▾</span>
+            </button>
+            <div className="hidden group-hover:block absolute left-0 top-full pt-1 z-50">
+              <div className="card min-w-52 p-1.5">
+                {TOOLS.map((t) => (
+                  <Link key={t.href} href={t.href} className="block px-3 py-2 rounded-lg text-sm text-zinc-300 hover:text-zinc-50 hover:bg-base-800 whitespace-nowrap">
+                    {t.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+          <Link href="/pricing" className="ml-1 px-3 py-1.5 rounded-lg bg-accent/15 text-accent-soft font-bold hover:bg-accent/25 whitespace-nowrap">
+            👑 VIP
+          </Link>
         </nav>
 
         <div className="flex-1 max-w-sm ml-auto relative">
@@ -105,7 +129,7 @@ export default function Header() {
       </div>
       {menuOpen && (
         <nav className="lg:hidden border-t border-base-700/60 px-4 py-2 flex flex-wrap gap-1">
-          {NAV.map((n) => (
+          {ALL_LINKS.map((n) => (
             <Link key={n.href} href={n.href} className="px-3 py-1.5 rounded-lg text-sm text-zinc-300 hover:bg-base-800" onClick={() => setMenuOpen(false)}>
               {n.label}
             </Link>
