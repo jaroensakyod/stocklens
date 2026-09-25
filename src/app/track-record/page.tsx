@@ -1,8 +1,19 @@
-import trackJson from "@/data/track-record.json";
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import type { TrackRecordEntry } from "@/lib/types";
 
 export default function TrackRecordPage() {
-  const entries = (trackJson as { entries: { id: string; date: string; thesis: string; tickers: string[]; stance: string; status: string; resultPct?: number; note?: string }[] }).entries;
+  // อ่านสดจาก API — เพื่อให้เห็นรายการที่บันทึกใหม่แม้บน Vercel (DB)
+  const [entries, setEntries] = useState<TrackRecordEntry[]>([]);
+  useEffect(() => {
+    fetch("/api/track-record")
+      .then((r) => r.json())
+      .then((j) => setEntries(j.entries ?? []))
+      .catch(() => {});
+  }, []);
+
   const closed = entries.filter((e) => e.status !== "open");
   const wins = closed.filter((e) => e.status === "win").length;
   const winRate = closed.length ? Math.round((wins / closed.length) * 100) : 0;

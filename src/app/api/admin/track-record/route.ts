@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { promises as fs } from "fs";
-import path from "path";
 import { adminCode } from "@/lib/admin";
+import { readTrackRecord, writeTrackRecord } from "@/lib/trackRecord";
 import type { TrackRecordEntry } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
-const FILE = path.join(process.cwd(), "src/data/track-record.json");
-
 // POST /api/admin/track-record — บันทึกสมมติฐานใหม่จากหน้าหุ้น (ต้องมีรหัสแอดมิน)
+// เก็บใน Redis เมื่อตั้ง DB (Vercel) / ไฟล์เมื่อ dev
 export async function POST(req: NextRequest) {
   if (req.headers.get("x-admin-code") !== adminCode()) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
@@ -26,9 +24,7 @@ export async function POST(req: NextRequest) {
     status: "open",
     note: b.note ?? "บันทึกจากหน้าวิเคราะห์หุ้น",
   };
-  const raw = await fs.readFile(FILE, "utf8");
-  const json = JSON.parse(raw) as { entries: TrackRecordEntry[] };
-  json.entries = [entry, ...json.entries];
-  await fs.writeFile(FILE, JSON.stringify(json, null, 2));
+  const entries = [entry, ...(await readTrackRecord())];
+  await writeTrackRecord(entries);
   return NextResponse.json({ ok: true, entry });
 }

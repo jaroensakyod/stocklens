@@ -58,3 +58,21 @@ git push -u origin main
 - Yahoo data: ฟรี
 - AI: จ่ายตามการใช้ (GLM ถูกมาก — ประมาณไม่กี่บาท/วันสำหรับ Daily Brief + แชทเล็กน้อย)
 - เมื่อคนเยอะขึ้นค่อยอัป Vercel Pro ($20/เดือน) เมื่อรายได้ VIP คุ้มแล้ว
+
+
+---
+
+## 🗄️ ต่อ Database (จำเป็นสำหรับระบบสมาชิกบน Vercel)
+
+ไฟล์ JSON ใช้ได้แค่ตอนรันที่เครื่อง — บน Vercel (serverless) ต้องมี DB จริง ไม่งั้นเพิ่มสมาชิก/บันทึก Track Record ไม่ติด ระบบรองรับ **Upstash Redis (ฟรี)** อัตโนมัติ:
+
+1. สมัคร [upstash.com](https://upstash.com) (ฟรี ไม่ต้องใส่บัตร)
+2. สร้าง Database → เลือก Region ใกล้ไทย (เช่น ap-northeast-1 Tokyo)
+3. คัดลอก 2 ค่า: **UPSTASH_REDIS_REST_URL** และ **UPSTASH_REDIS_REST_TOKEN** (หน้า Details ของ DB)
+4. ใส่ใน Vercel: Project → Settings → Environment Variables (ทั้ง Production + Preview)
+5. Redeploy 1 ครั้ง
+
+เสร็จแล้ว: สมาชิก + Track Record + รหัส login ทั้งหมดเก็บใน Redis
+ถ้าไม่ตั้งค่านี้ ระบบจะใช้ไฟล์เหมือนเดิม (เหมาะกับ dev) และหน้า /admin จะแจ้งเตือนเมื่อเขียนไม่ได้
+
+**ย้ายข้อมูลเดิมจากไฟล์ขึ้น DB**: รัน dev ที่เครื่อง (มี .env Upstash ใส่ด้วย) → เข้า /admin แล้วกดบันทึกสมาชิกแก้ไขกลับคนเดิม 1 ครั้ง ระบบเขียนทับขึ้น DB ทันที

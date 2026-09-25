@@ -10,7 +10,7 @@ import { getSurge } from "./surge";
 import { buildAnalysis } from "./analysis";
 import type { Quote } from "./types";
 import calendarJson from "@/data/calendar.json";
-import trackJson from "@/data/track-record.json";
+import { readTrackRecord } from "./trackRecord";
 
 const IDX_NAMES: Record<string, string> = { "^GSPC": "S&P", "^IXIC": "NASDAQ", "^DJI": "DOW", "^VIX": "VIX", "^SET.BK": "SET", "^N225": "NIKKEI" };
 
@@ -102,7 +102,7 @@ export async function buildBrief() {
     : "วันนี้ยังไม่มีหุ้นซิ่งที่ผ่านเกณฑ์ (ขยับ≥3% พร้อมวอลุ่ม/ตำแหน่งกราฟยืนยัน) — วันแบบนี้อย่าเร่งซื้อ";
 
   // Track Record — ความน่าเชื่อถือคือสิ่งที่ขายได้จริง
-  const track = (trackJson as { entries: { status: string; resultPct?: number }[] }).entries;
+  const track = await readTrackRecord();
   const trackOpen = track.filter((e) => e.status === "open").length;
   const trackDone = track.filter((e) => e.status === "win" || e.status === "loss").length;
   const trackWin = track.filter((e) => e.status === "win").length;
