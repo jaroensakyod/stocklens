@@ -27,6 +27,7 @@ const GROUPS: MenuGroup[] = [
     title: "ภาพตลาด",
     emoji: "🌍",
     items: [
+      { href: "/trend", label: "📈 แนวโน้มวันนี้", desc: "มหภาค + ธีมร้อน + ใต้น้ำ/แพงเกินตัว + คะแนน — ครบในหน้าเดียว" },
       { href: "/radar", label: "🌐 Radar เหตุการณ์", desc: "25 ธีมข่าวโลก (สงคราม/ดอกเบี้ย/AI...) → ห่วงโซ่หุ้นที่ได้-เสียประโยชน์" },
       { href: "/supernova", label: "🛰️ มหภาค (Supernova)", desc: "ยีลด์ US10Y · VIX · ทอง · น้ำมัน · insider — รวมเป็นสัญญาณเดียว" },
       { href: "/score", label: "🏆 อันดับ Score", desc: "คะแนน StockLens รวม 6 เสา — อันดับสูงสุด/ต่ำสุดของวัน" },

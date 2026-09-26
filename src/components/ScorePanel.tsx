@@ -11,13 +11,14 @@ interface Data {
   pillars?: Pillars; reasons?: string[]; risks?: string[]; history?: { d: string; t: number }[]; locked?: boolean;
 }
 
-const PILLARS: { k: keyof Pillars; label: string; icon: string }[] = [
-  { k: "quality", label: "Quality — คุณภาพธุรกิจ", icon: "🏗️" },
-  { k: "valuation", label: "Valuation — ราคาคุ้มค่า", icon: "💰" },
-  { k: "momentum", label: "Momentum — โมเมนตัม", icon: "🚀" },
-  { k: "news", label: "News AI — ข่าว (Jev)", icon: "📰" },
-  { k: "street", label: "Street — คอนเซนซัสโบรกฯ", icon: "🎯" },
-  { k: "safety", label: "Safety — ความเสี่ยงต่ำ", icon: "🛡️" },
+// น้ำหนักต้องตรงกับ W ใน src/lib/score.ts (quality .22 · valuation .18 · momentum .18 · news .12 · street .15 · safety .15)
+const PILLARS: { k: keyof Pillars; label: string; icon: string; w: number }[] = [
+  { k: "quality", label: "Quality — คุณภาพธุรกิจ", icon: "🏗️", w: 22 },
+  { k: "valuation", label: "Valuation — ราคาคุ้มค่า", icon: "💰", w: 18 },
+  { k: "momentum", label: "Momentum — โมเมนตัม", icon: "🚀", w: 18 },
+  { k: "news", label: "News AI — ข่าว (Jev)", icon: "📰", w: 12 },
+  { k: "street", label: "Street — คอนเซนซัสโบรกฯ", icon: "🎯", w: 15 },
+  { k: "safety", label: "Safety — ความเสี่ยงต่ำ", icon: "🛡️", w: 15 },
 ];
 
 export default function ScorePanel({ ticker }: { ticker: string }) {
@@ -94,7 +95,9 @@ export default function ScorePanel({ ticker }: { ticker: string }) {
               return (
                 <div key={p.k}>
                   <div className="flex justify-between text-xs mb-1">
-                    <span className="text-zinc-400">{p.icon} {p.label}</span>
+                    <span className="text-zinc-400">
+                      {p.icon} {p.label} <span className="text-zinc-600">· น้ำหนัก {p.w}%</span>
+                    </span>
                     <span className="num text-zinc-200 font-semibold">{v === null ? "ไม่มีข้อมูล" : v}</span>
                   </div>
                   <div className="h-1.5 bg-base-800 rounded-full overflow-hidden">
@@ -121,7 +124,7 @@ export default function ScorePanel({ ticker }: { ticker: string }) {
       )}
 
       <p className="text-[10px] text-zinc-600 mt-3">
-        คะแนนเชิงข้อมูลจากงบจริง (SEC/56-1) + ราคา + ข่าว + คอนเซนซัส — สูตรถ่วงน้ำหนักเปิดเผย ไม่ใช่คำแนะนำซื้อขาย · เสาที่ไม่มีข้อมูลใช้ค่ากลาง 50 และหัก Confidence
+        คะแนนเชิงข้อมูลจากงบจริง (SEC/56-1) + ราคา + ข่าว + คอนเซนซัส — สูตรถ่วงน้ำหนักเปิดเผยทุกตัว (22/18/18/12/15/15) ไม่ใช่คำแนะนำซื้อขาย · เสาที่ไม่มีข้อมูลใช้ค่ากลาง 50 และหัก Confidence
       </p>
     </div>
   );

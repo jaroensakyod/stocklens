@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import type { StarterProfile, StarterResult } from "@/lib/starterPortfolio";
+import type { StarterBtResult } from "@/lib/starterBacktest";
+import { usePortfolio } from "@/lib/store";
 
 // 🧑‍🎓 พอร์ตตัวอย่างรายวันสำหรับมือใหม่ — เลือก 2 อย่าง: งบ + สไตล์(6 แบบ) → ได้สัดส่วน+สถิติพอร์ต พร้อมเหตุผลภาษาคนไม่มีความรู้
 // (ข้อมูลจากเครื่องยนต์จริง หมุนรายวัน — เป็นตัวอย่างเพื่อการเรียนรู้ ไม่ใช่คำแนะนำการลงทุน)
@@ -27,6 +29,13 @@ const RISK_COLOR: Record<string, string> = {
 
 const baht = (n: number) => n.toLocaleString("th-TH", { maximumFractionDigits: 0 });
 
+// 🤔 คำถาม 3 ข้อช่วยเลือกสไตล์ — client ล้วน ไม่มีถูกผิด แค่จับคู่ "นิสัยคุณ ↔ ความผันผวนที่เหมาะ"
+const QUIZ: { q: string; opts: [string, string, string] }[] = [
+  { q: "1️⃣ ตั้งใจถือพอร์ตนี้นานแค่ไหน?", opts: ["ไม่ถึง 1 ปี", "1-3 ปี", "3 ปีขึ้นไป"] },
+  { q: "2️⃣ ถ้าพอร์ตติดลบ 20% ในช่วงตลาดเสีย คุณจะ…", opts: ["ขายกันเสียก่อน นอนไม่หลับ", "ถือเฉยๆ รอตลาดกลับ", "ยิ่งลงยิ่งซื้อเพิ่ม"] },
+  { q: "3️⃣ มีเวลา/ตั้งใจตามข่าวและพอร์ตแค่ไหน?", opts: ["แทบไม่มีเวลาดู", "บางวันเปิดดู", "ทุกวัน ชอบตลาดมาก"] },
+];
+
 export default function StarterPage() {
   const [data, setData] = useState<StarterResult | null>(null);
   const [risk, setRisk] = useState<StarterProfile["id"]>("balance");
@@ -35,6 +44,15 @@ export default function StarterPage() {
   const [rateOverride, setRateOverride] = useState<number | null>(null);
   const [contribMode, setContribMode] = useState<"none" | "week" | "month" | "year">("month");
   const [contrib, setContrib] = useState(1000);
+  // 🤔 quiz เลือกสไตล์ + ปุ่มส่งพอร์ตเข้า "พอร์ตของฉัน"
+  const [quizOpen, setQuizOpen] = useState(false);
+  const [quiz, setQuiz] = useState<{ q1?: number; q2?: number; q3?: number }>({});
+  const [addedMsg, setAddedMsg] = useState<string | null>(null);
+  const { holdings, setHoldings } = usePortfolio();
+  // 🕰️ ไทม์แมชชีนของพอร์ตนี้ — ย้อนหลังจากราคาจริงของทุกตำแหน่ง
+  const [bt, setBt] = useState<StarterBtResult | null>(null);
+  const [btBusy, setBtBusy] = useState(false);
+  const [btYears, setBtYears] = useState(5);
 
   useEffect(() => {
     fetch("/api/starter")
@@ -50,6 +68,89 @@ export default function StarterPage() {
 
   const profile = useMemo(() => data?.profiles.find((p) => p.id === risk), [data, risk]);
   const yearlyDiv = profile?.stats.yieldPerYearPct != null ? (budget * profile.stats.yieldPerYearPct) / 100 : null;
+
+  // ===== 🤔 quiz → สไตล์ที่เหมาะ (คะแนนรวม + กติกากันพลาด: ขายตอนติดลบ = ต้องผันผวนต่ำสุด / ไม่มีเวลาดู = ไม่เกินสมดุล) =====
+  const recommend = useMemo(() => {
+    if (quiz.q1 === undefined || quiz.q2 === undefined || quiz.q3 === undefined) return null;
+    const sum = quiz.q1 + quiz.q2 + quiz.q3;
+    let id: StarterProfile["id"] = sum <= 1 ? "calm" : sum <= 3 ? "balance" : sum <= 5 ? "grow" : "tech";
+    let why: string;
+    if (quiz.q2 === 0) {
+      id = "calm";
+      why = "คุณบอกว่าพอร์ตติดลบ 20% จะขายกันเสียก่อน — พอร์ตความผันผวนต่ำช่วยไม่ให้ต้องเจอจังหวะตัดสินใจแบบนั้น";
+    } else if (quiz.q3 === 0 && (id === "grow" || id === "tech")) {
+      id = "balance";
+      why = "คุณบอกว่าแทบไม่มีเวลาตามพอร์ต — สไตล์ที่ต้องเฝ้าระวังจึงยังไม่เหมาะ เริ่มจากพอร์ตสมดุลก่อน";
+    } else if (id === "calm") {
+      why = "คุณเลือกทุกข้อแบบระวังตัว — สายปันผล นอนหลับสบาย คือแบบของคุณ";
+    } else if (id === "balance") {
+      why = "คุณอยู่กึ่งกลาง: อยากโตแต่ยังไม่อยากเสี่ยงจัด — พอร์ตสมดุลเหมาะกับจุดเริ่มต้น";
+    } else if (id === "grow") {
+      why = "คุณรับความเสี่ยงได้และมีเวลาตามบ้าง — พอร์ตเติบโตเหมาะกว่า";
+    } else {
+      why = "คุณทนความผันผวนสูงได้และตามตลาดทุกวัน — สายเติบโต/เทคเร้าใจที่สุดสำหรับคุณ";
+    }
+    return { id, why };
+  }, [quiz]);
+  const recId = recommend?.id;
+  useEffect(() => {
+    if (recId) setRisk(recId);
+  }, [recId]);
+
+  // ===== ➕ ส่งพอร์ตนี้เข้า "พอร์ตของฉัน" (localStorage) — ตัวที่ถืออยู่แล้วรวมจำนวน + ต้นทุนเฉลี่ยถ่วงน้ำหนัก =====
+  function addToPortfolio() {
+    if (!profile) return;
+    const next = holdings.map((h) => ({ ...h }));
+    let added = 0;
+    for (const p of profile.positions) {
+      if (!p.priceThb || !p.priceLocal || p.priceLocal <= 0) continue;
+      const units = (budget * p.weight) / 100 / p.priceThb;
+      const qty = p.unitThb ? Math.floor(units) : Math.round(units * 1000) / 1000;
+      if (!(qty > 0)) continue;
+      const prev = next.find((h) => h.ticker === p.symbol);
+      if (prev) {
+        const total = prev.qty + qty;
+        prev.avgCost = Math.round(((prev.avgCost * prev.qty + p.priceLocal * qty) / total) * 100) / 100;
+        prev.qty = Math.round(total * 1000) / 1000;
+      } else {
+        next.push({ ticker: p.symbol, qty, avgCost: p.priceLocal });
+      }
+      added++;
+    }
+    setHoldings(next);
+    setAddedMsg(added ? `✅ เพิ่ม ${added} ตำแหน่งแล้ว` : "ราคายังไม่พร้อม — ลองอีกครั้งหลังตารางโหลดเสร็จ");
+  }
+
+  // ===== 🕰️ ไทม์แมชชีน: ดึงผลย้อนหลังของพอร์ตที่เลือก (ราคาจริงของทุกตำแหน่ง) =====
+  const profileId = profile?.id;
+  const profilePositions = profile?.positions;
+  useEffect(() => {
+    const positions = (profilePositions ?? []).filter((p) => p.priceLocal).map((p) => ({ symbol: p.symbol, weight: p.weight, kind: p.kind }));
+    if (!positions.length) return;
+    let alive = true;
+    setBtBusy(true);
+    setBt(null);
+    fetch("/api/starter-backtest", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ positions }),
+    })
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then((j: StarterBtResult) => alive && setBt(j))
+      .catch(() => {})
+      .finally(() => alive && setBtBusy(false));
+    return () => {
+      alive = false;
+    };
+  }, [profileId, profilePositions]);
+
+  // ถ้าช่วงที่เลือกไว้ไม่มีข้อมูล (พอร์ตนี้ประวัติสั้น) → ขยับไปช่วงยาวสุดที่มี
+  useEffect(() => {
+    if (bt && !bt.marks.some((m) => m.years === btYears && m.available)) {
+      const best = bt.marks.filter((m) => m.available).slice(-1)[0];
+      if (best) setBtYears(best.years);
+    }
+  }, [bt, btYears]);
 
   return (
     <div className="space-y-8 max-w-5xl mx-auto">
@@ -73,6 +174,49 @@ export default function StarterPage() {
       {/* เลือกสไตล์ — 6 แบบ */}
       <section>
         <h2 className="text-sm font-bold text-zinc-400 mb-3">1️⃣ เลือกสไตล์ของคุณ (6 แบบ)</h2>
+
+        {/* 🤔 ยังไม่รู้จะเลือกไหน — ตอบ 3 ข้อ เราเลือกให้ */}
+        <div className="card p-4 mb-3">
+          <button onClick={() => setQuizOpen(!quizOpen)} className="text-sm font-bold text-accent hover:text-accent-soft">
+            🤔 ยังไม่รู้จะเลือกสไตล์ไหน? ตอบ 3 ข้อ — เราเลือกให้ {quizOpen ? "▾" : "▸"}
+          </button>
+          {quizOpen && (
+            <div className="space-y-4 mt-3">
+              {QUIZ.map((row, qi) => {
+                const key = `q${qi + 1}` as "q1" | "q2" | "q3";
+                return (
+                  <div key={key}>
+                    <div className="text-xs text-zinc-300 font-semibold mb-2">{row.q}</div>
+                    <div className="flex flex-wrap gap-2">
+                      {row.opts.map((opt, oi) => (
+                        <button
+                          key={opt}
+                          onClick={() => setQuiz({ ...quiz, [key]: oi })}
+                          className={`chip ${quiz[key] === oi ? "bg-accent text-zinc-950" : "bg-base-800 text-zinc-400 border border-base-700 hover:text-zinc-200"}`}
+                        >
+                          {opt}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+              {recommend && (
+                <div className="card !bg-accent/5 !border-accent/40 p-3">
+                  <div className="text-sm font-bold text-accent">
+                    ⭐ เหมาะกับคุณ: {data?.profiles.find((p) => p.id === recommend.id)?.emoji} {data?.profiles.find((p) => p.id === recommend.id)?.title}
+                  </div>
+                  <p className="text-xs text-zinc-400 mt-1 leading-relaxed">{recommend.why}</p>
+                  <p className="text-[11px] text-zinc-600 mt-1.5">
+                    (เลือกให้แล้วด้านล่าง — ถ้าชอบ 🇹🇭 ไทย หรือ 🐋 ตามรอยบัฟเฟต์ มากกว่า กดเลือกเองได้เลย)
+                  </p>
+                </div>
+              )}
+              {!recommend && <p className="text-[11px] text-zinc-600">ตอบครบ 3 ข้อแล้วเราจะไฮไลต์สไตล์ที่เหมาะกับคุณทันที</p>}
+            </div>
+          )}
+        </div>
+
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {(data?.profiles ?? []).map((p) => (
             <button
@@ -80,7 +224,10 @@ export default function StarterPage() {
               onClick={() => setRisk(p.id)}
               className={`card p-3.5 text-left transition-colors ${risk === p.id ? "!border-accent bg-accent/5" : "hover:border-base-600"}`}
             >
-              <div className="text-xl">{p.emoji}</div>
+              <div className="flex items-start justify-between gap-1">
+                <div className="text-xl">{p.emoji}</div>
+                {recId === p.id && recommend && <span className="chip bg-accent text-zinc-950 text-[10px]">⭐ เหมาะกับคุณ</span>}
+              </div>
               <div className={`font-bold text-sm mt-1 ${risk === p.id ? "text-accent" : "text-zinc-100"}`}>{p.title}</div>
               <div className="text-[11px] text-zinc-500 mt-1 leading-relaxed">{p.desc}</div>
             </button>
@@ -246,6 +393,25 @@ export default function StarterPage() {
             </table>
           </div>
         )}
+
+        {/* ➕ ส่งต่อ: พอร์ตตัวอย่าง → "พอร์ตของฉัน" (ต้นทุนตั้งต้น = ราคาปัจจุบัน แก้ไขได้ที่หน้าพอร์ต) */}
+        {profile && (
+          <div className="card p-4 mt-3 border-accent/30 flex flex-wrap items-center gap-3">
+            <div className="flex-1 min-w-[240px]">
+              <div className="text-sm font-bold text-zinc-100">ถูกใจพอร์ตนี้? เอาไปต่อที่ &ldquo;พอร์ตของฉัน&rdquo;ได้เลย</div>
+              <div className="text-[11px] text-zinc-500 mt-1 leading-relaxed">
+                ทุกตำแหน่ง (ตามงบ ฿{baht(budget)} และน้ำหนักในตาราง) จะถูกบันทึกเข้าพอร์ตของคุณ — ต้นทุนตั้งต้น = ราคาปัจจุบัน
+                แก้ไข/ลบ/ติดดุม 📌 หุ้นแกน และให้ AI ช่วยปรับต่อได้ที่หน้าพอร์ต · ไม่รวมส่วนเงินสด {profile.cashPct}%
+              </div>
+            </div>
+            <button onClick={addToPortfolio} className="btn-primary whitespace-nowrap">➕ เพิ่มลงพอร์ตของฉัน</button>
+            {addedMsg && (
+              <span className="text-xs text-up">
+                {addedMsg} · <Link href="/portfolio" className="link">ไปดูพอร์ตของฉัน →</Link>
+              </span>
+            )}
+          </div>
+        )}
       </section>
 
       {/* ทบต้น — รายสัปดาห์·เดือน·ปี จนถึง 30 ปี */}
@@ -380,9 +546,98 @@ export default function StarterPage() {
         );
       })()}
 
+      {/* ไทม์แมชชีน — ถ้าเริ่มพอร์ตนี้เมื่อ N ปีก่อน วันนี้จะมีเท่าไหร่ (จากราคาจริง) */}
+      <section>
+        <h2 className="text-sm font-bold text-zinc-400 mb-3">6️⃣ 🕰️ ไทม์แมชชีน: ถ้าเริ่มพอร์ตนี้เมื่อ N ปีก่อน วันนี้จะมีเท่าไหร่?</h2>
+        <div className="card p-4">
+          {btBusy && <p className="text-sm text-zinc-500 animate-pulse">⏳ กำลังย้อนเวลาไปดูราคาจริงของทุกตำแหน่ง… (~10 วิ)</p>}
+          {!btBusy && !bt && <p className="text-sm text-zinc-500">ดึงข้อมูลย้อนหลังไม่สำเร็จ — ลองรีเฟรชอีกครั้ง</p>}
+          {bt && (() => {
+            const mark = bt.marks.find((m) => m.years === btYears && m.available);
+            if (!mark || !mark.mult) {
+              return <p className="text-sm text-zinc-500">พอร์ตนี้ย้อนหลังได้แค่ {bt.windowYears} ปี (ตัวหลักเพิ่งขึ้นจริงไม่นาน) — ข้อมูลยังสั้นเกินเปรียบเทียบ</p>;
+            }
+            const beats = mark.mult >= (mark.spyMult ?? 0);
+            const vals = bt.curve.flatMap((c) => [c.v, c.spy, 1]);
+            const min = Math.min(...vals), max = Math.max(...vals);
+            const W = 560, H = 130;
+            const X = (i: number) => (i / Math.max(1, bt.curve.length - 1)) * W;
+            const Y = (val: number) => H - ((val - min) / (max - min || 1)) * (H - 10) - 5;
+            const line = (key: "v" | "spy") => bt.curve.map((c, i) => `${X(i).toFixed(1)},${Y(c[key]).toFixed(1)}`).join(" ");
+            const coreBudget = (budget * bt.coreSharePct) / 100;
+            return (
+              <div className="space-y-3">
+                {/* เลือกช่วงเวลา */}
+                <div className="flex flex-wrap gap-2 items-center">
+                  {bt.marks.map((m) => (
+                    <button
+                      key={m.years}
+                      onClick={() => m.available && setBtYears(m.years)}
+                      disabled={!m.available}
+                      title={m.available ? undefined : "พอร์ตนี้มีข้อมูลย้อนหลังไม่ถึงช่วงนี้"}
+                      className={`chip num ${m.years === btYears && m.available ? "bg-accent text-zinc-950" : m.available ? "bg-base-800 text-zinc-400 border border-base-700" : "bg-base-900 text-zinc-700 border border-base-800 cursor-not-allowed"}`}
+                    >
+                      {m.label}
+                    </button>
+                  ))}
+                  <span className="text-[11px] text-zinc-600 ml-1">ข้อมูลย้อนหลัง {bt.windowYears} ปี (ตั้งแต่ {bt.windowStartTh}) · คิดจากราคาจริง {bt.asOf}</span>
+                </div>
+
+                {/* ผลลัพธ์ใหญ่ — คิดจาก "ส่วนตั้งฐาน" เท่านั้น (ตัวหมุนรายวันย้อนหลังไม่ซื่อสัตย์) */}
+                <div className="flex flex-wrap items-end gap-x-6 gap-y-3">
+                  <div>
+                    <div className="text-[11px] text-zinc-500">
+                      ส่วนตั้งฐาน ฿{baht(coreBudget)} ของงบ ฿{baht(budget)} ({bt.coreSharePct}%) เมื่อ {mark.label}ที่แล้ว → วันนี้
+                    </div>
+                    <div className={`num text-3xl font-bold ${mark.mult >= 1 ? "text-up" : "text-down"}`}>~฿{baht(coreBudget * mark.mult)}</div>
+                    <div className="text-xs num text-zinc-400">
+                      {((mark.mult - 1) * 100).toFixed(0)}% รวม · เฉลี่ย <b className={mark.cagrPct !== null && mark.cagrPct >= 0 ? "text-up" : "text-down"}>{mark.cagrPct}%/ปี</b>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-[11px] text-zinc-500">ถือ S&amp;P500 แทน (เงินก้อนเดียวกัน)</div>
+                    <div className="num text-xl font-bold text-zinc-300">~฿{mark.spyMult !== null ? baht(coreBudget * mark.spyMult) : "—"}</div>
+                    <div className={`chip !text-[10px] ${beats ? "bg-up/10 text-up" : "bg-down/10 text-down"}`}>{beats ? "🏆 พอร์ตนี้เกินตลาด" : "📉 ตามหลังตลาด"} · {mark.spyCagrPct}%/ปี</div>
+                  </div>
+                  <div>
+                    <div className="text-[11px] text-zinc-500">ช่วงร่วงแรงสุด (จากข้อมูลรายสัปดาห์)</div>
+                    <div className="num text-xl font-bold text-down">{bt.mddPct}%</div>
+                    <div className="text-[10px] text-zinc-600 num">S&amp;P500 ช่วงเดียวกัน {bt.spyMddPct}% — เทียบว่า "ร่วง" ของพอร์ตนี้ทนไหวไหม</div>
+                  </div>
+                </div>
+
+                {/* เส้นพอร์ต vs ตลาด */}
+                <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-32" role="img" aria-label="กราฟมูลค่าพอร์ตย้อนหลังเทียบ S&P500">
+                  <line x1="0" y1={Y(1)} x2={W} y2={Y(1)} stroke="#3f3f46" strokeWidth="1" strokeDasharray="4 4" />
+                  <polyline points={line("spy")} fill="none" stroke="#71717a" strokeWidth="1.5" />
+                  <polyline points={line("v")} fill="none" stroke="#facc15" strokeWidth="2" />
+                </svg>
+                <div className="flex flex-wrap gap-4 text-[10px] text-zinc-500">
+                  <span><span className="inline-block w-3 h-0.5 bg-accent-soft align-middle mr-1" />ส่วนตั้งฐาน {profile?.emoji} {profile?.title}</span>
+                  <span><span className="inline-block w-3 h-0.5 bg-zinc-500 align-middle mr-1" />S&amp;P500</span>
+                  <span><span className="inline-block w-3 border-t border-dashed border-zinc-600 align-middle mr-1" />ถือเงินสด (1.0x)</span>
+                </div>
+
+                {bt.rotating.length > 0 && (
+                  <p className="text-[11px] text-zinc-500 leading-relaxed">
+                    ✂️ ตัดออกจากการย้อนหลัง: {bt.rotating.map((r) => `${r.symbol}`).join(" · ")} ({[...new Set(bt.rotating.map((r) => r.kindTh))].join(" / ")}) — ตัวพวกนี้ระบบเพิ่งคัด "วันนี้" จากอันดับผลงานย้อนหลัง ถ้าเอาย้อนไปคำนวณจะได้ผลเกินจริงเสมอ
+                  </p>
+                )}
+                {bt.lateStart.length > 0 && (
+                  <p className="text-[11px] text-zinc-500 leading-relaxed">
+                    ℹ️ ตัวที่เพิ่งขึ้นจริงหลังวันเริ่มต้น: {bt.lateStart.map((l) => `${l.symbol} (${l.firstDateTh}, ${l.weight}%)`).join(" · ")} — ก่อนหน้านั้นส่วนของตัวนี้ถือเป็นเงินสด
+                  </p>
+                )}
+                <p className="text-[11px] text-zinc-600 leading-relaxed">⚠️ {bt.note}</p>
+              </div>
+            );
+          })()}
+        </div>
+      </section>
+
       {/* ซื้อจริงยังไง */}
       <section>
-        <h2 className="text-sm font-bold text-zinc-400 mb-3">6️⃣ พอใจแล้ว ซื้อยังไงต่อ?</h2>
+        <h2 className="text-sm font-bold text-zinc-400 mb-3">7️⃣ พอใจแล้ว ซื้อยังไงต่อ?</h2>
         <div className="grid md:grid-cols-2 gap-3">
           <div className="card p-4">
             <div className="font-bold text-zinc-100">🇺🇸 หุ้น/กองทุนต่างประเทศ</div>

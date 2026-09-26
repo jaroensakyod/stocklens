@@ -24,8 +24,8 @@ export default function ScorePage() {
       <div>
         <h1 className="text-2xl font-bold text-zinc-50">🏆 StockLens Score — อันดับคะแนนวันนี้</h1>
         <p className="text-sm text-zinc-400 mt-1 leading-relaxed">
-          คะแนนรวม 0-100 จาก 6 เสา (Quality · Valuation · Momentum · News AI · Street · Safety) — สูตรเปิดเผย คำนวณจากงบจริง ราคา ข่าว และคอนเซนซัสโบรกเกอร์ ·
-          ระบบบันทึกคะแนนจริงทุกวันเพื่อสะสม track record ที่ตรวจสอบได้ (ไม่อ้าง backtest ย้อนหลังที่พิสูจน์ไม่ได้)
+          คะแนนรวม 0-100 จาก 6 เสาถ่วงน้ำหนัก — Quality 22% · Valuation 18% · Momentum 18% · News AI 12% · Street 15% · Safety 15% (สูตรเปิดเผยทุกตัว)
+          คำนวณจากงบจริง ราคา ข่าว และคอนเซนซัสโบรกเกอร์ · ระบบบันทึกคะแนนจริงทุกวันเพื่อสะสม track record ที่ตรวจสอบได้ (ไม่อ้าง backtest ย้อนหลังที่พิสูจน์ไม่ได้)
         </p>
       </div>
 

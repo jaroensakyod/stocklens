@@ -17,11 +17,25 @@ interface AdvisorResult {
 }
 
 // AI Portfolio Advisor — วิเคราะห์พอร์ตจริง แนะนำการปรับ 4-6 ข้อ พร้อมเหตุผล
+// ผู้ใช้บอก "โปรไฟล์เจ้าของ" (ทนความผันผวน + ระยะมอง) เพิ่ม → AI ปรับน้ำหนักคำแนะนำให้เหมาะคน ไม่ใช่สูตรเดียวทุกคน
+const RISK_OPTS: { v: "low" | "mid" | "high"; label: string }[] = [
+  { v: "low", label: "🛡️ น้อย" },
+  { v: "mid", label: "⚖️ กลาง" },
+  { v: "high", label: "🚀 สูง" },
+];
+const HORIZON_OPTS: { v: "short" | "mid" | "long"; label: string }[] = [
+  { v: "short", label: "⏱️ <1 ปี" },
+  { v: "mid", label: "📅 1-3 ปี" },
+  { v: "long", label: "🌳 3+ ปี" },
+];
+
 function PortfolioAdvisorInner() {
   const { holdings } = usePortfolio();
   const [result, setResult] = useState<AdvisorResult | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
+  const [riskTol, setRiskTol] = useState<"low" | "mid" | "high">("mid");
+  const [horizon, setHorizon] = useState<"short" | "mid" | "long">("long");
 
   const run = async () => {
     if (holdings.length < 2) { setErr("ใส่ holdings อย่างน้อย 2 ตัวก่อน (แท็บ 💼)"); return; }
@@ -32,7 +46,7 @@ function PortfolioAdvisorInner() {
       const res = await fetch("/api/ai/portfolio-advisor", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ holdings }),
+        body: JSON.stringify({ holdings, profile: { riskTol, horizon } }),
       });
       const j = await res.json();
       if (!res.ok) setErr(j.error || "วิเคราะห์ไม่สำเร็จ");
@@ -51,6 +65,26 @@ function PortfolioAdvisorInner() {
         <button className="btn-primary" onClick={run} disabled={busy || holdings.length < 2}>
           {busy ? "กำลังวิเคราะห์… (~20 วิ)" : "▶ ให้ AI ปรับพอร์ต"}
         </button>
+      </div>
+
+      {/* โปรไฟล์เจ้าของพอร์ต — AI ใช้ปรับน้ำหนักคำแนะนำให้เหมาะคน (ไม่ใช่สูตรเดียวทุกคน) */}
+      <div className="flex flex-wrap gap-x-6 gap-y-2 mb-3 py-2.5 border-y border-base-700/50">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-[11px] text-zinc-500">คุณทนความผันผวนได้แค่ไหน:</span>
+          {RISK_OPTS.map((o) => (
+            <button key={o.v} onClick={() => setRiskTol(o.v)} className={`chip !text-[10px] ${riskTol === o.v ? "bg-accent text-zinc-950" : "bg-base-800 text-zinc-400 border border-base-700"}`}>
+              {o.label}
+            </button>
+          ))}
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-[11px] text-zinc-500">ระยะเวลามอง:</span>
+          {HORIZON_OPTS.map((o) => (
+            <button key={o.v} onClick={() => setHorizon(o.v)} className={`chip !text-[10px] ${horizon === o.v ? "bg-accent text-zinc-950" : "bg-base-800 text-zinc-400 border border-base-700"}`}>
+              {o.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {err && <p className="text-xs text-down mb-2">{err}</p>}

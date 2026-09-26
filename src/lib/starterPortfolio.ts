@@ -17,6 +17,8 @@ export interface StarterPosition {
   kind: "etf" | "dividend" | "growth" | "momentum" | "surge" | "commodity" | "guru";
   weight: number; // % ของงบ
   priceThb: number | null; // ราคาต่อหน่วย ณ ตอนนี้ (บาท)
+  priceLocal: number | null; // ราคาในสกุลของหุ้นเอง (บาท/ดอลลาร์) — ใช้บันทึกต้นทุนเข้า "พอร์ตของฉัน"
+  currency: string; // "THB" | "USD"
   unitThb: boolean; // true = ซื้อเป็นหุ้นเต็ม (ไทย) / false = ซื้อเศษได้ (Dime)
   changePct: number | null;
   reason: string; // ทำไมอยู่ในพอร์ต — ภาษาคนไม่มีความรู้
@@ -240,6 +242,8 @@ async function build(): Promise<StarterResult> {
       kind: d.kind,
       weight: d.weight,
       priceThb: isThb ? q.price : q.price * usdThb,
+      priceLocal: q.price,
+      currency: q.currency,
       unitThb: isThb,
       changePct: isFinite(q.changePct) ? q.changePct : null,
       reason: d.reason,

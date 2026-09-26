@@ -18,8 +18,12 @@ interface Holding {
   core?: boolean;
 }
 
-// POST /api/ai/portfolio-advisor { holdings: [{ticker, qty, avgCost, core?}] }
+// POST /api/ai/portfolio-advisor { holdings: [{ticker, qty, avgCost, core?}], profile?: {riskTol, horizon} }
 // ดึงข้อมูลจริงทั้งหมด (sector/factors/technicals/radar) → วิเคราะห์ 4 มิติ → AI แนะนำปรับพอร์ตเป็นข้อๆ
+// profile = "โปรไฟล์เจ้าของ" (ทนความผันผวน + ระยะมอง) — ให้ AI ปรับน้ำหนักคำแนะนำเหมาะคน ไม่ใช่สูตรเดียวทุกคน
+const RISK_LABEL = { low: "ทนความผันผวนได้น้อย", mid: "ทนความผันผวนระดับกลาง", high: "ทนความผันผวนสูง" } as const;
+const HORIZON_LABEL = { short: "ระยะสั้น (ไม่ถึง 1 ปี)", mid: "ระยะกลาง (1-3 ปี)", long: "ระยะยาว (3 ปีขึ้นไป)" } as const;
+
 export async function POST(req: NextRequest) {
   // 🔒 AI ปรับพอร์ตส่วนตัว = สิทธิ์สมาชิก 🥇 Pro
   const guard = requirePro(req);
@@ -28,7 +32,12 @@ export async function POST(req: NextRequest) {
       { error: "🔒 AI ปรับพอร์ตส่วนตัวเป็นสิทธิ์สมาชิก 🥇 Pro — อัปเกรดที่หน้า /pricing (ถ้ายังไม่ได้เข้าสู่ระบบ ที่หน้า /login)" },
       { status: 403 }
     );
-  const { holdings } = (await req.json().catch(() => ({}))) as { holdings?: Holding[] };
+  const { holdings, profile } = (await req.json().catch(() => ({}))) as {
+    holdings?: Holding[];
+    profile?: { riskTol?: string; horizon?: string };
+  };
+  const riskTol: keyof typeof RISK_LABEL = profile?.riskTol === "low" || profile?.riskTol === "high" ? profile.riskTol : "mid";
+  const horizon: keyof typeof HORIZON_LABEL = profile?.horizon === "short" || profile?.horizon === "long" ? profile.horizon : "mid";
   if (!holdings?.length || holdings.length < 2) {
     return NextResponse.json({ error: "ต้องมี holdings อย่างน้อย 2 ตัว (ใส่ที่หน้าพอร์ต)" }, { status: 400 });
   }
@@ -122,6 +131,7 @@ export async function POST(req: NextRequest) {
     .join("\n");
 
   const metricsText = `มูลค่าพอร์ต: $${(totalValue / 1000).toFixed(1)}K (รวมทุกสกุลเงินเป็น USD แล้ว)${truncated ? `\nหมายเหตุ: สมาชิกส่งมา ${holdings.length} ตัว วิเคราะห์ได้ 8 ตัวแรก (${rows.map((r) => r.ticker).join(", ")}) ตัวที่เหลือยังไม่ได้นับ` : ""}
+โปรไฟล์เจ้าของพอร์ต: ${RISK_LABEL[riskTol]} · มอง${HORIZON_LABEL[horizon]}
 หุ้นใหญ่สุด: ${topHolding.ticker} (${topHoldingPct.toFixed(1)}%) ${topHoldingPct > 30 ? "⚠️ เข้มข้นเกิน" : ""}
 Sector ใหญ่สุด: ${topSector[0]} (${topSectorPct.toFixed(1)}%) ${topSectorPct > 60 ? "⚠️ กระจุกเกิน" : ""}
 จำนวนหุ้น: ${rows.length} ตัว
@@ -147,6 +157,23 @@ Sector ใหญ่สุด: ${topSector[0]} (${topSectorPct.toFixed(1)}%) ${to
   if (avgFactors.momentum > 65 && avgFactors.valuation < 35) {
     demoAdvice.push({ action: "สมดุล", title: `⚖️ พอร์ตเอนไปทางโมเมนตัมสูง/แพง`, detail: `คะแนน Momentum ${avgFactors.momentum} สูง แต่ Valuation ${avgFactors.valuation} ต่ำ — เสี่ยงตอนตลาดหมุน ควรเพิ่มหุ้น value/defensive`, tone: "info" });
   }
+  // กฎที่คำนึงถึง "โปรไฟล์เจ้าของ" — คนละความเสี่ยง คำเตือนต้องต่างกัน
+  if (riskTol === "low" && (bearishCount > 0 || topHoldingPct > 25)) {
+    demoAdvice.push({
+      action: "เหมาะกับคุณไหม",
+      title: `🛡️ คุณบอกว่าทนผันผวนได้น้อย แต่พอร์ตยังมีจุดเสี่ยง`,
+      detail: `${topHolding.ticker} กิน ${topHoldingPct.toFixed(0)}%${bearishCount > 0 ? ` · ${bearishCount} ตัวสัญญาณเทคนิคลบ` : ""} — คนทนผันผวนน้อยควรเพิ่มสัดส่วน ETF ดัชนี/หุ้นปันผล และลดน้ำหนักตัวที่เหวี่ยงแรงลง`,
+      tone: "warn",
+    });
+  }
+  if (horizon === "short" && avgFactors.momentum < 45) {
+    demoAdvice.push({
+      action: "ระยะสั้น",
+      title: `⏱️ มองไม่ถึง 1 ปี แต่โมเมนตัมพอร์ตยังอ่อน`,
+      detail: `คะแนน Momentum เฉลี่ย ${avgFactors.momentum}/100 — ระยะสั้นโดนทิศทางตลาดเต็มๆ ไม่มีเวลาให้พอร์ตฟื้น พิจารณาถือเงินสดสูงขึ้น หรือเลือกตัวที่เสถียรกว่า`,
+      tone: "info",
+    });
+  }
   if (avgFactors.health > 70) {
     demoAdvice.push({ action: "จุดแข็ง", title: `💪 Financial Health เฉลี่ย ${avgFactors.health}/100 — พื้นฐานแข็ง`, detail: `พอร์ตทนแรงกดดันได้ดี ไม่ต้องรีบปรับมาก`, tone: "good" });
   }
@@ -168,6 +195,7 @@ Sector ใหญ่สุด: ${topSector[0]} (${topSectorPct.toFixed(1)}%) ${to
 รวม: (1) ความเสี่ยงที่ต้องจัดการทันที (2) สมดุล sector/factor (3) สิ่งที่ทำได้ดีอยู่แล้ว (4) ข้อเสนอ 1 อย่างที่ควรเพิ่ม (พร้อมเหตุผลเชิงปัจจัย)
 กติกาสำคัญ:
 - ตัวที่ระบุ "📌หุ้นแกน" = เจ้าของตั้งใจถือระยะยาว — ห้ามแนะนำลดสัดส่วนด้วยเหตุผล "น้ำหนักใหญ่/ราคาวิ่งแรง/Valuation แพง" เพียงอย่างเดียว ให้วิเคราะห์เฉพาะคุณภาพธุรกิจและความเสี่ยงพื้นฐานที่เปลี่ยนแปลง
+- ปรับน้ำหนักคำแนะนำตาม "โปรไฟล์เจ้าของพอร์ต": ทนผันผวนน้อย = เน้นลดความเสี่ยง/กระจาย/ETF ดัชนี ห้ามเสนอตัวผันผวนสูง · ทนผันผวนสูง = ยอมรับความผันผวนแลกการเติบโตได้ แต่ยังต้องเตือนความเข้มข้นเกิน · ระยะสั้น = ให้น้ำหนักความเสี่ยงตลาดช่วงใกล้ · ระยะยาว = เน้นคุณภาพธุรกิจและการทบต้น ไม่ต้องเร่งจังหวะซื้อ-ขาย
 - อ้างอิงตัวเลข (มูลค่าพอร์ต/%/P/L/factors) จากข้อมูลที่ให้ไว้ตรงๆ เท่านั้น ห้ามคำนวณหรือสรุปยอดรวมเพิ่มเอง
 ห้ามใช้คำ "ควรซื้อ/ควรขาย" ตรงๆ ใช้ "พิจารณา/อาจลด/น่าเพิ่ม" + ระบุเสมอว่าเป็นการวิเคราะห์เชิงข้อมูล ไม่ใช่คำแนะนำการลงทุน`,
           },

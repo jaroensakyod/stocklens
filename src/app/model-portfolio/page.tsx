@@ -219,6 +219,18 @@ export default function ModelPortfolioPage() {
         <div className="card p-10 text-center text-zinc-500 text-sm animate-pulse">กำลังให้ AI จัดพอร์ตรอบแรก… (อาจใช้ ~30 วิ)</div>
       )}
 
+      {/* ปิดวงจร: ดูพอร์ตจำลองชอบแล้ว → ไปต่อที่ AI ดูพอร์ตของตัวเอง */}
+      <Link href="/portfolio" className="card card-hover p-4 flex flex-wrap items-center gap-3 border-accent/30">
+        <span className="text-2xl">🤖</span>
+        <div className="flex-1 min-w-[240px]">
+          <div className="text-sm font-bold text-zinc-100">อยากให้ AI ช่วยดู &ldquo;พอร์ตของคุณเอง&rdquo; แบบนี้บ้างไหม?</div>
+          <div className="text-[11px] text-zinc-500 mt-0.5">
+            เพิ่มหุ้นที่ถืออยู่ที่หน้า พอร์ตของฉัน → แท็บ 🤖 AI ปรับพอร์ต — บอกได้ด้วยว่าคุณทนความผันผวนได้แค่ไหน มองระยะสั้นหรือยาว แล้ว AI วิเคราะห์จากข้อมูลจริงของพอร์ตคุณเอง (สิทธิ์สมาชิก 🥇 Pro)
+          </div>
+        </div>
+        <span className="text-accent text-sm font-bold">ไปหน้าพอร์ตของฉัน →</span>
+      </Link>
+
       <p className="text-[11px] text-zinc-500 leading-relaxed border-t border-base-700/60 pt-4">
         ⚠️ พอร์ตจำลองเพื่อการศึกษา/โปร่งใสของระบบ — ทุกการตัดสินใจใช้เฉพาะข้อมูล ณ วันปรับ (ไม่มีการแอบดูอนาคต) · ผลคำนวณจากราคาจริงรวมค่าเงินบาท ไม่หักค่าธรรมเนียม/ภาษี ไม่รวมปันผล · ไม่ใช่คำแนะนำการลงทุน · อยากดู Track Record แบบอื่น? <Link href="/track-record" className="text-accent-soft underline">คลิกที่นี่</Link> · อยากถาม AI ถึงเหตุผลการปรับ? ถามที่แชท 💬 ได้เลย เช่น &ldquo;พอร์ตจำลองเป็นยังไงบ้าง&rdquo;
       </p>

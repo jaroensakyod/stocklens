@@ -12,6 +12,7 @@ import { kvGet, kvSet } from "@/lib/storage";
 import { savePrices, saveScore, saveNews, saveThemeDay } from "@/lib/turso";
 import { getThemeNewsMap } from "@/lib/themeNews";
 import { computeThemeHeat } from "@/lib/radar";
+import { resolveValueTrackRecord } from "@/lib/trackRecordAuto";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -23,6 +24,9 @@ export async function GET(req: NextRequest) {
   if (secret && req.headers.get("authorization") !== `Bearer ${secret}`) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
+
+  // ---- 0) Track Record อัตโนมัติ: ประเมินผลสัญญาณ /value ที่ครบ 14 วัน (ไว้ต้นคิว — พังไม่กระทบงานอื่น) ----
+  const track = await resolveValueTrackRecord().catch(() => null);
 
   // ---- 1) อุ่น kb ไทย ----
   const th = await tvUniverse("thailand", 120).catch(() => []);
@@ -81,7 +85,7 @@ export async function GET(req: NextRequest) {
   // league: รวมจาก history ล่าสุดของทุกตัวที่เคยบันทึก (สะสมไปเรื่อยๆ)
   const league = await buildLeague(targets);
 
-  return NextResponse.json({ ok: true, market: "thailand", warmed: ok, total: targets.length, snapCount: Object.keys(snap).length, scored, league: league.length });
+  return NextResponse.json({ ok: true, market: "thailand", warmed: ok, total: targets.length, snapCount: Object.keys(snap).length, scored, league: league.length, trackAdded: track?.added ?? 0 });
 }
 
 async function buildLeague(symbols: string[]): Promise<{ sym: string; t: number }[]> {

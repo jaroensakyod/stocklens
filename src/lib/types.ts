@@ -201,4 +201,8 @@ export interface TrackRecordEntry {
   status: "open" | "win" | "loss" | "flat";
   resultPct?: number;
   note?: string;
+  /** manual = ทีมเขียนเอง · value = สัญญาณอัตโนมัติจาก /value ที่ระบบประเมินผลเอง (ไม่มีมนุษย์แตะ) */
+  source?: "manual" | "value";
+  /** ผลของตลาด (benchmark) ช่วงเดียวกัน — ใช้กับ source=value เพื่อบอกว่า "ชนะตลาด" หรือไม่ */
+  benchPct?: number;
 }

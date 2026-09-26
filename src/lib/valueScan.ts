@@ -14,6 +14,8 @@ export interface ValueRow {
   sector: string;
   market: "US" | "TH";
   priceThb: number;
+  priceLocal: number; // ราคาในสกุลของหุ้น ณ เวลาสแกน — ใช้วัดผลย้อนหลังแบบไม่โดนค่าเงินแพงขึ้น
+  currency: string; // "THB" | "USD"
   changePct: number;
   from52wHighPct: number | null; // ต่ำกว่ายอด 52 สัปดาห์กี่ % (ติดลบ = ใต้น้ำ)
   rsi: number | null;
@@ -96,6 +98,11 @@ export async function getValueDay(date: string): Promise<ValueDay | null> {
   return (await readHistory()).find((d) => d.date === date) ?? null;
 }
 
+/** ทุก snapshot ที่เก็บไว้ (ใหม่สุดก่อน) — ใช้โดย track record อัตโนมัติ */
+export async function getAllValueDays(): Promise<ValueDay[]> {
+  return readHistory();
+}
+
 interface Cand {
   sym: string;
   name: string;
@@ -167,6 +174,8 @@ async function build(): Promise<ValueResult> {
             sector: c.sector,
             market: c.market,
             priceThb: a.quote.currency === "THB" ? a.quote.price : a.quote.price * usdThb,
+            priceLocal: a.quote.price,
+            currency: a.quote.currency,
             changePct: c.changePct,
             from52wHigh: Math.round(from52w * 10) / 10,
             rsi: rsi !== null ? Math.round(rsi) : null,
@@ -233,6 +242,8 @@ async function build(): Promise<ValueResult> {
     sector: r.sector,
     market: r.market,
     priceThb: r.priceThb,
+    priceLocal: r.priceLocal,
+    currency: r.currency,
     changePct: r.changePct,
     from52wHighPct: r.from52wHighPct,
     rsi: r.rsi,

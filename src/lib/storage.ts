@@ -15,7 +15,9 @@ export function hasDB(): boolean {
 export async function kvGet<T>(key: string): Promise<T | null> {
   if (!hasDB()) return null;
   try {
-    const res = await fetch(`${URL_}/get/${key}`, { headers: { Authorization: `Bearer ${TOKEN}` } });
+    // cache: "no-store" สำคัญมาก — Redis เป็น cache ของตัวเองแล้ว ถ้าปล่อยให้ Next แคช fetch นี้
+    // เราจะอ่านได้แต่ค่าเก่าหลังมีการเขียนใหม่ (เจอจริงตอนทดสอบ track-record อัตโนมัติ)
+    const res = await fetch(`${URL_}/get/${key}`, { headers: { Authorization: `Bearer ${TOKEN}` }, cache: "no-store" });
     const j = (await res.json()) as { result?: string | null };
     if (!j.result) return null;
     return JSON.parse(j.result) as T;

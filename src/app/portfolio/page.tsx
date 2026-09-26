@@ -296,6 +296,10 @@ function PortfolioTab({
           <p className="text-3xl mb-2">💼</p>
           <p className="text-zinc-300 font-semibold">ยังไม่มี Position</p>
           <p className="text-xs text-zinc-500 mt-1">ใส่หุ้นที่ถืออยู่ (แม้แค่เศษหุ้น 0.1 ตัวจาก Dime!) แล้วระบบจะคำนวณกำไรและบอกว่าเหตุการณ์โลกกระทบพอร์ตคุณตรงไหน</p>
+          <Link href="/starter" className="inline-flex items-center gap-2 mt-4 card !py-2 !px-4 border-accent/40 hover:border-accent transition-colors">
+            🧑‍🎓 <span className="text-sm font-bold text-zinc-100">มือใหม่ ยังไม่มีหุ้น? เริ่มจาก "พอร์ตตัวอย่างรายวัน" — เลือกงบ+สไตล์ แล้วกดเพิ่มลงพอร์ตนี้ได้เลย</span>
+            <span className="text-accent text-sm">→</span>
+          </Link>
         </div>
       ) : (
         <div className="card overflow-x-auto">
