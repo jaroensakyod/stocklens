@@ -140,20 +140,36 @@ export async function getChart(symbol: string, range = "1Y"): Promise<Candle[]> 
   return candles;
 }
 
-/** ปันผลรวมที่จ่าย "จริง" ใน 12 เดือนล่าสุด (บาท/ดอลลาร์ต่อหุ้น) — จาก events=div ของ chart endpoint (ไม่ต้องมี crumb) */
-export async function getTrailingDividends(symbol: string): Promise<number | null> {
+export interface DividendTrail {
+  sum12m: number; // รวมปันผล 12 เดือนล่าสุด ต่อหุ้น
+  count12m: number; // จ่ายกี่ครั้งใน 12 เดือน (12 = รายเดือนจริง)
+  lastAmount: number; // งวดล่าสุดต่อหุ้น
+  lastDateIso: string; // วันที่จ่ายล่าสุด yyyy-mm-dd
+}
+
+/** ปันผลที่จ่าย "จริง" ใน 12 เดือนล่าสุด — จาก events=div ของ chart endpoint (ไม่ต้องมี crumb) */
+export async function getTrailingDividends(symbol: string): Promise<DividendTrail | null> {
   const key = "div:" + symbol.toUpperCase();
-  const hit = getCached<number>(key, 6 * 60 * 60_000);
+  const hit = getCached<DividendTrail>(key, 6 * 60 * 60_000);
   if (hit !== undefined) return hit;
   const json = (await jget(`/v8/finance/chart/${encodeURIComponent(symbol)}?range=1y&interval=1mo&events=div`)) as
-    | { chart?: { result?: { events?: { dividends?: Record<string, { amount?: number }> } }[] } }
+    | { chart?: { result?: { events?: { dividends?: Record<string, { amount?: number; date?: number }> } }[] } }
     | null;
   const divs = json?.chart?.result?.[0]?.events?.dividends;
   if (!divs) return null;
-  const sum = Object.values(divs).reduce((a, d) => a + Number(d.amount ?? 0), 0);
-  if (!isFinite(sum) || sum <= 0) return null;
-  setCached(key, sum);
-  return sum;
+  const entries = Object.entries(divs)
+    .map(([k, d]) => ({ ts: Number(d.date ?? k), amount: Number(d.amount ?? 0) }))
+    .filter((d) => isFinite(d.amount) && d.amount > 0)
+    .sort((a, b) => a.ts - b.ts);
+  if (!entries.length) return null;
+  const out: DividendTrail = {
+    sum12m: entries.reduce((a, d) => a + d.amount, 0),
+    count12m: entries.length,
+    lastAmount: entries[entries.length - 1].amount,
+    lastDateIso: new Date(entries[entries.length - 1].ts * 1000).toISOString().slice(0, 10),
+  };
+  setCached(key, out);
+  return out;
 }
 
 // ---------- Fundamentals (timeseries จาก filings จริง) ----------

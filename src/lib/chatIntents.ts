@@ -3,6 +3,7 @@
 // ทำ 2 หน้าที่: (1) รู้จักชื่อหุ้น (ticker regex + name-map + search fallback + .BK retry)
 //              (2) จำแนกคำถามเป็น intent แล้วประกอบ truth packet จาก lib ที่มีอยู่ทั้งหมด
 import nameMapJson from "@/data/name-map.json";
+import brokersJson from "@/data/brokers.json";
 import { buildAnalysis } from "./analysis";
 import { findSectorInfo, tvUniverse } from "./tvscanner";
 import { getQuotes, getNews, getChart, getUsdThb, searchSymbols } from "./yahoo";
@@ -458,7 +459,7 @@ async function buildLongtermPacket(): Promise<{ packet: string; demo: string }> 
   return { packet, demo };
 }
 
-/** ซื้อผ่านไหน/ยังไง — markets.ts (lib เดิมที่ไม่เคยมี route ใช้) */
+/** ซื้อผ่านไหน/ยังไง — markets.ts + ลิสต์โบรกไทยจาก brokers.json */
 function buildBrokerPacket(tickers: string[]): { packet: string; demo: string } {
   const lines: string[] = [];
   for (const t of tickers.filter(isRealStock).slice(0, 3)) {
@@ -467,15 +468,16 @@ function buildBrokerPacket(tickers: string[]): { packet: string; demo: string } 
     lines.push(`${t} [${MARKET_LABEL[detectMarket(t)]}] → ${b.label}: ${b.detail}${hint ? ` · ${hint}` : ""}`);
   }
   if (!lines.length) {
+    const brokers = (brokersJson as { brokers: { name: string; type: string; markets: string; fee: string; fractional: boolean; highlight: string }[] }).brokers;
+    const brokerLines = brokers.map((b) => `${b.name} (${b.type}${b.fractional ? "·เศษหุ้นได้" : ""}) — ${b.markets} · ค่าธรรมเนียม ${b.fee} — ${b.highlight}`).join("\n");
     lines.push(
-      "หุ้นสหรัฐฯ: ซื้อได้ใน Dime (เศษหุ้นเริ่ม 50฿ ค่าธรรมเนียม ~0.15%) หรือ InnovestX / Webull",
-      "หุ้นไทย: โบรกเกอร์ไทยที่มีบัญชี SET ทุกที่",
-      "ฮ่องกง/ญี่ปุ่น: InnovestX หรือโบรกต่างประเทศ · ตลาดอื่นทั่วโลก: IBKR",
-      "ดัชนี/ทอง/น้ำมัน: ซื้อตรงไม่ได้ ดูเป็นสัญญาณ — ถ้าอยากถือทองดู ETF อย่าง GLD"
+      `[ช่องทางซื้อหุ้นต่างประเทศสำหรับคนไทย — ทั้งหมด ${brokers.length} ช่องทาง (ค่าธรรมเนียมโดยประมาณ ก.ย. 2026)]`,
+      brokerLines,
+      "หุ้นไทย: โบรกเกอร์ไทยที่มีบัญชี SET ทุกที่ · ดัชนี/ทอง/น้ำมัน: ซื้อตรงไม่ได้ ดูเป็นสัญญาณ (อยากถือทองดู ETF อย่าง GLD)"
     );
   }
   return {
-    packet: `[ช่องทางซื้อสำหรับคนไทย — ข้อมูล ณ ก.ย. 2026]\n${lines.join("\n")}`,
+    packet: `[ช่องทางซื้อสำหรับคนไทย]\n${lines.join("\n")}`,
     demo: `**🛒 ช่องทางซื้อ**\n${lines.map((l) => `- ${l}`).join("\n")}`,
   };
 }

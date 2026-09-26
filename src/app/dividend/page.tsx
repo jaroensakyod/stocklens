@@ -3,6 +3,11 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import type { MonthlyDivRow } from "@/lib/monthlyDividends";
+import brokersJson from "@/data/brokers.json";
+
+const BROKERS = (brokersJson as {
+  brokers: { name: string; type: string; markets: string; fee: string; fractional: boolean; minNote: string; highlight: string; note: string }[];
+}).brokers;
 
 // 📅 หุ้นปันผลรายเดือน + ตัววางแผนรายได้ปันผล — "สร้างเงินเดือนเสริมจากปันผลทุกเดือน"
 // หุ้นไทยจ่ายสูงสุดปีละ 2 ครั้ง — ตัวจ่าย "เดือนละครั้ง" อยู่ตลาดสหรัฐฯ (ซื้อผ่าน Dime/โบรกต่างประเทศได้)
@@ -18,6 +23,9 @@ const baht = (n: number) => n.toLocaleString("th-TH", { maximumFractionDigits: 0
 export default function DividendPage() {
   const [rows, setRows] = useState<MonthlyDivRow[] | null>(null);
   const [asOf, setAsOf] = useState("");
+  const [riskFilter, setRiskFilter] = useState<"all" | "ต่ำ" | "กลาง" | "สูง">("all");
+
+  const filtered = useMemo(() => (rows ?? []).filter((r) => riskFilter === "all" || r.risk === riskFilter), [rows, riskFilter]);
 
   useEffect(() => {
     fetch("/api/monthly-dividends")
@@ -77,12 +85,25 @@ export default function DividendPage() {
 
       {/* ตารางหุ้นจ่ายรายเดือน */}
       <section>
-        <h2 className="text-sm font-bold text-zinc-400 mb-3">1️⃣ หุ้น/ETF ที่จ่ายปันผลรายเดือน (เรียงจากเสี่ยงน้อย → หวานเสี่ยงสูง)</h2>
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+          <h2 className="text-sm font-bold text-zinc-400">1️⃣ หุ้น/ETF ที่จ่ายปันผลรายเดือน — {rows?.length ?? "…"} ตัว (เรียงจากเสี่ยงน้อย → หวานเสี่ยงสูง)</h2>
+          <div className="flex gap-1.5">
+            {(["all", "ต่ำ", "กลาง", "สูง"] as const).map((f) => (
+              <button
+                key={f}
+                onClick={() => setRiskFilter(f)}
+                className={`chip ${riskFilter === f ? "bg-accent text-zinc-950" : "bg-base-800 text-zinc-400 border border-base-700"} text-[11px]`}
+              >
+                {f === "all" ? "ทั้งหมด" : f}
+              </button>
+            ))}
+          </div>
+        </div>
         <div className="card overflow-x-auto">
-          <table className="w-full text-sm min-w-[720px]">
+          <table className="w-full text-sm min-w-[760px]">
             <thead>
               <tr className="text-left text-[11px] text-zinc-500 border-b border-base-700">
-                <th className="py-2 px-3">ตัวจ่าย + ทำไมต้องรู้จัก</th>
+                <th className="py-2 px-3">ตัวจ่าย + ข้อมูลปันผลจริง</th>
                 <th className="py-2 px-3">ประเภท</th>
                 <th className="py-2 px-3 text-right">Yield/ปี</th>
                 <th className="py-2 px-3 text-right">ราคา/หุ้น</th>
@@ -91,12 +112,25 @@ export default function DividendPage() {
               </tr>
             </thead>
             <tbody>
-              {(rows ?? []).map((r) => (
+              {filtered.map((r) => (
                 <tr key={r.symbol} className="border-b border-base-700/50 align-top">
                   <td className="py-2.5 px-3">
                     <Link href={`/stock/${r.symbol}`} className="font-semibold text-zinc-100 hover:text-accent">{r.symbol}</Link>
                     <span className="text-zinc-500 text-xs ml-2">{r.name}</span>
+                    {r.mcapB != null && <span className="text-[10px] text-zinc-600 ml-1 num">· mcap ${r.mcapB}B</span>}
                     <div className="text-[11px] text-zinc-400 mt-1 max-w-md leading-relaxed">{r.note}</div>
+                    {r.payCount12m != null && (
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        <span className={`chip text-[10px] ${r.payCount12m >= 11 ? "bg-emerald-500/10 text-emerald-400" : "bg-amber-500/10 text-amber-400"}`}>
+                          {r.payCount12m >= 11 ? `✓ จ่าย ${r.payCount12m} ครั้งใน 12 เดือน` : `⚠ จ่ายจริงแค่ ${r.payCount12m} ครั้ง/ปี`}
+                        </span>
+                        {r.lastDivUsd != null && r.lastDivDate && (
+                          <span className="chip bg-base-800 text-zinc-500 text-[10px] num">
+                            ล่าสุด ${r.lastDivUsd.toFixed(3)}/หุ้น · {new Date(r.lastDivDate).toLocaleDateString("th-TH", { day: "numeric", month: "short" })}
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </td>
                   <td className="py-2.5 px-3 text-xs text-zinc-400">{r.type}</td>
                   <td className="py-2.5 px-3 text-right">
@@ -117,18 +151,47 @@ export default function DividendPage() {
               ))}
               {!rows && (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-zinc-500 text-sm animate-pulse">กำลังดึงราคา/yield ล่าสุด…</td>
+                  <td colSpan={6} className="py-8 text-center text-zinc-500 text-sm animate-pulse">กำลังดึงราคา/ปันผล 12 เดือนล่าสุด…</td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
-        <p className="text-[11px] text-zinc-500 mt-2">*รายได้ปันผลสุทธิต่อเดือน เมื่อลงเงิน ฿100,000 — คิดภาษี 15% ที่สหรัฐฯ หัก ณ ที่จ่ายแล้ว (ยื่น W-8BEN กับโบรกได้) · yield สดจาก TradingView (ที่ไม่มีข้อมูลสดใช้ค่าโดยประมาณ) · yield/ความถี่การจ่ายเปลี่ยนได้ ตรวจอีกครั้งก่อนซื้อ</p>
+        <p className="text-[11px] text-zinc-500 mt-2">
+          *รายได้ปันผลสุทธิต่อเดือน เมื่อลงเงิน ฿100,000 — คิดภาษี 15% ที่สหรัฐฯ หัก ณ ที่จ่ายแล้ว (ยื่น W-8BEN กับโบรกได้) · yield คำนวณจากปันผลที่จ่ายจริง 12 เดือน ÷ ราคาปัจจุบัน (ไม่ใช่ตัวเลขโฆษณา) · yield/ความถี่เปลี่ยนได้ ตรวจอีกครั้งก่อนซื้อ · ซื้อทุกตัวในตารางผ่านโบรกด้านล่างนี้ได้ทั้งหมด
+        </p>
+      </section>
+
+      {/* โบรกไทยที่ซื้อหุ้น US ได้ */}
+      <section>
+        <h2 className="text-sm font-bold text-zinc-400 mb-3">2️⃣ คนไทยซื้อผ่านไหนได้บ้าง — {BROKERS.length} ช่องทาง (แอปไทย + โบรกไทย + ต่างประเทศ)</h2>
+        <div className="grid md:grid-cols-2 gap-3">
+          {BROKERS.map((b) => (
+            <div key={b.name} className="card p-4">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="font-bold text-zinc-100">{b.name}</span>
+                <span className="chip bg-base-800 text-zinc-400 text-[10px]">{b.type}</span>
+                {b.fractional && <span className="chip bg-emerald-500/10 text-emerald-400 text-[10px]">เศษหุ้นได้</span>}
+              </div>
+              <div className="text-[11px] text-zinc-500 mt-1">{b.markets}</div>
+              <div className="text-xs mt-2">
+                <span className="text-zinc-400">ค่าธรรมเนียม:</span> <span className="num text-accent-soft">{b.fee}</span>
+                <span className="text-zinc-600 mx-1">·</span>
+                <span className="text-zinc-500">{b.minNote}</span>
+              </div>
+              <div className="text-xs text-zinc-300 mt-1.5 leading-relaxed">⭐ {b.highlight}</div>
+              <div className="text-[11px] text-zinc-500 mt-1 leading-relaxed">{b.note}</div>
+            </div>
+          ))}
+        </div>
+        <p className="text-[11px] text-zinc-500 mt-2">
+          ⚠️ ค่าธรรมเนียม/เงื่อนไขเป็นค่าโดยประมาณ (ก.ย. 2026) — แต่ละเจ้าปรับได้ตลอด ตรวจอีกครั้งกับทางโบรกก่อนเปิดบัญชี · StockLens ไม่มีส่วนแบ่งจากช่องทางใดๆ
+        </p>
       </section>
 
       {/* ตัววางแผน โหมด A: เป้า → ทุน */}
       <section>
-        <h2 className="text-sm font-bold text-zinc-400 mb-3">2️⃣ วางแผนแบบที่ 1 — "อยากได้ปันผลเดือนละเท่าไหร่ ต้องมีทุนเท่าไหร่?"</h2>
+        <h2 className="text-sm font-bold text-zinc-400 mb-3">3️⃣ วางแผนแบบที่ 1 — "อยากได้ปันผลเดือนละเท่าไหร่ ต้องมีทุนเท่าไหร่?"</h2>
         <div className="card p-4">
           <div className="flex flex-wrap items-center gap-2 text-xs">
             <span className="text-zinc-400">อยากได้รายได้สุทธิ:</span>
@@ -162,7 +225,7 @@ export default function DividendPage() {
 
       {/* ตัววางแผน โหมด B: สะสมจนถึงเป้า */}
       <section>
-        <h2 className="text-sm font-bold text-zinc-400 mb-3">3️⃣ วางแผนแบบที่ 2 — "เริ่มวันนี้ จะถึงเป้าในกี่ปี" (สะสม + ทบต้น)</h2>
+        <h2 className="text-sm font-bold text-zinc-400 mb-3">4️⃣ วางแผนแบบที่ 2 — "เริ่มวันนี้ จะถึงเป้าในกี่ปี" (สะสม + ทบต้น)</h2>
         <div className="card p-4 space-y-3">
           <div className="flex flex-wrap gap-x-5 gap-y-2 text-xs items-center">
             <label className="flex items-center gap-2">
