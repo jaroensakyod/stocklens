@@ -3,9 +3,10 @@
 import { useAuth } from "@/lib/authContext";
 
 // 🛡️ ลายน้ำรายสมาชิกทั่วทั้งหน้าจอ — กัน cap จอส่งต่อ: ทุกภาพที่แชร์จะจำชื่อ+รหัส+วันหมดอายุของเจ้าของ
+// (ยกเว้นโหมดแอดมิน — เจ้าของเว็บล็อกอินด้วยรหัส /admin เพื่ออัดวิดีโอ/แคปหน้าจอโปรโมท)
 export default function UserWatermark() {
-  const { member } = useAuth();
-  if (!member) return null;
+  const { member, admin, loading } = useAuth();
+  if (!member || admin || loading) return null;
   const label = `StockLens · ${member.name} · ${member.code} · ถึง ${member.paidUntil} · ห้ามแชร์`;
   return (
     <div

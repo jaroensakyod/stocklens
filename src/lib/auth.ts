@@ -6,6 +6,7 @@ import { readMembers } from "./admin";
 import type { Member } from "./types";
 
 export const AUTH_COOKIE = "sl_token";
+export const ADMIN_COOKIE = "sl_admin";
 const SECRET = process.env.ADMIN_CODE || "stocklens-default-secret";
 const MAX_AGE = 30 * 24 * 3600; // 30 วัน
 
@@ -15,6 +16,7 @@ export interface SessionMember {
   tier: "starter" | "pro";
   paidUntil: string;
   code: string;
+  isAdmin?: boolean;
 }
 
 /** ออกรหัสสมาชิกใหม่ เช่น SL-7K2M9Q */
@@ -51,6 +53,26 @@ export function cookieOptions() {
   return { httpOnly: true, sameSite: "lax" as const, path: "/", maxAge: MAX_AGE };
 }
 
+// ---------- โหมดแอดมิน: session แยกจากสมาชิก (ใช้รหัสเดียวกับหน้า /admin) ----------
+// ไว้ให้เจ้าของเว็บเข้าใช้หน้าต่างๆ แบบไม่ติดลายน้ำรายสมาชิก (อัดวิดีโอ/แคปภาพโปรโมท)
+export function createAdminToken(): string {
+  const payload = Buffer.from(JSON.stringify({ admin: true, exp: Date.now() + MAX_AGE * 1000 })).toString("base64url");
+  return `${payload}.${sign(payload)}`;
+}
+
+export function verifyAdminToken(token: string | undefined): boolean {
+  if (!token) return false;
+  const [payload, sig] = token.split(".");
+  if (!payload || !sig) return false;
+  if (sign(payload) !== sig) return false;
+  try {
+    const j = JSON.parse(Buffer.from(payload, "base64url").toString()) as { admin?: boolean; exp?: number };
+    return j.admin === true && typeof j.exp === "number" && j.exp > Date.now();
+  } catch {
+    return false;
+  }
+}
+
 /** login ด้วยรหัสสมาชิก: ตรวจจาก members.json + ยังไม่หมดอายุ */
 export async function loginByCode(code: string): Promise<SessionMember | null> {
   const normalized = code.trim().toUpperCase();
@@ -59,7 +81,7 @@ export async function loginByCode(code: string): Promise<SessionMember | null> {
   const m: Member | undefined = members.find((x) => (x.accessCode ?? "").toUpperCase() === normalized);
   if (!m) return null;
   if (new Date(m.paidUntil).getTime() < Date.now() - 24 * 3600e3) return null; // หมดอายุ
-  return { id: m.id, name: m.name, tier: m.tier, paidUntil: m.paidUntil, code: normalized };
+  return { id: m.id, name: m.name, tier: m.tier, paidUntil: m.paidUntil, code: normalized, ...(m.isAdmin ? { isAdmin: true } : {}) };
 }
 
 // ---------- ตรวจสิทธิ์จาก request (ใช้ใน API routes) ----------
