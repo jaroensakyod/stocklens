@@ -2,7 +2,8 @@
 import themesJson from "@/data/radar-themes.json";
 import impactJson from "@/data/impact-map.json";
 import examplesJson from "@/data/examples.json";
-import { getQuotes } from "./yahoo";
+import { getQuotes, getChart } from "./yahoo";
+import { getThemeNewsMap, newsHeat, type ThemeNews } from "./themeNews";
 import type { ChainResult, EventAnalysis, ImpactNode, Quote, RadarTheme } from "./types";
 
 export const THEMES = (themesJson as { themes: RadarTheme[] }).themes;
@@ -16,18 +17,56 @@ export function getNode(id: string) {
   return IMPACT_NODES.find((n) => n.id === id);
 }
 
-/** ความร้อนของแต่ละธีม: เฉลี่ย |%เปลี่ยนแปลง| ของตัวชี้วัดที่ติดตาม */
+/**
+ * % เปลี่ยนแปลง 5 วันของตัวชี้วัด — ใช้แทน "วันเดียว" ในสูตร heat เพื่อลด noise
+ * (VIX เด้งวันเดียวจาก noise ไม่ควรทำให้ธีม credit ร้อน 100 — แนวโน้ม 5 วันสะท้อนเหตุการณ์จริงกว่า)
+ * แคช 30 นาที: computeThemeHeat ถูกเรียกจากหลายที่ (radar/advisor/chat) กันยิงกราฟซ้ำ
+ */
+let chg5dCache: { at: number; map: Record<string, number> } | null = null;
+async function changes5d(symbols: string[]): Promise<Record<string, number>> {
+  const cache = chg5dCache;
+  const cacheFresh = cache && Date.now() - cache.at < 30 * 60_000;
+  if (cacheFresh && symbols.every((s) => s in cache.map)) return cache.map;
+  const map: Record<string, number> = { ...(cache?.map ?? {}) };
+  const toFetch = symbols.filter((s) => !(cacheFresh && s in map));
+  await Promise.all(
+    toFetch.map(async (s) => {
+      try {
+        const c = await getChart(s, "5D");
+        if (c.length > 2) {
+          const first = c.find((k) => isFinite(k.close) && k.close > 0);
+          const last = c[c.length - 1];
+          if (first && isFinite(last.close) && first.close > 0) map[s] = (last.close / first.close - 1) * 100;
+        }
+      } catch {
+        // ตัวไหนไม่มีกราฟ (เช่น index แปลก) ข้ามไปใช้เฉพาะ quote วันเดียว
+      }
+    })
+  );
+  chg5dCache = { at: Date.now(), map };
+  return map;
+}
+
+/**
+ * ความร้อนของธีม (สูตรใหม่): ข่าวจริง 24 ชม. 60% + แนวโน้มราคา 5 วัน 40%
+ * ทำไม: สูตรเดิมดูราคาวันเดียวเท่านั้น ธีมที่ watch แค่ 1 ตัว (เช่น credit = VIX) จะ heat พุ่ง 100
+ * จากแค่ noise รายวันทั้งที่ไม่มีเหตุการณ์จริง — ปนข่าวเข้ามา + ดูแนวโน้ม 5 วัน = สะท้อนเหตุการณ์จริง
+ */
 export async function computeThemeHeat() {
   const all = [...new Set(THEMES.flatMap((t) => t.watch))];
-  const quotes = await getQuotes(all);
+  const [quotes, newsMap, chg5] = await Promise.all([getQuotes(all), getThemeNewsMap(), changes5d(all)]);
   return THEMES.map((t) => {
     const qs = t.watch.map((w) => quotes[w]).filter((q): q is Quote => !!q && isFinite(q.price));
-    const moves = qs.map((q) => q.changePct);
-    const heat = moves.length
-      ? Math.round(Math.min(100, (moves.reduce((a, b) => a + Math.abs(b), 0) / moves.length) * 14 + Math.abs(Math.max(...moves.map(Math.abs), 0)) * 6))
+    // แนวโน้ม 5 วันของตัวชี้วัดธีมนี้ (fallback เป็น % วันนี้ถ้ายังไม่มีกราฟ)
+    const moves = t.watch.map((w) => chg5[w] ?? quotes[w]?.changePct).filter((m): m is number => m !== undefined && isFinite(m));
+    const priceHeat = moves.length
+      ? Math.min(100, (moves.reduce((a, b) => a + Math.abs(b), 0) / moves.length) * 5 + Math.abs(Math.max(...moves.map(Math.abs), 0)) * 2.5)
       : 0;
+    const nHeat = newsHeat(newsMap[t.id]);
+    const heat = Math.round(Math.min(100, priceHeat * 0.4 + nHeat * 0.6));
     const up = moves.length ? moves.reduce((a, b) => a + b, 0) / moves.length : 0;
-    return { theme: t, heat, avgChange: up, quotes: qs };
+    const news = newsMap[t.id] as ThemeNews | undefined;
+    return { theme: t, heat, avgChange: up, quotes: qs, newsCount: news?.count24h ?? 0, newsTop: news?.top ?? [] };
   }).sort((a, b) => b.heat - a.heat);
 }
 

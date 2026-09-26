@@ -11,6 +11,8 @@ export async function GET() {
       id: h.theme.id, name: h.theme.name, emoji: h.theme.emoji, desc: h.theme.desc,
       heat: h.heat, avgChange: h.avgChange,
       quotes: h.quotes.map((q) => ({ symbol: q.symbol, name: q.name, price: q.price, changePct: q.changePct })),
+      newsCount: h.newsCount,
+      newsTop: h.newsTop,
     })),
   });
 }

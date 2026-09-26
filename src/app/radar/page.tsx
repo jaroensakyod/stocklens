@@ -6,7 +6,7 @@ import ImpactGraph from "@/components/ImpactGraph";
 import type { EventAnalysis } from "@/lib/types";
 
 interface RadarData {
-  themes: { id: string; name: string; emoji: string; desc: string; heat: number; avgChange: number; quotes: { symbol: string; name: string; price: number; changePct: number }[] }[];
+  themes: { id: string; name: string; emoji: string; desc: string; heat: number; avgChange: number; quotes: { symbol: string; name: string; price: number; changePct: number }[]; newsCount?: number; newsTop?: { title: string; source: string; link: string; time: number }[] }[];
 }
 
 const EXAMPLES = [
@@ -131,6 +131,7 @@ export default function RadarPage() {
                   <div className="text-right shrink-0">
                     <div className={`num text-lg font-bold ${t.heat >= 60 ? "text-down" : t.heat >= 35 ? "text-accent" : "text-zinc-400"}`}>{t.heat}</div>
                     <div className="text-[10px] text-zinc-600">ความร้อน /100</div>
+                    {!!t.newsCount && <div className="text-[10px] text-zinc-500 num">📰 {t.newsCount} ข่าว/24 ชม.</div>}
                   </div>
                 </div>
                 <div className="mt-3 flex flex-wrap gap-1.5">
@@ -140,6 +141,15 @@ export default function RadarPage() {
                     </span>
                   ))}
                 </div>
+                {!!t.newsTop?.length && (
+                  <div className="mt-2.5 space-y-1 border-t border-base-700/40 pt-2">
+                    {t.newsTop.slice(0, 2).map((n, i) => (
+                      <a key={i} href={n.link} target="_blank" rel="noopener noreferrer" className="block text-[11px] leading-snug text-zinc-400 hover:text-accent-soft line-clamp-2" title={n.title}>
+                        📰 {n.title} <span className="text-zinc-600">· {n.source}</span>
+                      </a>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
           </div>

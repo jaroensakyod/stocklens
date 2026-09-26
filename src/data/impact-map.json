@@ -98,6 +98,90 @@
           "direction": "negative",
           "strength": "medium",
           "reason": "อินดอรามา — ต้นทุนปิโตรเคมีสัมพันธ์กับราคาน้ำมัน"
+        },
+        {
+          "ticker": "TTE",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "อุตสาหกรรม \"Integrated Oil\" จับคู่อัตโนมัติจากชื่ออุตสาหกรรม — รีวิวความถูกต้องได้เสมอ"
+        },
+        {
+          "ticker": "CNQ",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "อุตสาหกรรม \"Integrated Oil\" จับคู่อัตโนมัติจากชื่ออุตสาหกรรม — รีวิวความถูกต้องได้เสมอ"
+        },
+        {
+          "ticker": "SU",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "อุตสาหกรรม \"Integrated Oil\" จับคู่อัตโนมัติจากชื่ออุตสาหกรรม — รีวิวความถูกต้องได้เสมอ"
+        },
+        {
+          "ticker": "EOG",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "อุตสาหกรรม \"Integrated Oil\" จับคู่อัตโนมัติจากชื่ออุตสาหกรรม — รีวิวความถูกต้องได้เสมอ"
+        },
+        {
+          "ticker": "IMO",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "อุตสาหกรรม \"Integrated Oil\" จับคู่อัตโนมัติจากชื่ออุตสาหกรรม — รีวิวความถูกต้องได้เสมอ"
+        },
+        {
+          "ticker": "VLO",
+          "market": "US",
+          "direction": "negative",
+          "strength": "medium",
+          "reason": "อุตสาหกรรม \"Oil Refining/Marketing\" จับคู่อัตโนมัติจากชื่ออุตสาหกรรม — รีวิวความถูกต้องได้เสมอ"
+        },
+        {
+          "ticker": "MPC",
+          "market": "US",
+          "direction": "negative",
+          "strength": "medium",
+          "reason": "อุตสาหกรรม \"Oil Refining/Marketing\" จับคู่อัตโนมัติจากชื่ออุตสาหกรรม — รีวิวความถูกต้องได้เสมอ"
+        },
+        {
+          "ticker": "PSX",
+          "market": "US",
+          "direction": "negative",
+          "strength": "medium",
+          "reason": "อุตสาหกรรม \"Oil Refining/Marketing\" จับคู่อัตโนมัติจากชื่ออุตสาหกรรม — รีวิวความถูกต้องได้เสมอ"
+        },
+        {
+          "ticker": "BANPU.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "พลังงานถ่านหิน-ก๊าซ ราคาพลังงานโลกแพง = รายได้ขึ้นตรง"
+        },
+        {
+          "ticker": "TOP.BK",
+          "market": "TH",
+          "direction": "negative",
+          "strength": "medium",
+          "reason": "รีไฟเนอรี่ — น้ำมันดิบแพง = ต้นทุนดิบสูงตาม"
+        },
+        {
+          "ticker": "SPRC.BK",
+          "market": "TH",
+          "direction": "negative",
+          "strength": "medium",
+          "reason": "โรงกลั่นน้ำมัน ต้นทุนดิบแพงขึ้นเมื่อราคาดิบพุ่ง"
+        },
+        {
+          "ticker": "AAV.BK",
+          "market": "TH",
+          "direction": "negative",
+          "strength": "medium",
+          "reason": "สายการบินต้นทุนเชื้อเพลิง ~1 ใน 3 ของต้นทุน โดนตรงที่สุดกลุ่มบินไทย"
         }
       ]
     },
@@ -142,6 +226,27 @@
           "direction": "negative",
           "strength": "medium",
           "reason": "ผลิตปุ๋ยแอมโมเนียจากก๊าซ — ต้นทุนแพงขึ้น (แต่ราคาปุ๋ยมักตามขึ้นด้วย)"
+        },
+        {
+          "ticker": "TRGP",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "อุตสาหกรรม \"Gas Distributors\" จับคู่อัตโนมัติจากชื่ออุตสาหกรรม — รีวิวความถูกต้องได้เสมอ"
+        },
+        {
+          "ticker": "SRE",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "อุตสาหกรรม \"Gas Distributors\" จับคู่อัตโนมัติจากชื่ออุตสาหกรรม — รีวิวความถูกต้องได้เสมอ"
+        },
+        {
+          "ticker": "CQP",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "อุตสาหกรรม \"Gas Distributors\" จับคู่อัตโนมัติจากชื่ออุตสาหกรรม — รีวิวความถูกต้องได้เสมอ"
         }
       ]
     },
@@ -172,6 +277,34 @@
           "direction": "positive",
           "strength": "medium",
           "reason": "เหมืองทองคุณภาพสูง ต้นทุนต่ำ"
+        },
+        {
+          "ticker": "B",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "อุตสาหกรรม \"Precious Metals\" จับคู่อัตโนมัติจากชื่ออุตสาหกรรม — รีวิวความถูกต้องได้เสมอ"
+        },
+        {
+          "ticker": "WPM",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "อุตสาหกรรม \"Precious Metals\" จับคู่อัตโนมัติจากชื่ออุตสาหกรรม — รีวิวความถูกต้องได้เสมอ"
+        },
+        {
+          "ticker": "AU",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "อุตสาหกรรม \"Precious Metals\" จับคู่อัตโนมัติจากชื่ออุตสาหกรรม — รีวิวความถูกต้องได้เสมอ"
+        },
+        {
+          "ticker": "FNV",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "อุตสาหกรรม \"Precious Metals\" จับคู่อัตโนมัติจากชื่ออุตสาหกรรม — รีวิวความถูกต้องได้เสมอ"
         }
       ]
     },
@@ -516,6 +649,34 @@
           "direction": "positive",
           "strength": "medium",
           "reason": "Leidos — ไอทีกลาโหม/AI สัญญาราชการ"
+        },
+        {
+          "ticker": "GE",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "อุตสาหกรรม \"Aerospace & Defense\" จับคู่อัตโนมัติจากชื่ออุตสาหกรรม — รีวิวความถูกต้องได้เสมอ"
+        },
+        {
+          "ticker": "BA",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "อุตสาหกรรม \"Aerospace & Defense\" จับคู่อัตโนมัติจากชื่ออุตสาหกรรม — รีวิวความถูกต้องได้เสมอ"
+        },
+        {
+          "ticker": "TDG",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "อุตสาหกรรม \"Aerospace & Defense\" จับคู่อัตโนมัติจากชื่ออุตสาหกรรม — รีวิวความถูกต้องได้เสมอ"
+        },
+        {
+          "ticker": "HONA",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "อุตสาหกรรม \"Aerospace & Defense\" จับคู่อัตโนมัติจากชื่ออุตสาหกรรม — รีวิวความถูกต้องได้เสมอ"
         }
       ]
     },
@@ -703,6 +864,20 @@
           "direction": "negative",
           "strength": "medium",
           "reason": "สัดส่วนลูกค้าจีนสูง — สงครามการค้ากระทบตรง"
+        },
+        {
+          "ticker": "CPF.BK",
+          "market": "TH",
+          "direction": "negative",
+          "strength": "medium",
+          "reason": "ส่งออกอาหาร/กิจการในจีนขนาดใหญ่ — เศรษฐกิจจีนอ่อนแรงกระทบตรง"
+        },
+        {
+          "ticker": "SCC.BK",
+          "market": "TH",
+          "direction": "negative",
+          "strength": "medium",
+          "reason": "วัสดุ-ปิโตรเคมีผูกวัฏจักรเศรษฐกิจจีนเป็นหลัก"
         }
       ]
     },
@@ -733,6 +908,41 @@
           "direction": "negative",
           "strength": "weak",
           "reason": "โรงงานในไต้หวันเสี่ยงภูมิรัฐศาสตร์ + ลูกค้าจีน"
+        },
+        {
+          "ticker": "AVGO",
+          "market": "US",
+          "direction": "negative",
+          "strength": "medium",
+          "reason": "อุตสาหกรรม \"Semiconductors\" จับคู่อัตโนมัติจากชื่ออุตสาหกรรม — รีวิวความถูกต้องได้เสมอ"
+        },
+        {
+          "ticker": "MU",
+          "market": "US",
+          "direction": "negative",
+          "strength": "medium",
+          "reason": "อุตสาหกรรม \"Semiconductors\" จับคู่อัตโนมัติจากชื่ออุตสาหกรรม — รีวิวความถูกต้องได้เสมอ"
+        },
+        {
+          "ticker": "AMD",
+          "market": "US",
+          "direction": "negative",
+          "strength": "medium",
+          "reason": "อุตสาหกรรม \"Semiconductors\" จับคู่อัตโนมัติจากชื่ออุตสาหกรรม — รีวิวความถูกต้องได้เสมอ"
+        },
+        {
+          "ticker": "INTC",
+          "market": "US",
+          "direction": "negative",
+          "strength": "medium",
+          "reason": "อุตสาหกรรม \"Semiconductors\" จับคู่อัตโนมัติจากชื่ออุตสาหกรรม — รีวิวความถูกต้องได้เสมอ"
+        },
+        {
+          "ticker": "TXN",
+          "market": "US",
+          "direction": "negative",
+          "strength": "medium",
+          "reason": "อุตสาหกรรม \"Semiconductors\" จับคู่อัตโนมัติจากชื่ออุตสาหกรรม — รีวิวความถูกต้องได้เสมอ"
         }
       ]
     },
@@ -800,6 +1010,27 @@
           "direction": "positive",
           "strength": "medium",
           "reason": "NextEra — ผู้ผลิตไฟลม/โซลาร์รายใหญ่สุด"
+        },
+        {
+          "ticker": "GPSC.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "ผู้ผลิตไฟพลังงานสะอาด/หลากหลาย ได้ประโยชน์จากนโยบายสนับสนุน RE"
+        },
+        {
+          "ticker": "SUPER.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "โซลาร์รูฟ/ระบบไฟฟ้าพลังแสงอาทิตย์เต็มตัว"
+        },
+        {
+          "ticker": "EA.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "พลังงานลม/แบตเตอรี่/EV — เดิมพันนโยบายพลังงานสะอาด"
         }
       ]
     },
@@ -1001,6 +1232,20 @@
           "direction": "positive",
           "strength": "medium",
           "reason": "ขนส่งทางทะเลสหรัฐฯ ได้ราคาขนส่งดี"
+        },
+        {
+          "ticker": "RCL.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "สายเดินเรือระบบกำปั่น-สายบรรจุภัณฑ์เอเชีย ค่าระวางขึ้น = รายได้ตาม"
+        },
+        {
+          "ticker": "PSL.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "ธุรกิจเรือ+ให้เช่าเรือบรรจุภัณฑ์ ผูกอัตราค่าระวางโลก"
         }
       ]
     },
@@ -1082,6 +1327,34 @@
           "direction": "positive",
           "strength": "strong",
           "reason": "พันธบัตรยาวบวกตรงเมื่อ yield ลง"
+        },
+        {
+          "ticker": "AP.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "เด็กเลอร์อสังหาฯ — ดอกเบี้ยลด = ลูกบ้านกู้ง่าย ยอดขายโครงการดีขึ้น"
+        },
+        {
+          "ticker": "LH.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "เด็กเลอร์อสังหาฯรายใหญ่ ผู้รับประโยชน์ตรงจากที่ดอกเบี้ยกู้ต่ำลง"
+        },
+        {
+          "ticker": "KBANK.BK",
+          "market": "TH",
+          "direction": "negative",
+          "strength": "medium",
+          "reason": "ธนาคาร — ดอกเบี้ยเงินให้กู้ลงเร็วกว่าต้นทุนเงินฝาก กด NIM"
+        },
+        {
+          "ticker": "KTB.BK",
+          "market": "TH",
+          "direction": "negative",
+          "strength": "medium",
+          "reason": "ธนาคารรัฐ กำไรจากส่วนต่างดอกเบี้ยหดเมื่อทยอยลดอัตรา"
         }
       ]
     },
@@ -1267,6 +1540,57 @@
           "direction": "negative",
           "strength": "medium",
           "reason": "ETF เซมิโดยรวมกดดันช่วง reprice"
+        }
+      ]
+    },
+    {
+      "id": "thaipol",
+      "type": "macro",
+      "name": "การเมืองไทย",
+      "yahoo": "THB=X",
+      "upReason": "การเมืองไทยร้อนแรง (ชุมนุม/เลือกตั้ง/อภิปรายไม่ไว้วางใจ) มักกด sentiment ตลาดไทยและเงินบาท — แต่ถ้าจบด้วยงบใหญ่/มาตรการกระตุ้น กลุ่มก่อสร้าง-โครงสร้างพื้นฐานรัฐจะได้ประโยชน์ตามหลัง",
+      "stocks": [
+        {
+          "ticker": "CK.BK",
+          "market": "TH",
+          "direction": "negative",
+          "strength": "medium",
+          "reason": "โครงสร้างพื้นฐานรัฐ — ความไม่แน่นอนทำให้งบ/โครงการล่าช้า แต่ดีดกลับแรงเมื่อมีมาตรการกระตุ้น"
+        },
+        {
+          "ticker": "STEC.BK",
+          "market": "TH",
+          "direction": "negative",
+          "strength": "medium",
+          "reason": "ผู้รับเหมาก่อสร้างภาครัฐ ผูกกับรอบงบประมาณและเสถียรภาพรัฐบาล"
+        },
+        {
+          "ticker": "ITD.BK",
+          "market": "TH",
+          "direction": "negative",
+          "strength": "medium",
+          "reason": "โครงการขนาดใหญ่ภาครัฐล่าช้าเมื่อการเมืองต้องค้าง แต่ผู้รับประโยชน์หลักถ้าคลี่คลายด้วยงบใหญ่"
+        },
+        {
+          "ticker": "KBANK.BK",
+          "market": "TH",
+          "direction": "negative",
+          "strength": "medium",
+          "reason": "ธนาคารใหญ่อ่อนไหวต่อเงินไหลออก/ความเสี่ยงเศรษฐกิจไทยจากความไม่แน่นอน"
+        },
+        {
+          "ticker": "BBL.BK",
+          "market": "TH",
+          "direction": "negative",
+          "strength": "medium",
+          "reason": "ธนาคารระบบ — ส่งผลต่อ sentiment ตลาดทุนไทยโดยรวม"
+        },
+        {
+          "ticker": "AOT.BK",
+          "market": "TH",
+          "direction": "negative",
+          "strength": "medium",
+          "reason": "หุ้นแรงส่งของ SET — โดนกดตามดัชนีทุกครั้งที่การเมืองตึงเครียด"
         }
       ]
     }
