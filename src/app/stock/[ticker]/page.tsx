@@ -4,6 +4,7 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import PriceChart from "@/components/PriceChart";
 import FactorRadar from "@/components/FactorRadar";
+import FinancialsPanel from "@/components/FinancialsPanel";
 import AIAnalysis from "@/components/AIAnalysis";
 import BrokerBadge from "@/components/BrokerBadge";
 import BudgetCalc from "@/components/BudgetCalc";
@@ -189,6 +190,9 @@ export default function StockPage() {
             </div>
           )}
 
+          {/* งบการเงิน 4 ปี (คลัง kb — TTM ละเอียด + ประวัติรายปี + EDGAR) */}
+          <FinancialsPanel ticker={q.symbol} />
+
           {/* เทคนิค */}
           {t && (
             <div className="card p-5">
@@ -292,29 +296,6 @@ export default function StockPage() {
               ))}
             </dl>
           </div>
-
-          {/* งบการเงิน */}
-          {a.financials && Object.values(a.financials).some((v) => v !== undefined) && (
-            <div className="card p-5">
-              <h3 className="text-sm font-bold text-zinc-100 mb-3">💼 งบการเงิน (ล่าสุด)</h3>
-              <dl className="text-sm divide-y divide-base-700/50">
-                {[
-                  ["รายได้โต YoY", a.financials.revenueGrowth !== undefined ? (a.financials.revenueGrowth * 100).toFixed(1) + "%" : "—"],
-                  ["กำไรโต YoY", a.financials.earningsGrowth !== undefined ? (a.financials.earningsGrowth * 100).toFixed(1) + "%" : "—"],
-                  ["มาร์จิ้นสุทธิ", a.financials.profitMargins !== undefined ? (a.financials.profitMargins * 100).toFixed(1) + "%" : "—"],
-                  ["ROE", a.financials.returnOnEquity !== undefined ? (a.financials.returnOnEquity * 100).toFixed(1) + "%" : "—"],
-                  ["หนี้/ทุน", a.financials.debtToEquity !== undefined ? a.financials.debtToEquity.toFixed(0) + "%" : "—"],
-                  ["Current Ratio", a.financials.currentRatio !== undefined ? a.financials.currentRatio.toFixed(2) : "—"],
-                  ["FCF", a.financials.freeCashflow !== undefined ? formatBig(a.financials.freeCashflow) : "—"],
-                ].map(([k, v]) => (
-                  <div key={k as string} className="flex justify-between py-1.5">
-                    <dt className="text-zinc-500">{k}</dt>
-                    <dd className="num text-zinc-200">{v}</dd>
-                  </div>
-                ))}
-              </dl>
-            </div>
-          )}
 
           {isUsd && a.usdThb && <BudgetCalc priceUsd={q.price} usdThb={a.usdThb} currency={q.currency} />}
 

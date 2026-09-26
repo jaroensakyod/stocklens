@@ -16,6 +16,7 @@ import { getLongterm } from "./longterm";
 import { getStarterPortfolios } from "./starterPortfolio";
 import { getMonthlyDividends } from "./monthlyDividends";
 import { getModelPortfolio, liveNav } from "./modelPortfolio";
+import { kbFundamentals, kbMacro, fundTrendText, macroText } from "./kb";
 import { getValueScan } from "./valueScan";
 import { brokerFor, marketOpenHint, detectMarket, MARKET_LABEL } from "./markets";
 import { applyAdvisorRules } from "./advisorBacktest";
@@ -201,6 +202,9 @@ async function buildStockPacket(tickers: string[]): Promise<{ packet: string; de
       if (bits.length) lines.push(bits.join(" | "));
     }
     if (f) lines.push(`คะแนนปัจจัย: Valuation ${f.valuation} · Growth ${f.growth} · Profitability ${f.profitability} · Momentum ${f.momentum} · Health ${f.health} (รวม ${f.overall}/100)`);
+    // คลังความรู้: งบ 4 ปีจาก filings จริง (kb:*) — เพิ่มความแม่นเรื่องแนวโน้มระยะยาว
+    const kbFund = await kbFundamentals(sym).catch(() => null);
+    if (kbFund) lines.push(fundTrendText(kbFund));
     if (a.scenarios) {
       const sc = a.scenarios.scenarios.map((s) => `${s.label.split("—")[0].trim()} ${s.targetPrice.toFixed(2)} (${s.upsidePct >= 0 ? "+" : ""}${s.upsidePct.toFixed(0)}%)`).join(" · ");
       lines.push(`สถานการณ์12เดือน(สมมติ): ${sc} — คำนวณจาก EPSจริง×สมมติP/E`);
@@ -258,10 +262,11 @@ async function buildMarketPacket(): Promise<{ packet: string; demo: string }> {
 
   const heat = await computeThemeHeat();
   const themes = heat.slice(0, 3).map((h) => `${h.theme.emoji}${h.theme.name} ความร้อน${h.heat}`).join(", ");
+  const macro = await kbMacro().catch(() => null); // คลังความรู้ macro (kb:macro — ดอกเบี้ย/เงินเฟ้อ/ค่าเงิน ล่าสุด)
   const picksLine = picks ? picks.picks.slice(0, 3).map((p) => `${p.ticker} ${p.tagEmoji}${p.tag} (${p.reason})`).join(" · ") : "ไม่มีข้อมูล";
   const surgeLine = surge ? surge.rows.slice(0, 3).map((r) => `${r.ticker} +${r.changePct.toFixed(1)}% [${r.flags.join("/") || "ขยับแรง"}]`).join(" · ") : "ไม่มี";
 
-  const packet = `[ภาพรวมตลาดวันนี้ — ข้อมูลจริง]\nดัชนี: ${idxLine}\nขึ้นแรง (mcap>5B): ${gainers}\nลงแรง: ${losers}\nพรีมาร์เก็ตเด่น: ${pm || "ไม่มีข้อมูล"}\nธีม Radar ร้อนสุด: ${themes}\n🎯 Daily Picks วันนี้: ${picksLine}\n🚀 หุ้นซิ่งเด่น: ${surgeLine}\nข่าว 48 ชม.ล่าสุด: ${newsLine}`;
+  const packet = `[ภาพรวมตลาดวันนี้ — ข้อมูลจริง]\nดัชนี: ${idxLine}\n${macro ? macroText(macro) + "\n" : ""}ขึ้นแรง (mcap>5B): ${gainers}\nลงแรง: ${losers}\nพรีมาร์เก็ตเด่น: ${pm || "ไม่มีข้อมูล"}\nธีม Radar ร้อนสุด: ${themes}\n🎯 Daily Picks วันนี้: ${picksLine}\n🚀 หุ้นซิ่งเด่น: ${surgeLine}\nข่าว 48 ชม.ล่าสุด: ${newsLine}`;
   const demo = `**📊 ตลาดวันนี้ (ข้อมูลจริง ณ ตอนนี้)**\n- ดัชนี: ${idxLine}\n- 🚀 ขึ้นแรง: ${gainers}\n- 💀 ลงแรง: ${losers}${pm ? `\n- 🌅 พรีมาร์เก็ตเด่น: ${pm}` : ""}\n- 🔥 ธีมร้อนสุด: ${themes}${picks ? `\n- 🎯 Picks วันนี้: ${picksLine}` : ""}\n\n📰 พาดหัวล่าสุด:\n${news.slice(0, 4).map((n) => `- ${n.title}`).join("\n")}`;
   return { packet, demo };
 }

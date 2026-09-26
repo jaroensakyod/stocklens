@@ -13,12 +13,12 @@ type CacheEntry = { at: number; data: unknown };
 const cache = new Map<string, CacheEntry>();
 const TTL = { quote: 60_000, chart: 10 * 60_000, fundamentals: 6 * 60 * 60_000, news: 2 * 60_000, search: 24 * 60 * 60_000 };
 
-function getCached<T>(key: string, ttl: number): T | undefined {
+export function getCached<T>(key: string, ttl: number): T | undefined {
   const e = cache.get(key);
   if (e && Date.now() - e.at < ttl) return e.data as T;
   return undefined;
 }
-function setCached(key: string, data: unknown) {
+export function setCached(key: string, data: unknown) {
   cache.set(key, { at: Date.now(), data });
   if (cache.size > 900) {
     const keys = [...cache.entries()].sort((a, b) => a[1].at - b[1].at);
@@ -73,7 +73,7 @@ async function alpacaOverwrite(out: Record<string, Quote>) {
   for (let i = 0; i < usSyms.length; i += 50) {
     const batch = usSyms.slice(i, i + 50);
     try {
-      const res = await fetch(`https://data.alpaca.markets/v2/stocks/snapshots?symbols=${encodeURIComponent(batch.join(","))}&feed=ipse`, {
+      const res = await fetch(`https://data.alpaca.markets/v2/stocks/snapshots?symbols=${encodeURIComponent(batch.join(","))}&feed=iex`, {
         headers: { "APCA-API-KEY-ID": process.env.ALPACA_KEY_ID!, "APCA-API-SECRET-KEY": process.env.ALPACA_SECRET_KEY! },
         signal: AbortSignal.timeout(8_000),
       });
@@ -322,6 +322,83 @@ export function deriveRatios(f: TimeseriesFundamentals, price: number): Record<s
     }
   }
   return out;
+}
+
+// ---------- งบรายปี 4 ปี (quoteSummary + crumb — timeseries ให้แค่ 5 ไตรมาส) ----------
+let crumbCache: { at: number; cookie: string; crumb: string } | null = null;
+async function yahooCrumb(): Promise<{ cookie: string; crumb: string } | null> {
+  if (crumbCache && Date.now() - crumbCache.at < 60 * 60_000) return crumbCache;
+  try {
+    const r1 = await fetch("https://fc.yahoo.com", { headers: { "User-Agent": UA } });
+    const cookie = (r1.headers.getSetCookie?.() ?? []).map((c) => c.split(";")[0]).join("; ");
+    if (!cookie) return null;
+    const r2 = await fetch("https://query2.finance.yahoo.com/v1/test/getcrumb", { headers: { "User-Agent": UA, cookie } });
+    const crumb = (await r2.text()).trim();
+    if (!crumb || crumb.length > 30) return null;
+    crumbCache = { at: Date.now(), cookie, crumb };
+    return crumbCache;
+  } catch {
+    return null;
+  }
+}
+
+export interface AnnualRaw {
+  label: string; // FY2026
+  revenue?: number;
+  grossProfit?: number;
+  operatingIncome?: number;
+  netIncome?: number;
+  ebitda?: number;
+  eps?: number;
+  rd?: number;
+  buyback?: number;
+  ocf?: number;
+  capex?: number;
+  fcf?: number;
+  totalAssets?: number;
+  equity?: number;
+  totalDebt?: number;
+  cash?: number;
+  currentAssets?: number;
+  currentLiabilities?: number;
+}
+
+/** งบรายปี 4 ปีจาก quoteSummary (ต้องใช้ crumb)
+ *  ความจริงของ Yahoo ฟรี 2026: รายปีเหลือแค่ totalRevenue/netIncome ที่เชื่อถือได้ (ฟิลด์อื่นถูก strip = 0)
+ *  ตัวเลขละเอียด (margin/EBITDA/หนี้/FCF) ให้เป็นหน้าที่ของแถว TTM จาก timeseries + EDGAR ใน kb.ts */
+export async function getAnnualStatements(symbol: string): Promise<AnnualRaw[] | null> {
+  const key = "as:" + symbol;
+  const hit = getCached<AnnualRaw[]>(key, TTL.fundamentals);
+  if (hit) return hit;
+  const c = await yahooCrumb();
+  if (!c) return null;
+  const raw = (v: { raw?: number } | undefined) => (v && typeof v.raw === "number" && isFinite(v.raw) && v.raw !== 0 ? v.raw : undefined);
+  try {
+    const res = await fetch(
+      `https://query2.finance.yahoo.com/v10/finance/quoteSummary/${encodeURIComponent(symbol)}?modules=incomeStatementHistory&crumb=${encodeURIComponent(c.crumb)}`,
+      { headers: { "User-Agent": UA, cookie: c.cookie }, signal: AbortSignal.timeout(12_000) }
+    );
+    const j = (await res.json()) as {
+      quoteSummary?: { result?: { incomeStatementHistory?: { incomeStatementHistory?: Record<string, never>[] } }[] };
+    };
+    const arr = j.quoteSummary?.result?.[0]?.incomeStatementHistory?.incomeStatementHistory ?? [];
+    const out: AnnualRaw[] = [];
+    type Raw = Record<string, { raw?: number } | { fmt?: string } | undefined>;
+    for (const st of arr as unknown as Raw[]) {
+      const fmt = (st.endDate as { fmt?: string } | undefined)?.fmt;
+      if (!fmt) continue;
+      const revenue = raw(st.totalRevenue as { raw?: number });
+      const netIncome = raw(st.netIncome as { raw?: number });
+      if (revenue === undefined && netIncome === undefined) continue;
+      out.push({ label: "FY" + fmt.slice(0, 4), revenue, netIncome });
+    }
+    out.sort((a, b) => b.label.localeCompare(a.label));
+    if (out.length < 2) return null;
+    setCached(key, out);
+    return out;
+  } catch {
+    return null;
+  }
 }
 
 // ---------- Search ----------
