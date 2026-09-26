@@ -20,7 +20,7 @@ function channelsFor(m: MarketId) {
 
 const MARKET_NAME: Partial<Record<MarketId, string>> = { US: "สหรัฐฯ 🇺🇸", TH: "ไทย 🇹🇭", HK: "ฮ่องกง 🇭🇰", JP: "ญี่ปุ่น 🇯🇵" };
 
-// ป้ายช่องทางซื้อ — โหมด compact (ในตาราง) แสดงชิปเดี่ยว / โหมดเต็ม (หน้าหุ้น) กดดูครบทุกช่องทาง+ค่าธรรมเนียม
+// ป้ายช่องทางซื้อ — ทุกที่กดเปิดดูครบช่องทาง+ค่าธรรมเนียมได้ (โหมด compact เล็กพอให้อยู่ในตาราง)
 export default function BrokerBadge({ ticker, compact = false }: { ticker: string; compact?: boolean }) {
   const [open, setOpen] = useState(false);
   const b = brokerFor(ticker);
@@ -33,16 +33,6 @@ export default function BrokerBadge({ ticker, compact = false }: { ticker: strin
     : b.label === "InnovestX" ? "bg-violet-500/15 text-violet-400 border-violet-500/30"
     : "bg-zinc-500/15 text-zinc-400 border-zinc-500/30";
 
-  if (compact) {
-    const extra = channelsFor(market).length - 1;
-    return (
-      <span className={`chip border ${color}`} title={`${b.detail}${extra > 0 ? ` · และอีก ${extra} ช่องทาง (กดดูที่หน้าหุ้น)` : ""}`}>
-        {b.label === "Dime" ? "✓ " : ""}
-        {b.label}
-      </span>
-    );
-  }
-
   if (!b.buyable) return <span className={`chip border ${color}`}>{b.label}</span>;
 
   const channels = channelsFor(market);
@@ -53,13 +43,14 @@ export default function BrokerBadge({ ticker, compact = false }: { ticker: strin
       <button
         onClick={() => setOpen((v) => !v)}
         className={`chip border ${color} cursor-pointer hover:brightness-125`}
-        title="กดดูช่องทางซื้อทั้งหมด"
+        title="กดดูช่องทางซื้อทั้งหมด + ค่าธรรมเนียม"
       >
-        🛒 ซื้อผ่าน {b.label}
+        {compact ? (b.label === "Dime" ? "✓ " : "") : "🛒 ซื้อผ่าน "}
+        {b.label}
         {extra > 0 && <span className="opacity-70 ml-1">+{extra} ▾</span>}
       </button>
       {open && (
-        <div className="absolute left-0 top-full mt-2 w-[340px] max-w-[88vw] card p-3.5 z-50 shadow-2xl text-left space-y-2">
+        <div className={`absolute ${compact ? "right-0" : "left-0"} top-full mt-2 ${compact ? "w-72" : "w-[340px]"} max-w-[88vw] card p-3.5 z-50 shadow-2xl text-left space-y-2`}>
           <div className="text-[10px] text-zinc-500">
             ช่องทางซื้อ{MARKET_NAME[market] ?? "ตลาดนี้"}สำหรับคนไทย · {market === "TH" ? "เปิดบัญชี SET ได้ทุกโบรกไทย" : `${channels.length} ช่องทาง`}
           </div>
