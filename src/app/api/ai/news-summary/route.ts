@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireMember } from "@/lib/auth";
 import { chatOnce, hasAI, SYSTEM_NEWS } from "@/lib/ai";
+import { guardAdvice } from "@/lib/typesafe";
 
 export const dynamic = "force-dynamic";
 
@@ -13,13 +14,16 @@ export async function POST(req: NextRequest) {
   const { title, publisher } = (await req.json().catch(() => ({}))) as { title?: string; publisher?: string };
   if (!title) return NextResponse.json({ error: "missing title" }, { status: 400 });
   try {
-    const summary = await chatOnce(
+    let summary = await chatOnce(
       [
         { role: "system", content: SYSTEM_NEWS },
         { role: "user", content: `ข่าวจาก ${publisher ?? "สำนักข่าว"}: ${title}` },
       ],
       0.3
     );
+    // 🛡️ Guardrail (Jev): สรุปข่าวไม่ควรกลายเป็นคำแนะนำซื้อขาย — ติด disclaimer ถ้าเกินเกณฑ์
+    const g = await guardAdvice(summary).catch(() => null);
+    if (g?.flagged) summary += "\n\n⚠️ (สรุปนี้เป็นการถ่ายทอดเนื้อหาข่าว ไม่ใช่คำแนะนำการลงทุน)";
     return NextResponse.json({ summary, aiAvailable: true });
   } catch (e) {
     return NextResponse.json({ summary: "", aiAvailable: true, error: (e as Error).message.slice(0, 120) });

@@ -44,7 +44,7 @@ export async function GET(req: NextRequest) {
     rows: rows.slice(0, limit).map((r) => ({
       symbol: r.symbol, name: r.name, price: r.price, changePct: r.changePct, mcap: r.mcap,
       sector: r.sector, industry: r.industry, exchange: r.exchange, ipoDate: r.ipoDate,
-      premarketPct: r.premarketPct, country: r.country,
+      premarketPct: r.premarketPct, divYield: r.dividendYield, country: r.country,
     })),
   });
 }

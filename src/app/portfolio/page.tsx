@@ -10,9 +10,10 @@ import impactJson from "@/data/impact-map.json";
 import themesJson from "@/data/radar-themes.json";
 import type { Quote } from "@/lib/types";
 import PortfolioAdvisor from "@/components/PortfolioAdvisor";
+import XrayPanel from "@/components/XrayPanel";
 import TickerPicker from "@/components/TickerPicker";
 
-type Tab = "watchlist" | "portfolio" | "advisor" | "alerts";
+type Tab = "watchlist" | "portfolio" | "xray" | "advisor" | "alerts";
 interface RadarThemeInfo {
   id: string; name: string; emoji: string; heat: number;
 }
@@ -88,6 +89,7 @@ export default function PortfolioPage() {
   const tabs: { id: Tab; label: string; count: number }[] = [
     { id: "watchlist", label: "⭐ Watchlist", count: watchlist.length },
     { id: "portfolio", label: "💼 พอร์ตของฉัน", count: holdings.length },
+    { id: "xray", label: "🩻 X-ray", count: holdings.filter((h) => h.qty > 0).length },
     { id: "advisor", label: "🤖 AI ปรับพอร์ต", count: 0 },
     { id: "alerts", label: "🔔 แจ้งเตือน", count: alerts.filter((a) => !a.triggeredAt).length },
   ];
@@ -125,6 +127,7 @@ export default function PortfolioPage() {
 
       {tab === "watchlist" && <WatchlistTab watchlist={watchlist} quotes={quotes} toggle={toggle} />}
       {tab === "portfolio" && <PortfolioTab holdings={holdings} quotes={quotes} usdThb={usdThb} upsert={upsert} remove={removeHolding} setCore={setCore} themes={themes} />}
+      {tab === "xray" && <XrayPanel holdings={holdings} />}
       {tab === "advisor" && <PortfolioAdvisor />}
       {tab === "alerts" && <AlertsTab alerts={alerts} quotes={quotes} add={addAlert} remove={removeAlert} reset={resetAlert} />}
     </div>

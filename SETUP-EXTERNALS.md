@@ -78,3 +78,35 @@ ALPACA_SECRET_KEY=<secret>
 
 - **อัตโนมัติ**: Vercel Cron `/api/cron/kb` รายวัน 01:30 เวลาไทย อุ่นหุ้นไทย top 25 (ผู้ใช้คนแรกของวันไม่ต้องรอโหลด)
 - **มือ (แอดมิน)**: `curl -X POST -H "x-admin-code: <ADMIN_CODE>" -H "Content-Type: application/json" -d '{"market":"us","n":15}' https://<เว็บ>/api/admin/kb-warm` — อุ่นหุ้น US พร้อม EDGAR ลึกขึ้น (ช้า ~13 วิ/ตัว)
+
+---
+
+## TypeSafe Jev — ให้คะแนนข่าวด้วย AI ตัดสิน (แนะนำ เริ่มต้น $10 ใช้ได้เกือบปี)
+
+**ใช้ทำอะไรใน StockLens:** อ่านพาดหัวข่าวแล้วตอบเป็น decision — sentiment (bullish/neutral/bearish) + ความสำคัญ (0-2) → mood ธีมใน radar, ป้ายข่าวรายหุ้น, บริบทแชท (ไม่ใช่ตัวเขียนบทวิเคราะห์ — นั่นยังเป็นหน้าที่ Gemini)
+
+**ราคา:** $0.042/ล้าน input token (output ฟรี) — ทดสอบจริงได้ ~541 token/ข่าว = **$0.000023/ข่าว** (สแกน 600 ข่าว/วัน ≈ $0.41/เดือน) · เร็ว ~0.3 วิ/เรียก · ลิมิต 1,200 เรียก/นาที
+
+**วิธีเปิด:**
+1. สมัคร https://console.typesafe.ai (Google login ได้)
+2. **Billing → Add funds** — ต้องเติมจริงครั้งแรก ถึงจะปลดล็อก (เครดิตฟรี $5/เดือนอย่างเดียวยังกดใช้ไม่ได้ ณ ก.ย. 2026 — เจอตรงๆ)
+3. API Keys → Create key → เอามาใส่ `TYPESAFE_API_KEY` ใน `.env.local` และ Vercel Environment Variables
+4. ไม่ต้องทำอย่างอื่น — ระบบ auto-detect: มี key = ข่าวมี sentiment, ไม่มี = ใช้ระบบเดิม
+
+**ตรวจสอบว่าทำงาน:** `curl -s localhost:3000/api/radar | jq '.themes[0].mood'` → ได้ `{"dir":"bullish"|"bearish"|"neutral",...}` (null = key ยังไม่ทำงาน/ยังไม่อุ่น)
+
+**ทดสอบคุณภาพซ้ำได้:** `TS_KEY=<key> node scripts/test-typesafe-thai.mjs` — ยิงข่าวจริง 30 ชิ้นจาก radar เรา + วัด latency/ต้นทุน/ความนิ่ง (ผลรอบ 26 ก.ย. 2026: sentiment ถูก ~93-97%, จับภาษาไทย 0.99, 333ms, $0.000023/ข่าว)
+
+**หมายเหตุ:** คะแนนแคช 24 ชม./พาดหัว (Redis `jev:*` + memory 1 ชม.) — ข่าวเดียวกันไม่ยิงซ้ำ
+
+---
+
+## 📅 ปฏิทินงบรายไตรมาส (แผนรองบ — ยังไม่ลงมือ)
+
+**สถานะข้อมูล (ตรวจแล้ว ก.ย. 2026):** Yahoo `earningsTrend` คืน `earningsDate = null` ทั้ง PTT.BK และ NVDA → ทางฟรีไม่พอจริง
+
+**แผนเมื่อมีทุน — FMP Starter ~$19-22/เดือน:**
+- Endpoint: `financialmodelingprep.com/stable/earning-calendar` (รายวันทั้งตลาด) + `earnings-calendar-confirmed` — ครบ US + ตลาดหลัก
+- โครงสร้างไฟล์ที่เจอะไว้แล้ว: `src/lib/earnings.ts` (fetch + cache Redis 24 ชม. ต่อวัน) + `/api/earnings-calendar?week=` + การ์ด "📅 งบสัปดาห์นี้" ในหน้าแรก + chip ในหน้าหุ้น (ต่อยอด nextEarnings ที่เตรียมไว้ใน `/api/analyst` แล้ว)
+- ตัวเลือกเสริมเมื่อออกงบจริง: ดึง actual EPS vs estimate จาก FMP + ให้ Jev สรุป "ดีกว่า/แย่กว่าคาด" ต่อหุ้น → ปรับเสา News/Street ของ StockLens Score อัตโนมัติ
+- ทางเลือกฟรีที่ยังไม่ได้ลองทั้งหมด: Nasdaq.com earnings calendar (scrape ได้แต่เปราะ), Alpha Vantage earnings calendar (ฟรี 25 req/วัน — น้อยไปสำหรับทั้งตลาด)

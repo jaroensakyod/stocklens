@@ -13,6 +13,7 @@ export async function GET() {
       quotes: h.quotes.map((q) => ({ symbol: q.symbol, name: q.name, price: q.price, changePct: q.changePct })),
       newsCount: h.newsCount,
       newsTop: h.newsTop,
+      mood: h.mood,
     })),
   });
 }

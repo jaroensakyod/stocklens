@@ -4,6 +4,7 @@ import impactJson from "@/data/impact-map.json";
 import examplesJson from "@/data/examples.json";
 import { getQuotes, getChart } from "./yahoo";
 import { getThemeNewsMap, newsHeat, type ThemeNews } from "./themeNews";
+import { jevChoiceProbabilities } from "./typesafe";
 import type { ChainResult, EventAnalysis, ImpactNode, Quote, RadarTheme } from "./types";
 
 export const THEMES = (themesJson as { themes: RadarTheme[] }).themes;
@@ -66,7 +67,7 @@ export async function computeThemeHeat() {
     const heat = Math.round(Math.min(100, priceHeat * 0.4 + nHeat * 0.6));
     const up = moves.length ? moves.reduce((a, b) => a + b, 0) / moves.length : 0;
     const news = newsMap[t.id] as ThemeNews | undefined;
-    return { theme: t, heat, avgChange: up, quotes: qs, newsCount: news?.count24h ?? 0, newsTop: news?.top ?? [] };
+    return { theme: t, heat, avgChange: up, quotes: qs, newsCount: news?.count24h ?? 0, newsTop: news?.top ?? [], mood: news?.mood };
   }).sort((a, b) => b.heat - a.heat);
 }
 
@@ -92,8 +93,29 @@ function matchThemesByText(text: string): RadarTheme[] {
   return scored.sort((a, b) => b.score - a.score).slice(0, 3).map((x) => x.t);
 }
 
+/** จับธีมด้วย Jev ก่อน (เข้าใจบริบท เช่น "ปิดช่องแคบฮอร์มุซ" → สงคราม+พลังงาน) — ไม่มี key/พัง = keyword เดิม */
+async function matchThemes(text: string): Promise<RadarTheme[]> {
+  try {
+    const options: Record<string, string> = {};
+    for (const t of THEMES) options[t.id] = t.desc.slice(0, 90);
+    const probs = await jevChoiceProbabilities(text, "Which investment theme does this event or news relate to? Pick the closest match", options);
+    if (probs) {
+      const top = Object.entries(probs)
+        .filter(([id, p]) => p >= 0.1)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 3)
+        .map(([id]) => THEMES.find((t) => t.id === id))
+        .filter((t): t is RadarTheme => !!t);
+      if (top.length) return top;
+    }
+  } catch {
+    // ไป keyword
+  }
+  return matchThemesByText(text);
+}
+
 export async function keywordAnalyze(text: string, focusTickers: string[] = []): Promise<EventAnalysis> {
-  const themes = matchThemesByText(text);
+  const themes = await matchThemes(text);
   const lower = " " + text.toLowerCase() + " ";
   const focus = new Set(focusTickers.map((t) => t.toUpperCase()));
   // ให้คะแนนโหนด: ชื่อสินค้าโผล่ในข้อความ = ตรงเป้าสุด, มีตราสารที่สนใจอยู่ใน chain = โฟกัส

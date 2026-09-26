@@ -26,6 +26,15 @@ export default function ComparePage() {
   const [rows, setRows] = useState<CmpRow[]>([]);
   const [loading, setLoading] = useState(false);
 
+  // รับ ?t=SYMBOL[,SYMBOL] — ลิงก์ "เทียบหุ้น" จากหน้าหุ้นคลิกเดียวมาถึงเลย
+  useEffect(() => {
+    const t = new URLSearchParams(location.search).get("t");
+    if (t) {
+      const list = t.split(",").map((s) => s.trim().toUpperCase()).filter(Boolean).slice(0, 4);
+      if (list.length) setTickers(list);
+    }
+  }, []);
+
   const load = async (list: string[]) => {
     if (!list.length) { setRows([]); return; }
     setLoading(true);

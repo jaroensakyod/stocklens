@@ -17,6 +17,7 @@ import { getStarterPortfolios } from "./starterPortfolio";
 import { getMonthlyDividends } from "./monthlyDividends";
 import { getModelPortfolio, liveNav } from "./modelPortfolio";
 import { kbFundamentals, kbMacro, fundTrendText, macroText } from "./kb";
+import { computeScore } from "./score";
 import { getValueScan } from "./valueScan";
 import { brokerFor, marketOpenHint, detectMarket, MARKET_LABEL } from "./markets";
 import { applyAdvisorRules } from "./advisorBacktest";
@@ -202,6 +203,8 @@ async function buildStockPacket(tickers: string[]): Promise<{ packet: string; de
       if (bits.length) lines.push(bits.join(" | "));
     }
     if (f) lines.push(`คะแนนปัจจัย: Valuation ${f.valuation} · Growth ${f.growth} · Profitability ${f.profitability} · Momentum ${f.momentum} · Health ${f.health} (รวม ${f.overall}/100)`);
+    const sls = await computeScore(sym).catch(() => null);
+    if (sls) lines.push(`StockLens Score: ${sls.total}/100 (${sls.grade}, confidence ${sls.confidence}%)${sls.reasons[0] ? " — " + sls.reasons[0] : ""}`);
     // คลังความรู้: งบ 4 ปีจาก filings จริง (kb:*) — เพิ่มความแม่นเรื่องแนวโน้มระยะยาว
     const kbFund = await kbFundamentals(sym).catch(() => null);
     if (kbFund) lines.push(fundTrendText(kbFund));
@@ -261,7 +264,7 @@ async function buildMarketPacket(): Promise<{ packet: string; demo: string }> {
   const newsLine = news.slice(0, 5).map((n) => n.title).join(" / ");
 
   const heat = await computeThemeHeat();
-  const themes = heat.slice(0, 3).map((h) => `${h.theme.emoji}${h.theme.name} ความร้อน${h.heat}`).join(", ");
+  const themes = heat.slice(0, 3).map((h) => `${h.theme.emoji}${h.theme.name} ความร้อน${h.heat}${h.mood ? (h.mood.dir === "bullish" ? " ข่าวบวก" : h.mood.dir === "bearish" ? " ข่าวลบ" : "") : ""}`).join(", ");
   const macro = await kbMacro().catch(() => null); // คลังความรู้ macro (kb:macro — ดอกเบี้ย/เงินเฟ้อ/ค่าเงิน ล่าสุด)
   const picksLine = picks ? picks.picks.slice(0, 3).map((p) => `${p.ticker} ${p.tagEmoji}${p.tag} (${p.reason})`).join(" · ") : "ไม่มีข้อมูล";
   const surgeLine = surge ? surge.rows.slice(0, 3).map((r) => `${r.ticker} +${r.changePct.toFixed(1)}% [${r.flags.join("/") || "ขยับแรง"}]`).join(" · ") : "ไม่มี";

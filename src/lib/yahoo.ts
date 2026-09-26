@@ -6,6 +6,7 @@
 //  - v1/finance/search         → ค้นหา + ข่าว
 
 import type { Candle, Quote } from "./types";
+import { kvGet, kvSet } from "./storage";
 
 const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
 
@@ -24,6 +25,37 @@ export function setCached(key: string, data: unknown) {
     const keys = [...cache.entries()].sort((a, b) => a[1].at - b[1].at);
     for (let i = 0; i < 300; i++) cache.delete(keys[i][0]);
   }
+}
+
+/** ===== แคช 3 ชั้น: memory → Redis → ยิงจริง (พร้อม stale-serve เมื่อต้นทางพัง) =====
+ *  บน Vercel serverless memory โหลดใหม่แทบทุก cold-start — Redis ช่วยให้ "ข้อมูลของเรา" อยู่รอดข้าม instance
+ *  TTL ใน Redis = 4 เท่า TTL จริง เพื่อเหลือของเก่าไว้ใช้ยามฉุกเฉิน (คืนของเก่าแทนหน้าพัง) */
+export async function cached<T>(key: string, ttlMs: number, fetcher: () => Promise<T | null>): Promise<T | null> {
+  const m = cache.get(key);
+  if (m && Date.now() - m.at < ttlMs) return m.data as T;
+  const rk = "yc:" + key;
+  let stale: { v: T; at: number } | null = null;
+  try {
+    const r = await kvGet<{ v: T; at: number }>(rk);
+    if (r && typeof r === "object" && "v" in r) {
+      if (Date.now() - (r.at ?? 0) < ttlMs) {
+        cache.set(key, { at: r.at ?? Date.now(), data: r.v });
+        return r.v;
+      }
+      stale = r;
+    }
+  } catch {
+    // Redis ล่ม = ยิงตรงต่อ
+  }
+  const fresh = await fetcher();
+  if (fresh !== null && fresh !== undefined) {
+    cache.set(key, { at: Date.now(), data: fresh });
+    kvSet(rk, { v: fresh, at: Date.now() }, Math.max(Math.round((ttlMs / 1000) * 4), 86_400)).catch(() => {});
+    return fresh;
+  }
+  if (stale) return stale.v; // ต้นทางพัง → ของเก่าดีกว่าไม่มี
+  if (m) return m.data as T;
+  return null;
 }
 
 /** GET JSON พร้อม fallback query1 ↔ query2 */
@@ -107,6 +139,38 @@ export async function getQuotes(symbols: string[]): Promise<Record<string, Quote
     if (hit) out[s] = hit;
     else need.push(s);
   }
+  // ชั้นที่ 2: Redis ("ข้อมูลของเรา" ข้าม instance) — เอาอันสด และจำอันเก่าไว้ใช้ยามต้นทางพัง
+  const stale: Record<string, Quote> = {};
+  if (need.length) {
+    const fromRedis = await Promise.all(
+      need.map(async (s) => {
+        try {
+          return await kvGet<{ v: Quote; at: number }>("yc:q:" + s);
+        } catch {
+          return null;
+        }
+      })
+    );
+    const still: string[] = [];
+    need.forEach((s, i) => {
+      const r = fromRedis[i];
+      if (r && typeof r === "object" && "v" in r && r.v && isFinite(r.v.price)) {
+        if (Date.now() - (r.at ?? 0) < TTL.quote) {
+          out[s] = r.v;
+          setCached("q:" + s, r.v);
+        } else {
+          still.push(s);
+          stale[s] = r.v;
+        }
+      } else still.push(s);
+    });
+    need.length = 0;
+    need.push(...still);
+  }
+  const saveQuote = (q: Quote) => {
+    setCached("q:" + q.symbol, q);
+    kvSet("yc:q:" + q.symbol, { v: q, at: Date.now() }, 3600).catch(() => {});
+  };
   for (let i = 0; i < need.length; i += 15) {
     const batch = need.slice(i, i + 15);
     const json = (await jget(`/v7/finance/spark?symbols=${encodeURIComponent(batch.join(","))}&range=1d&interval=1d`)) as
@@ -119,7 +183,7 @@ export async function getQuotes(symbols: string[]): Promise<Record<string, Quote
       const q = metaToQuote(m);
       if (q && q.symbol) {
         out[q.symbol] = q;
-        setCached("q:" + q.symbol, q);
+        saveQuote(q);
         found.add(q.symbol);
       }
     }
@@ -131,11 +195,13 @@ export async function getQuotes(symbols: string[]): Promise<Record<string, Quote
       if (q) {
         q.symbol = s;
         out[s] = q;
-        setCached("q:" + s, q);
+        saveQuote(q);
       }
     }
   }
   await alpacaOverwrite(out); // มี key Alpaca = อัปเดตหุ้น US เป็น real-time (ไม่มี = ข้ามเงียบๆ)
+  // ตัวที่ยังไม่มีและต้นทางพัง → ใช้ของเก่าจาก Redis ดีกว่าหายไปเฉยๆ
+  for (const s of symbols) if (!out[s] && stale[s]) out[s] = stale[s];
   return out;
 }
 
@@ -155,29 +221,30 @@ const RANGE_MAP: Record<string, { range: string; interval: string }> = {
   "1Y": { range: "1y", interval: "1d" },
   "5Y": { range: "5y", interval: "1wk" },
   "5YD": { range: "5y", interval: "1d" }, // ใช้กับ backtest
+  "5YM": { range: "5y", interval: "1mo" }, // seasonality รายเดือน
   "10YD": { range: "10y", interval: "1d" }, // backtest + walk-forward หลายหน้าต่างเวลา
 };
 
 export async function getChart(symbol: string, range = "1Y"): Promise<Candle[]> {
   const key = `c:${symbol}:${range}`;
-  const hit = getCached<Candle[]>(key, TTL.chart);
-  if (hit) return hit;
-  const cfg = RANGE_MAP[range] ?? RANGE_MAP["1Y"];
-  const json = (await jget(`/v8/finance/chart/${encodeURIComponent(symbol)}?range=${cfg.range}&interval=${cfg.interval}&includePrePost=false`)) as
-    | { chart?: { result?: { timestamp?: number[]; indicators?: { quote?: { open?: (number | null)[]; high?: (number | null)[]; low?: (number | null)[]; close?: (number | null)[]; volume?: (number | null)[] }[] } }[] } }
-    | null;
-  const r = json?.chart?.result?.[0];
-  const ts = r?.timestamp ?? [];
-  const q = r?.indicators?.quote?.[0] ?? {};
-  const candles: Candle[] = [];
-  for (let i = 0; i < ts.length; i++) {
-    const o = q.open?.[i], h = q.high?.[i], l = q.low?.[i], c = q.close?.[i];
-    if ([o, h, l, c].every((v) => typeof v === "number" && isFinite(v as number))) {
-      candles.push({ time: ts[i], open: o as number, high: h as number, low: l as number, close: c as number, volume: q.volume?.[i] ?? 0 });
+  const out = await cached<Candle[]>(key, TTL.chart, async () => {
+    const cfg = RANGE_MAP[range] ?? RANGE_MAP["1Y"];
+    const json = (await jget(`/v8/finance/chart/${encodeURIComponent(symbol)}?range=${cfg.range}&interval=${cfg.interval}&includePrePost=false`)) as
+      | { chart?: { result?: { timestamp?: number[]; indicators?: { quote?: { open?: (number | null)[]; high?: (number | null)[]; low?: (number | null)[]; close?: (number | null)[]; volume?: (number | null)[] }[] } }[] } }
+      | null;
+    const r = json?.chart?.result?.[0];
+    const ts = r?.timestamp ?? [];
+    const q = r?.indicators?.quote?.[0] ?? {};
+    const candles: Candle[] = [];
+    for (let i = 0; i < ts.length; i++) {
+      const o = q.open?.[i], h = q.high?.[i], l = q.low?.[i], c = q.close?.[i];
+      if ([o, h, l, c].every((v) => typeof v === "number" && isFinite(v as number))) {
+        candles.push({ time: ts[i], open: o as number, high: h as number, low: l as number, close: c as number, volume: q.volume?.[i] ?? 0 });
+      }
     }
-  }
-  if (candles.length) setCached(key, candles);
-  return candles;
+    return candles.length ? candles : null;
+  });
+  return out ?? [];
 }
 
 export interface DividendTrail {
@@ -401,7 +468,146 @@ export async function getAnnualStatements(symbol: string): Promise<AnnualRaw[] |
   }
 }
 
-// ---------- Search ----------
+// ---------- Top Shareholders (US) — ใครถือ ใครเพิ่ม ใครลด ----------
+export interface InstitutionHolder {
+  org: string;
+  pctHeld: number; // 0-1
+  pctChange: number; // เปลี่ยนแปลงไตรมาสล่าสุด (สัดส่วนที่ถือเทียบก่อนหน้า 0-1)
+  value: number; // มูลค่า USD
+  reportDate: string;
+}
+export interface InsiderHolder {
+  name: string;
+  position: string;
+  shares: number;
+  latestTrans: string;
+}
+export interface HoldersData {
+  institutions: InstitutionHolder[]; // เรียงมาก→น้อย สูงสุด 10
+  insiders: InsiderHolder[]; // สูงสุด 5
+  insiderNetPct: number | null; // ซื้อขายสุทธิของ insider (% ของทั้งหมด 6 เดือน)
+}
+export async function getHolders(symbol: string): Promise<HoldersData | null> {
+  const key = "hd:" + symbol;
+  const hit = getCached<HoldersData>(key, TTL.fundamentals);
+  if (hit) return hit;
+  const c = await yahooCrumb();
+  if (!c) return null;
+  try {
+    const res = await fetch(
+      `https://query2.finance.yahoo.com/v10/finance/quoteSummary/${encodeURIComponent(symbol)}?modules=institutionOwnership,insiderHolders,netSharePurchaseActivity&crumb=${encodeURIComponent(c.crumb)}`,
+      { headers: { "User-Agent": UA, cookie: c.cookie }, signal: AbortSignal.timeout(12_000) }
+    );
+    const j = (await res.json()) as {
+      quoteSummary?: {
+        result?: {
+          institutionOwnership?: { ownershipList?: { organization?: string; pctHeld?: { raw?: number }; pctChange?: { raw?: number }; position?: { raw?: number }; reportDate?: { fmt?: string } }[] };
+          insiderHolders?: { holders?: { name?: string; position?: { fmt?: string } | string; shares?: { raw?: number }; latestTransDate?: { fmt?: string } }[] };
+          netSharePurchaseActivity?: { netInsiderPctPurchase?: { raw?: number } };
+        }[];
+      };
+    };
+    const r = j.quoteSummary?.result?.[0];
+    if (!r) return null;
+    const num = (v: { raw?: number } | undefined) => (v && typeof v.raw === "number" && isFinite(v.raw) ? v.raw : 0);
+    const institutions: InstitutionHolder[] = (r.institutionOwnership?.ownershipList ?? [])
+      .map((h) => ({
+        org: String(h.organization ?? "").slice(0, 40),
+        pctHeld: num(h.pctHeld),
+        pctChange: num(h.pctChange),
+        value: num(h.position),
+        reportDate: h.reportDate?.fmt ?? "",
+      }))
+      .filter((h) => h.org && h.pctHeld > 0)
+      .sort((a, b) => b.pctHeld - a.pctHeld)
+      .slice(0, 10);
+    const insiders: InsiderHolder[] = (r.insiderHolders?.holders ?? [])
+      .map((h) => ({
+        name: String(h.name ?? "").slice(0, 30),
+        position: typeof h.position === "string" ? h.position : (h.position?.fmt ?? ""),
+        shares: num(h.shares),
+        latestTrans: h.latestTransDate?.fmt ?? "",
+      }))
+      .filter((h) => h.name)
+      .slice(0, 5);
+    if (!institutions.length && !insiders.length) return null;
+    const out: HoldersData = {
+      institutions,
+      insiders,
+      insiderNetPct: r.netSharePurchaseActivity?.netInsiderPctPurchase?.raw ?? null,
+    };
+    setCached(key, out);
+    return out;
+  } catch {
+    return null;
+  }
+}
+
+// ---------- คอนเซนซัสนักวิเคราะห์ (โบรกเกอร์ ทั้งไทยและ US) + วันออกงบถัดไป ----------
+export interface AnalystConsensus {
+  symbol: string;
+  strongBuy: number;
+  buy: number;
+  hold: number;
+  sell: number;
+  strongSell: number;
+  targetMean: number | null; // เป้าหมายราคาเฉลี่ย (สกุลเงินของหุ้นนั้น)
+  targetHigh: number | null;
+  targetLow: number | null;
+  nAnalysts: number;
+  nextEarnings: string | null; // YYYY-MM-DD
+}
+export async function getAnalystConsensus(symbol: string): Promise<AnalystConsensus | null> {
+  const key = "ac:" + symbol;
+  const hit = getCached<AnalystConsensus>(key, 6 * 3600_000);
+  if (hit) return hit;
+  const c = await yahooCrumb();
+  if (!c) return null;
+  try {
+    const res = await fetch(
+      `https://query2.finance.yahoo.com/v10/finance/quoteSummary/${encodeURIComponent(symbol)}?modules=recommendationTrend,financialData,earningsTrend&crumb=${encodeURIComponent(c.crumb)}`,
+      { headers: { "User-Agent": UA, cookie: c.cookie }, signal: AbortSignal.timeout(12_000) }
+    );
+    const j = (await res.json()) as {
+      quoteSummary?: {
+        result?: {
+          recommendationTrend?: { trend?: { strongBuy?: number; buy?: number; hold?: number; sell?: number; strongSell?: number }[] };
+          financialData?: {
+            targetMeanPrice?: { raw?: number }; targetHighPrice?: { raw?: number }; targetLowPrice?: { raw?: number };
+            numberOfAnalystOpinions?: { raw?: number };
+          };
+          earningsTrend?: { trend?: { period?: string; earningsDate?: { raw?: number }[] }[] };
+        }[];
+      };
+    };
+    const r = j.quoteSummary?.result?.[0];
+    const t0 = r?.recommendationTrend?.trend?.[0];
+    const fd = r?.financialData;
+    const num = (v: { raw?: number } | undefined) => (v && typeof v.raw === "number" && isFinite(v.raw) ? v.raw : null);
+    const strongBuy = t0?.strongBuy ?? 0;
+    const buy = t0?.buy ?? 0;
+    const hold = t0?.hold ?? 0;
+    const sell = t0?.sell ?? 0;
+    const strongSell = t0?.strongSell ?? 0;
+    const nAnalysts = num(fd?.numberOfAnalystOpinions) ?? strongBuy + buy + hold + sell + strongSell;
+    if (!nAnalysts) return null;
+    const raw0y = r?.earningsTrend?.trend?.find((x) => x.period === "0y")?.earningsDate?.[0]?.raw;
+    const out: AnalystConsensus = {
+      symbol,
+      strongBuy, buy, hold, sell, strongSell,
+      targetMean: num(fd?.targetMeanPrice),
+      targetHigh: num(fd?.targetHighPrice),
+      targetLow: num(fd?.targetLowPrice),
+      nAnalysts,
+      nextEarnings: raw0y ? new Date(raw0y * 1000).toISOString().slice(0, 10) : null,
+    };
+    setCached(key, out);
+    return out;
+  } catch {
+    return null;
+  }
+}
+
 export async function searchSymbols(query: string) {
   const key = "s:" + query.toLowerCase();
   const hit = getCached<{ symbol: string; name: string; exchange: string; type: string }[]>(key, TTL.search);

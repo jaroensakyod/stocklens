@@ -9,7 +9,10 @@ const NAV = [
   { href: "/", label: "หน้าแรก" },
   { href: "/surge", label: "🚀 หุ้นซิ่ง" },
   { href: "/radar", label: "Radar" },
-  { href: "/screener", label: "คัดกรอง" },
+  { href: "/screener", label: "📡 Radars" },
+  { href: "/dr", label: "🪙 DR" },
+  { href: "/supernova", label: "🛰️ มหภาค" },
+  { href: "/score", label: "🏆 Score" },
   { href: "/portfolio", label: "พอร์ต" },
 ];
 

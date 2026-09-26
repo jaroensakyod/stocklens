@@ -3,7 +3,7 @@
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import PriceChart from "@/components/PriceChart";
-import FactorRadar from "@/components/FactorRadar";
+import ScorePanel from "@/components/ScorePanel";
 import FinancialsPanel from "@/components/FinancialsPanel";
 import AIAnalysis from "@/components/AIAnalysis";
 import BrokerBadge from "@/components/BrokerBadge";
@@ -14,6 +14,10 @@ import LockGate from "@/components/LockGate";
 import { useCan } from "@/lib/authContext";
 import TrustPanel from "@/components/TrustPanel";
 import ThesisLogger from "@/components/ThesisLogger";
+import SeasonalityPanel from "@/components/SeasonalityPanel";
+import HoldersPanel from "@/components/HoldersPanel";
+import RevenueStructurePanel from "@/components/RevenueStructurePanel";
+import AnalystPanel from "@/components/AnalystPanel";
 import ScenarioPanel from "@/components/ScenarioPanel";
 import type { Scenarios } from "@/lib/scenarios";
 import { formatBig } from "@/lib/factors";
@@ -136,6 +140,7 @@ export default function StockPage() {
               </>
             )}
             <a className="chip bg-base-800 text-zinc-400 border border-base-700 hover:text-accent-soft" href={`https://finance.yahoo.com/quote/${encodeURIComponent(q.symbol)}/news/`} target="_blank" rel="noopener noreferrer">📰 ข่าวล่าสุด</a>
+            <a className="chip bg-base-800 text-zinc-400 border border-base-700 hover:text-accent-soft" href={`/compare?t=${encodeURIComponent(q.symbol)}`}>⚖️ เทียบหุ้น</a>
           </div>
         </div>
         <div className="ml-auto text-right">
@@ -152,43 +157,8 @@ export default function StockPage() {
         <div className="lg:col-span-2 space-y-6">
           <PriceChart symbol={q.symbol} />
 
-          {/* ปัจจัย 5 มิติ */}
-          {f && (
-            <div className="card p-5">
-              <div className="flex items-center justify-between mb-2">
-                <h2 className="text-lg font-bold text-zinc-50">คะแนนปัจจัย 5 มิติ</h2>
-                <span className="chip bg-accent/15 text-accent-soft border border-accent/30 num">รวม {f.overall}/100</span>
-              </div>
-              <div className="grid md:grid-cols-2 gap-4 items-center">
-                <FactorRadar factors={f} />
-                <div className="space-y-2">
-                  {[
-                    { k: "valuation", label: "Valuation (ความคุ้มค่า)" },
-                    { k: "growth", label: "Growth (การเติบโต)" },
-                    { k: "profitability", label: "Profitability (ความมีกำไร)" },
-                    { k: "momentum", label: "Momentum (โมเมนตัม)" },
-                    { k: "health", label: "Financial Health (ความแข็งแรง)" },
-                  ].map((d) => {
-                    const v = f[d.k as keyof typeof f] as number;
-                    return (
-                      <div key={d.k}>
-                        <div className="flex justify-between text-xs mb-1">
-                          <span className="text-zinc-400">{d.label}</span>
-                          <span className="num text-zinc-200 font-semibold">{v}</span>
-                        </div>
-                        <div className="h-1.5 bg-base-800 rounded-full overflow-hidden">
-                          <div className={`h-full rounded-full ${v >= 66 ? "bg-up" : v >= 40 ? "bg-accent" : "bg-down"}`} style={{ width: `${v}%` }} />
-                        </div>
-                      </div>
-                    );
-                  })}
-                  {f.gaps.length > 0 && (
-                    <p className="text-[11px] text-zinc-600 pt-1">⚠️ ข้อมูลขาด: {f.gaps.join(", ")} — ตลาดนี้ Yahoo ให้ข้อมูลจำกัด คะแนนคำนวณจากเฉพาะข้อมูลที่มี</p>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
+          {/* StockLens Score — แทนการ์ดปัจจัย 5 มิติเดิม (5 มิติรวมอยู่ในเสา Quality/Valuation/Momentum) */}
+          <ScorePanel ticker={q.symbol} />
 
           {/* งบการเงิน 4 ปี (คลัง kb — TTM ละเอียด + ประวัติรายปี + EDGAR) */}
           <FinancialsPanel ticker={q.symbol} />
@@ -316,16 +286,34 @@ export default function StockPage() {
           <h3 className="text-sm font-bold text-zinc-100 mb-3">📰 ข่าวล่าสุดของ {q.symbol}</h3>
           <ul className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
             {a.news.slice(0, 6).map((n, i) => (
-              <li key={i} className="border-l-2 border-base-700 pl-3">
+              <li key={i} className={`border-l-2 pl-3 ${n.score?.sentiment === "bullish" ? "border-up/60" : n.score?.sentiment === "bearish" ? "border-down/60" : "border-base-700"}`}>
                 <a href={n.link} target="_blank" rel="noopener noreferrer" className="text-xs text-zinc-300 hover:text-accent-soft leading-snug">
-                  {n.title}
+                  {n.score ? (n.score.sentiment === "bullish" ? "🟢" : n.score.sentiment === "bearish" ? "🔴" : "⚪") : "📰"} {n.title}
                 </a>
-                <span className="text-[10px] text-zinc-600 block">{n.publisher}</span>
+                <span className="text-[10px] text-zinc-600 block">
+                  {n.publisher}
+                  {n.score && n.score.impact >= 1.2 ? " · ⚡ ข่าวตัวจักร" : ""}
+                  {n.cred?.label === "danger" && <span className="text-down"> · 🚫 {n.cred.text}</span>}
+                  {n.cred?.label === "warn" && <span className="text-yellow-500"> · ⚠️ {n.cred.text}</span>}
+                  {n.cred?.label === "ok" && <span className="text-up"> · ✅ {n.cred.text}</span>}
+                </span>
               </li>
             ))}
           </ul>
         </div>
       )}
+
+      {/* ฤดูกาลรายเดือน (Seasonality) */}
+      <SeasonalityPanel ticker={q.symbol} />
+
+      {/* ใครถือหุ้นนี้ (Top Shareholders) */}
+      <HoldersPanel ticker={q.symbol} market={q.exchange} />
+
+      {/* โครงสร้างรายได้ (Revenue Structure — US auto จาก EDGAR) */}
+      <RevenueStructurePanel ticker={q.symbol} />
+
+      {/* คอนเซนซัสนักวิเคราะห์ + วันออกงบ */}
+      <AnalystPanel ticker={q.symbol} price={q.price} />
     </div>
   );
 }

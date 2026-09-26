@@ -5,6 +5,7 @@ import { chatOnce, hasAI, friendlyAIError } from "@/lib/ai";
 import { findSectorInfo, tvUniverse } from "@/lib/tvscanner";
 import { computeThemeHeat } from "@/lib/radar";
 import { getQuotes, getUsdThb } from "@/lib/yahoo";
+import { guardAdvice } from "@/lib/typesafe";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120;
@@ -176,6 +177,13 @@ Sector ใหญ่สุด: ${topSector[0]} (${topSectorPct.toFixed(1)}%) ${to
       );
     } catch (e) {
       aiText = friendlyAIError(e);
+    }
+    // 🛡️ Guardrail (Jev): จับคำตอบที่สัญญาผลตอบแทน/สั่งซื้อขายเด็ดขาด ก่อนถึงมือผู้ใช้ — ติด disclaimer แทนการปิดกั้น
+    if (aiText && aiText.length > 40) {
+      const g = await guardAdvice(aiText).catch(() => null);
+      if (g?.flagged) {
+        aiText += `\n\n---\n⚠️ *ระบบตรวจพบถ้อยคำที่อาจเกินขอบเขตของการวิเคราะห์เชิงข้อมูล${g.guaranteedReturns ? " (ลักษณะสัญญาผลตอบแทน)" : ""}${g.recklessDirective ? " (ลักษณะสั่งซื้อขายเด็ดขาด)" : ""} — โปรดใช้วิจารณญาณ นี่ไม่ใช่คำแนะนำการลงทุน*`;
+      }
     }
   }
 

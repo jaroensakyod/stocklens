@@ -109,7 +109,7 @@ export interface StockAnalysis {
   };
   factors?: FactorScores;
   technicals?: TechnicalRead;
-  news: { title: string; publisher: string; link: string; time: number }[];
+  news: { title: string; publisher: string; link: string; time: number; score?: { sentiment: "bullish" | "bearish" | "neutral"; impact: number; confidence: number; substantive?: boolean; suspicious?: boolean; verifiable?: boolean }; cred?: { label: "ok" | "warn" | "danger"; text: string } }[];
 }
 
 export interface ImpactStock {

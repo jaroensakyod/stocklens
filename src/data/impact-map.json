@@ -1593,6 +1593,423 @@
           "reason": "หุ้นแรงส่งของ SET — โดนกดตามดัชนีทุกครั้งที่การเมืองตึงเครียด"
         }
       ]
+    },
+    {
+      "id": "thai-banks",
+      "type": "theme",
+      "name": "ธนาคารไทย",
+      "yahoo": "KBANK.BK",
+      "upReason": "กำไรธนาคารไทยดีขึ้น (NIM ขยาย/ค่าเผื่อลด/สินเชื่อโตตามเศรษฐกิจฟื้น) = กลุ่มธนาคารซึ่งหนักที่สุดใน SET จะดีดพาดัชนี",
+      "stocks": [
+        {
+          "ticker": "KBANK.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "strong",
+          "reason": "ธนาคารเอกชนใหญ่สุดโดยสินทรัพย์ — ส่งออกไทยและธุรกิจฟื้น = รายได้ค่าธรรมเนียม+สินเชื่อโตพร้อมกัน"
+        },
+        {
+          "ticker": "BBL.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "ธนาคารระบบเก่าแก่ ฐานลูกหนี้รายใหญ่/รัฐวิสาหกิจ ผูกเศรษฐกิจไทยโดยตรง"
+        },
+        {
+          "ticker": "SCB.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "ธนาคารพาณิชย์ (อดีต SCB ในเครือ SCBx) ผูกสินเชื่อบุคคล-เกษตร-ธุรกิจขนาดย่อม"
+        },
+        {
+          "ticker": "KTB.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "ธนาคารรัฐ — สินเชื่อโครงการรัฐ/SME ขยายเมื่อรัฐอัดฉีดงบ"
+        },
+        {
+          "ticker": "TTB.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "ธนาคารเพื่อรายย่อย-ธุรกิจ ต้นทุนเงินฝากลด = NIM ฟื้นเร็ว"
+        },
+        {
+          "ticker": "TISCO.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "สินเชื่อรถยนต์-ไฟแนนซ์ ผูกกำลังซื้อฐานล่างและรอบผ่อนรถ"
+        },
+        {
+          "ticker": "KKP.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "สินเชื่อเช่าซื้อ-ธุรกิจ กำไรเด้งแรงเมื่อเศรษฐกิจไทยฟื้นชัด"
+        },
+        {
+          "ticker": "KTC.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "บัตรเครดิต-สินเชื่อบุคคล โตตามการบริโภคและการท่องเที่ยว"
+        },
+        {
+          "ticker": "BAY.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "กรุงศรีอยุธยา — สินเชื่อรถยนต์/ผู้บริโภค ผูกกำลังซื้อไทย"
+        }
+      ]
+    },
+    {
+      "id": "property-thai",
+      "type": "theme",
+      "name": "อสังหาฯ ไทย",
+      "yahoo": "LH.BK",
+      "upReason": "ดอกเบี้ยลง/มาตรการรัฐ (ลดภาระจำนอง/สินเชื่อเพื่อที่อยู่อาศัยผ่อนคลาย) = ยอดโอน-รอบเปิดโครงการดีขึ้นทั้งกลุ่มเด็กเลอร์",
+      "stocks": [
+        {
+          "ticker": "LH.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "strong",
+          "reason": "เด็กเลอร์รายใหญ่สุด ลูกบ้านระดับกลาง-บน ไวต่อดอกเบี้ยเงินกู้โดยตรง"
+        },
+        {
+          "ticker": "AP.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "strong",
+          "reason": "เด็กเลอร์หรู-ทำเลท็อป กำไรต่อหน่วงสูง หุ้นไวต่อ sentiment กลุ่ม"
+        },
+        {
+          "ticker": "QH.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "คอนโด-บ้านฐานกว้าง รอบเปิดไวต่อมาตรการกระตุ้นการซื้อบ้านแรก"
+        },
+        {
+          "ticker": "PLUS.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "ทางหลวง-โครงสร้างพื้นฐานภาครัฐ ผู้รับประโยชน์ตรงจากงบลงทุนภาครัฐ"
+        },
+        {
+          "ticker": "SIRI.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "เด็กเลอร์พันธมิตรแบรนด์ต่างชาติ โตตามตลาดบ้านจัดสรรทั้งประเทศ"
+        },
+        {
+          "ticker": "SC.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "ครัวสั่งซื้อ-เด็กเลอร์คาเดนซ่า โตทั้งในไทยและต่างประเทศ (อินเดีย)"
+        },
+        {
+          "ticker": "WHA.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "นิคมอุตสาหกรรม-โกดัง ผู้เช่าผูก FDI และภาคการผลิต/ดาต้าเซ็นเตอร์"
+        }
+      ]
+    },
+    {
+      "id": "petro-thai",
+      "type": "theme",
+      "name": "ปิโตรเคมีไทย",
+      "yahoo": "PTTGC.BK",
+      "upReason": "ส่วนต่างผลิตภัณฑ์ (spread) ขยาย — ราคาผลิตภัณฑ์ขึ้นเร็วกว่าวัตถุดิบน้ำมัน/ก๊าซ = กำไรกลุ่มเคมีบินสูง",
+      "stocks": [
+        {
+          "ticker": "PTTGC.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "strong",
+          "reason": "ผู้ผลิตโอเลฟินส์-PO รายใหญ่สุดของไทย ไวต่อ spread ตรงที่สุดในกลุ่ม"
+        },
+        {
+          "ticker": "IVL.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "strong",
+          "reason": "เคมีภัณฑ์ครบวงจรกระจายทั่วโลก กำไรผูก margin ทั้ง PET และกลุ่ม HVC"
+        },
+        {
+          "ticker": "SCC.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "ราชาเคมีภัณฑ์+วัสดุก่อสร้าง หลากหลายกำไร ผูกอุปสงค์จีนและก่อสร้างไทยด้วย"
+        }
+      ]
+    },
+    {
+      "id": "thai-power",
+      "type": "theme",
+      "name": "ผู้ผลิตไฟฟ้าไทย",
+      "yahoo": "GULF.BK",
+      "upReason": "ค่าไฟ FT ปรับขึ้น/ความต้องการไฟฟ้าโต (ดาต้าเซ็นเตอร์-EV) = ผู้ผลิตไฟเอกชนรายได้ขยาย โดยเฉพาะ RE ที่ต้นทุนต่ำลงต่อเนื่อง",
+      "stocks": [
+        {
+          "ticker": "GULF.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "strong",
+          "reason": "ผู้ผลิตไฟเอกชนใหญ่สุด โรงไฟก๊าซ+RE พร้อมเดิมพันใหม่ที่ดาต้าเซ็นเตอร์และไฟฟ้าแห่งอนาคต"
+        },
+        {
+          "ticker": "GPSC.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "พลังงานหลากหลาย (ก๊าซ/RE/ต่างประเทศ) ในเครือ CP ผูกความต้องการไฟภาคอุตสาหกรรม"
+        },
+        {
+          "ticker": "BGRIM.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "RE ลูกค้าอุตสาหกรรม+โครงการต่างประเทศ (ลาว/เวียดนาม) สัญญา PPA ระยะยาว"
+        },
+        {
+          "ticker": "EA.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "พลังงานลม-แบตเตอรี่-EV เดิมพันนโยบายพลังงานสะอาดทั้งกลุ่ม"
+        },
+        {
+          "ticker": "BCPG.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "โรงไฟหลัก-ชีวมวล-พลังน้ำเล็ก รายได้เสถียรผูกค่า FT และสัญญาซื้อขายไฟ"
+        }
+      ]
+    },
+    {
+      "id": "telecom-thai",
+      "type": "theme",
+      "name": "โทรคมนาคมไทย",
+      "yahoo": "ADVANC.BK",
+      "upReason": "ยอดใช้บริการ/รายได้ 5G ขยาย สงครามราคาเบาลง = กำไรและกระแสปันผลกลุ่มเทเลคอมไทยฟื้น",
+      "stocks": [
+        {
+          "ticker": "ADVANC.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "strong",
+          "reason": "AIS — ค่ายมือถือเบอร์ 1 ปันผลงาม ไวต่อ ARPU และความรุนแรงของสงครามราคา"
+        },
+        {
+          "ticker": "TRUE.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "ทรู คอร์ปอเรชั่น (รวม dtac แล้ว) กำไรเทิร์นราวด์ผูกวินัยราคาตลาด 2 ค่าย"
+        },
+        {
+          "ticker": "SAMART.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "ดาวเทียม-ระบบสื่อสารภาครัฐ/เอเชีย ได้จากสัญญารัฐและงานดาวเทียมโดยตรง"
+        }
+      ]
+    },
+    {
+      "id": "retail",
+      "type": "theme",
+      "name": "ค้าปลีก & การบริโภค",
+      "yahoo": "CPALL.BK",
+      "upReason": "กำลังซื้อคนไทย-นักท่องเที่ยวฟื้น = ยอดขาย same-store โตทั้งโมเดิร์นเทรดและรีเทลออนไลน์",
+      "stocks": [
+        {
+          "ticker": "CPALL.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "strong",
+          "reason": "เซเว่นอีเลฟเว่นทั่วไทย ยอดขายร้านคือเกจกำลังซื้อคนไทยแบบเรียลไทม์"
+        },
+        {
+          "ticker": "CRC.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "เซ็นทรัล-โรบินสัน-แม็คโคร ผูกทั้งคนไทยและกำลังซื้อนักท่องเที่ยว"
+        },
+        {
+          "ticker": "HMPRO.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "โฮมโปร — ผูกการลงทุนปรับปรุงบ้านและงานก่อสร้างภาคครัวเรือน"
+        },
+        {
+          "ticker": "DOHOME.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "โด เฮาส์ — วัสดุก่อสร้างปลีก ตามงานซ่อม-สร้างบ้าน"
+        },
+        {
+          "ticker": "GLOBAL.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "โกลบอล เฮาส์ โตตามหัวเมือง ผูกการก่อสร้างบ้านนอก กทม."
+        },
+        {
+          "ticker": "COM7.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "ผู้จัดจำหน่ายสมาร์ทโฟน-ไอที ผูกรอบเปิดตัวเครื่องใหม่และกำลังซื้อ"
+        },
+        {
+          "ticker": "WMT",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "วอลมาร์ท — ยักษ์ค้าปลีกสหรัฐ มาตรฐานเทียบรีเทลโลกและสุขภาพผู้บริโภค"
+        },
+        {
+          "ticker": "COST",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "คอสโต้ — สโมสรราคาส่ง สมาชิกจ่ายรายปี กำไรเสถียรตามการบริโภค"
+        }
+      ]
+    },
+    {
+      "id": "health-thai",
+      "type": "theme",
+      "name": "โรงพยาบาล & การแพทย์ไทย",
+      "yahoo": "BDMS.BK",
+      "upReason": "คนไข้ต่างชาติ (ตะวันออกกลาง/จีน/CLMV) กลับมาเต็ม + สิทธิประกัน-บัตรทองใช้บริการมากขึ้น = รายได้กลุ่มโรงพยาบาลฟื้นแรง",
+      "stocks": [
+        {
+          "ticker": "BDMS.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "strong",
+          "reason": "เครือโรงพยาบาลใหญ่สุดของไทย มีทั้งคนไข้ต่างชาติและฐานบัตรสวัสดิการกว้างที่สุด"
+        },
+        {
+          "ticker": "BH.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "strong",
+          "reason": "บำรุงราษฎร์ — สัดส่วนคนไข้ต่างชาติสูงสุด ไวต่อท่องเที่ยวเชิงการแพทย์ตรงที่สุด"
+        },
+        {
+          "ticker": "CHG.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "จุฬารัตน์ — โรงพยาบาลชุมชนนอก กทม. โตตามสิทธิการรักษาฐานล่าง"
+        },
+        {
+          "ticker": "RAM.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "รามาธิบดี — โรงพยาบาลตติยภูมิ ผสานคนไข้สิทธิประกันและต่างชาติ"
+        },
+        {
+          "ticker": "THG.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "ธนบุรีเฮลท์แคร์ — เครือธนบุรี + เครือข่ายลงทุนต่างประเทศ (สปป.ลาว)"
+        }
+      ]
+    },
+    {
+      "id": "thai-agro",
+      "type": "theme",
+      "name": "เกษตร & อาหารไทย",
+      "yahoo": "CPF.BK",
+      "upReason": "ราคาหมู-กุ้ง-ไก่ส่งออกขยับขึ้น ประกอบต้นทุนอาหารสัตว์ (ข้าวโพด/ปลาป่น) ที่ลดลง = กำไรกลุ่มเกษตร-อาหารไทยดีขึ้น",
+      "stocks": [
+        {
+          "ticker": "CPF.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "strong",
+          "reason": "ซีพีเอฟ — โปรตีนครบวงจรทั่วโลก ทั้งหมู ไก่ กุ้ง และอาหารสัตว์ สัญญาณของราคาโปรตีนโลก"
+        },
+        {
+          "ticker": "TU.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "strong",
+          "reason": "ทูน่า-กุ้ง-อาหารทะเลสำเร็จรูป รายได้ผูกราคาส่งออกอาหารทะเลโลกโดยตรง"
+        },
+        {
+          "ticker": "GFPT.BK",
+          "market": "TH",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "สุกร-อาหารสัตว์เบ็ดเสร็จ ผูกราคาหมูในประเทศตรงที่สุด"
+        }
+      ]
+    },
+    {
+      "id": "crypto",
+      "type": "theme",
+      "name": "คริปโต & ดิจิทัลแอสเซ็ต",
+      "yahoo": "BTC-USD",
+      "upReason": "บิตคอยน์ขึ้น = รายได้ค่าธรรมเนียม-กำไรถุงคริปโตของทุกบริษัทในห่วงโซ่บินตาม (แลกเปลี่ยน/ไมนิ่ง/คลาวด์)",
+      "stocks": [
+        {
+          "ticker": "COIN",
+          "market": "US",
+          "direction": "positive",
+          "strength": "strong",
+          "reason": "Coinbase — รายได้ค่าธรรมเนียมผูกโวลุ่มซื้อขายคริปโตตรงที่สุดในหุ้นสหรัฐ"
+        },
+        {
+          "ticker": "MSTR",
+          "market": "US",
+          "direction": "positive",
+          "strength": "strong",
+          "reason": "ไมโครสแตรเทจี — คลังบิตคอยน์ใหญ่สุดขององค์กร เด้งเหมือนบิตคอยน์แบบ leverage"
+        },
+        {
+          "ticker": "MARA",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "ขุดบิตคอยน์รายใหญ่ กำไรผูกราคาบิทและต้นทุนพลังงาน"
+        },
+        {
+          "ticker": "RIOT",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "ไมนิ่ง+ศูนย์ข้อมูล ไวต่อราคาบิตคอยน์สุดกลุ่ม"
+        },
+        {
+          "ticker": "CLSK",
+          "market": "US",
+          "direction": "positive",
+          "strength": "medium",
+          "reason": "ไมนิ่งพลังงานสะอาด ต้นทุนต่อเหรียญถูก กำไรผูก margin การขุด"
+        }
+      ]
     }
   ]
 }

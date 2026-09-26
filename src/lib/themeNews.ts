@@ -5,17 +5,20 @@
 // หมายเหตุ: ออกแบบให้ไม่ import radar.ts (radar จะ import ไฟล์นี้ — กัน circular)
 
 import { getNews } from "./yahoo";
+import { scoreNewsMany, type NewsScore } from "./typesafe";
 
 export interface ThemeNewsItem {
   title: string;
   source: string;
   link: string;
   time: number; // epoch ms
+  score?: NewsScore; // จาก Jev — มีเมื่อตั้ง TYPESAFE_API_KEY
 }
 export interface ThemeNews {
   count24h: number; // จำนวนชิ้นใน 24 ชม.จริง (โชว์ UI)
   weighted: number; // คะแนนถ่วงน้ำหนักตามความสด (≤24 ชม.=1, ≤48=0.5, ≤7 วัน=0.25)
   top: ThemeNewsItem[]; // ล่าสุดก่อน สูงสุด 3 ชิ้น
+  mood?: { dir: "bullish" | "bearish" | "neutral"; score: number }; // ทิศทางข่าวรวมของธีม (Jev)
 }
 
 // คิวรีอังกฤษให้ครอบคลุมกว่า (ข่าวไทยเรื่องมหภาคใน Yahoo/Google RSS มีน้อยกว่ามาก)
@@ -35,6 +38,18 @@ const THEME_QUERIES: Record<string, string | { q: string; th?: true }> = {
   travel: "tourism travel airline passengers recovery",
   ai: "artificial intelligence chip data center",
   thaipol: { q: "การเมืองไทย รัฐบาล เลือกตั้ง สภา", th: true },
+  // กลุ่มใหม่: ไทยใช้คิวรีไทย (ได้พาดหัวไทยจริง = จุดชนะ) · โลกใช้อังกฤษ
+  gold: "gold price rally bullion silver",
+  thaibank: { q: "ธนาคาร กำไร", th: true },
+  property: { q: "อสังหาริมทรัพย์ คอนโด เปิดโครงการ", th: true },
+  petro: { q: "ปิโตรเคมี เคมีภัณฑ์ ราคาผลิตภัณฑ์", th: true },
+  thaipower: { q: "ค่าไฟ ผู้ผลิตไฟฟ้า พลังงานหมุนเวียน", th: true },
+  telecom: { q: "โทรคมนาคม 5G มือถือ", th: true },
+  retail: { q: "ค้าปลีก ยอดขาย กำลังซื้อ ผู้บริโภค", th: true },
+  health: { q: "โรงพยาบาล คนไข้ต่างชาติ ท่องเที่ยวเชิงการแพทย์", th: true },
+  thaiagro: { q: "ราคาหมู กุ้ง ไก่ ส่งออกอาหาร", th: true },
+  crypto: "bitcoin ethereum crypto etf",
+  ev: "electric vehicle sales battery",
 };
 
 const CACHE_TTL = 15 * 60_000;
@@ -103,12 +118,34 @@ export async function getThemeNewsMap(): Promise<Record<string, ThemeNews>> {
       const uniq = merged
         .filter((n) => n.title && !seen.has(n.title.slice(0, 60)) && seen.add(n.title.slice(0, 60)))
         .sort((a, b) => b.time - a.time);
+      // ให้คะแนน sentiment/impact/คุณภาพ ข่าวบนสุดด้วย Jev (ถ้ามี key — แคชต่อพาดหัว 24 ชม.)
+      // สแกน 5 ชิ้นแล้วเลือก 3 ที่เป็น "ข่าวจริง" (substantive) — กรองวาไรตี้/โฆษณาออกก่อนโชว์
+      const pool = uniq.slice(0, 5);
+      let top: ThemeNewsItem[] = pool.slice(0, 3);
+      let mood: ThemeNews["mood"];
+      try {
+        const scores = await scoreNewsMany(pool.map((n) => n.title));
+        if (scores.size) {
+          const marked = pool.map((n) => ({ ...n, score: scores.get(n.title) }));
+          const substantive = marked.filter((n) => n.score?.substantive !== false);
+          top = (substantive.length >= 2 ? substantive : marked).slice(0, 3);
+          const sum = top.reduce((a, n) => {
+            const s = n.score;
+            if (!s) return a;
+            return a + (s.sentiment === "bullish" ? 1 : s.sentiment === "bearish" ? -1 : 0) * Math.max(0.3, s.impact);
+          }, 0);
+          mood = { dir: sum > 0.5 ? "bullish" : sum < -0.5 ? "bearish" : "neutral", score: Math.round(sum * 10) / 10 };
+        }
+      } catch {
+        // ไม่มี key/ยิงพัง = ข่าวยังโชว์ได้ แค่ไม่มี mood
+      }
       return [
         id,
         {
           count24h: uniq.filter((n) => Date.now() - n.time < 24 * 3600e3).length,
           weighted: uniq.reduce((a, n) => a + ageWeight(n.time), 0),
-          top: uniq.slice(0, 3),
+          top,
+          mood,
         },
       ] as const;
     })

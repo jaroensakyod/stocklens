@@ -3,6 +3,7 @@ import { getChart, getFundamentals, getNews, getQuotes, getUsdThb, deriveRatios 
 import { computeFactors } from "./factors";
 import { readTechnicals } from "./indicators";
 import { buildScenarios, type Scenarios } from "./scenarios";
+import { scoreNewsMany, credibilityBadge } from "./typesafe";
 import type { StockAnalysis } from "./types";
 
 export interface AnalysisConfidence {
@@ -25,6 +26,16 @@ export async function buildAnalysis(ticker: string): Promise<StockAnalysis & { u
     getNews(sym, 6),
   ]);
   const quote = quotes[sym] ?? { symbol: sym, name: sym, price: NaN, change: 0, changePct: 0, currency: "USD", exchange: "" };
+
+  // ให้คะแนนข่าวรายหุ้นด้วย Jev (ถ้ามี key — แคช 24 ชม./พาดหัว) + กรองข่าวขยะ/วาไรตี้ออก (คงไว้อย่างน้อย 3 ชิ้น)
+  const newsScores = await scoreNewsMany(news.map((n) => n.title)).catch(() => new Map());
+  const newsMarked = news.map((n) => {
+    const score = newsScores.get(n.title);
+    const cred = credibilityBadge(score ?? null, n.title);
+    return cred ? { ...n, score, cred } : { ...n, score };
+  });
+  const newsReal = newsMarked.filter((n) => n.score?.substantive !== false);
+  const newsScored = newsReal.length >= 3 ? newsReal : newsMarked;
 
   // อัตราแลกเปลี่ยนสำหรับหุ้นสหรัฐฯ (แสดงราคาบาท)
   const usdThb = quote.currency === "USD" ? await getUsdThb() : undefined;
@@ -90,5 +101,5 @@ export async function buildAnalysis(ticker: string): Promise<StockAnalysis & { u
   const scenarios =
     ratios.trailingPE && quote.price > 0 ? (buildScenarios(quote.price, quote.price / ratios.trailingPE, ratios.trailingPE, ratios.revenueGrowth, ratios.earningsGrowth) ?? undefined) : undefined;
 
-  return { quote, profile, financials, factors, technicals, news, usdThb, confidence, scenarios };
+  return { quote, profile, financials, factors, technicals, news: newsScored, usdThb, confidence, scenarios };
 }
