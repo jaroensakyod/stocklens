@@ -65,7 +65,7 @@ async function universe(region, n) {
 
 const toYahoo = (region, s) => (region === "thailand" ? s + ".BK" : s);
 
-async function chartDaily(sym) {
+async function chartDaily(sym, reg) {
   for (const host of ["query1", "query2"]) {
     try {
       const res = await fetch(`https://${host}.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?range=5y&interval=1d`, { headers: UA, signal: AbortSignal.timeout(20000) });
@@ -90,30 +90,44 @@ async function chartDaily(sym) {
   return [];
 }
 
-let region = "thailand";
 const SQL = `INSERT INTO prices_daily (date, symbol, open, high, low, close, volume, chg_pct) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   ON CONFLICT (date, symbol) DO UPDATE SET open=excluded.open, high=excluded.high, low=excluded.low, close=excluded.close, volume=excluded.volume, chg_pct=excluded.chg_pct`;
 
+// ข้ามตัวที่มีข้อมูลแล้ว (รอบเติมเต็มไม่ต้องดึงซ้ำ)
+const existing = new Set((await c.execute("SELECT DISTINCT symbol FROM prices_daily")).rows.map((r) => String(r.symbol)));
+console.log("มีอยู่แล้ว:", existing.size, "ตัว — จะข้าม");
+
+const WORKERS = Number(process.env.BF_WORKERS ?? 5); // ขนาน 5 ชุด (Yahoo อึดอัดน้อยกว่า batch quotes)
 for (const [reg, n] of [["thailand", N_TH], ["america", N_US]]) {
-  region = reg;
-  const syms = await universe(reg, n);
-  console.log(`\n== ${reg}: ${syms.length} ตัว (backfill 5 ปี) ==`);
+  let syms = await universe(reg, n);
+  const before = syms.length;
+  syms = syms.filter((s) => !existing.has(toYahoo(reg, s)));
+  console.log(`\n== ${reg}: เติม ${syms.length}/${before} ตัว (ขนาน ${WORKERS}) ==`);
   let done = 0;
-  for (const s of syms) {
-    const y = toYahoo(reg, s);
-    const rows = await chartDaily(y);
-    if (rows.length) {
-      try {
-        await c.batch(rows.map((r) => ({ sql: SQL, args: [r.date, y, r.open, r.high, r.low, r.close, Math.round(r.volume), r.chg === null ? null : Math.round(r.chg * 100) / 100] })), "write");
-        done++;
-      } catch (e) {
-        console.log("  ✗ turso", y, String(e).slice(0, 60));
+  let idx = 0;
+  const now = () => new Date().toISOString().slice(11, 19);
+  await Promise.all(
+    Array.from({ length: WORKERS }, async () => {
+      while (idx < syms.length) {
+        const my = idx++;
+        const s = syms[my];
+        if (!s) break;
+        const y = toYahoo(reg, s);
+        const rows = await chartDaily(y, reg);
+        if (rows.length) {
+          try {
+            await c.batch(rows.map((r) => ({ sql: SQL, args: [r.date, y, r.open, r.high, r.low, r.close, Math.round(r.volume), r.chg === null ? null : Math.round(r.chg * 100) / 100] })), "write");
+            done++;
+          } catch {
+            // ข้ามตัวที่ติด
+          }
+        }
+        if (done % 50 === 0 && done > 0) console.log(`  [${now()}] ... ${done}/${syms.length}`);
+        await new Promise((r) => setTimeout(r, Number(process.env.BF_DELAY ?? 120)));
       }
-    }
-    if ((done + 1) % 25 === 0) console.log(`  ... ${done} ตัวแล้ว`);
-    await new Promise((r) => setTimeout(r, 300));
-  }
+    })
+  );
   console.log(`== ${reg} เสร็จ: ${done}/${syms.length} ตัว ==`);
 }
-const total = await c.execute("SELECT COUNT(*) n, MIN(date) a, MAX(date) b FROM prices_daily");
+const total = await c.execute("SELECT COUNT(*) n, COUNT(DISTINCT symbol) s, MIN(date) a, MAX(date) b FROM prices_daily");
 console.log("\nคลังรวมตอนนี้:", JSON.stringify(total.rows[0]));
