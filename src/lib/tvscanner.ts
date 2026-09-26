@@ -19,7 +19,7 @@ export interface TvRow {
 
 export const TV_REGIONS: { id: string; label: string; flag: string; minCap: number }[] = [
   { id: "america", label: "สหรัฐฯ", flag: "🇺🇸", minCap: 3e8 },
-  { id: "thailand", label: "ไทย", flag: "🇹🇭", minCap: 3e8 },
+  { id: "thailand", label: "ไทย", flag: "🇹🇭", minCap: 3e7 }, // 30 ล้านบาท = ครอบทั้ง SET + mai (รวม ~876 ตัว)
   { id: "vietnam", label: "เวียดนาม", flag: "🇻🇳", minCap: 1e8 },
   { id: "indonesia", label: "อินโดนีเซีย", flag: "🇮🇩", minCap: 1e8 },
   { id: "singapore", label: "สิงคโปร์", flag: "🇸🇬", minCap: 1e8 },

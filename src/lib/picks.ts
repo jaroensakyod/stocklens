@@ -41,7 +41,7 @@ function tagOf(overall: number, dims: { valuation: number; growth: number; profi
 }
 
 async function buildPicks(): Promise<PicksResult> {
-  const [usAll, thAll, usdThb] = await Promise.all([tvUniverse("america", 600), tvUniverse("thailand", 400), getUsdThb()]);
+  const [usAll, thAll, usdThb] = await Promise.all([tvUniverse("america", 600), tvUniverse("thailand", 900), getUsdThb()]);
 
   // สหรัฐฯ: หุ้นใหญ่พอ (mcap USD ปกติใน universe america) ขยับพอสมควรแต่ไม่ใช่ปั๊มน้ำมัน
   // กรอง ticker ยาวเกิน 4 ตัวอักษร (เช่น OVCHF, MRAAF = OTC foreign ordinary ไม่มีสภาพคล่อง หาซื้อยากใน Dime)

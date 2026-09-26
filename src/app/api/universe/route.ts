@@ -8,14 +8,14 @@ export const dynamic = "force-dynamic";
 export async function GET(req: NextRequest) {
   const sp = req.nextUrl.searchParams;
   const region = TV_REGIONS.find((r) => r.id === (sp.get("region") || "america"))?.id ?? "america";
-  const limit = Math.min(Number(sp.get("limit")) || 200, 300);
+  const limit = Math.min(Number(sp.get("limit")) || 300, 1000);
   const sector = sp.get("sector") || "";
   const industry = sp.get("industry") || "";
   const ipoOnly = sp.get("ipo") === "1";
   const pmOnly = sp.get("pm") === "1";
   const q = (sp.get("q") || "").toLowerCase();
 
-  const all = await tvUniverse(region, region === "america" ? 1000 : 400);
+  const all = await tvUniverse(region, region === "america" || region === "thailand" ? 1000 : 400);
   if (!all.length) {
     return NextResponse.json({ error: "โหลด universe ไม่สำเร็จ (TradingView scanner) — ลองใหม่อีกครั้ง" }, { status: 502 });
   }
