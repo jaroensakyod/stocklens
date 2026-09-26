@@ -5,33 +5,60 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/lib/authContext";
 
-const NAV = [
+// ===== โครงแถบเมนู: 5 จุดหลัก — หน้าแรก / ค้นหาหุ้น / ภาพตลาด / พอร์ต / เครื่องมือ =====
+// ทุก dropdown มีคำอธิบายสั้นๆ กำกับ เพื่อให้ผู้ใช้ใหม่เข้าใจใน 3 วินาที
+type MenuLink = { href: string; label: string; desc: string };
+type MenuGroup = { id: string; title: string; emoji: string; items: MenuLink[] };
+
+const GROUPS: MenuGroup[] = [
+  {
+    id: "find",
+    title: "ค้นหาหุ้น",
+    emoji: "🔎",
+    items: [
+      { href: "/screener", label: "📡 Radars Builder", desc: "สร้างเรดาร์คัดกรองหุ้นตามเงื่อนไขของคุณ — 30 ตลาด, บันทึก/แชร์ได้" },
+      { href: "/surge", label: "🚀 หุ้นซิ่งวันนี้", desc: "สแกนหุ้นขยับแรงพร้อมสัญญาณ (ทะลุสูงสุด/วอลุ่มพุ่ง) หลายตลาด" },
+      { href: "/dr", label: "🪙 DR ไทย", desc: "หุ้นต้นทางของ DR ยอดนิยม + วิเคราะห์ภาษาไทยเต็มรูปแบบ" },
+      { href: "/compare", label: "⚖️ เทียบหุ้น", desc: "เทียบสถิติ 2-4 ตัวแบบคลิกเดียว — factors/งบ/สัญญาณ" },
+    ],
+  },
+  {
+    id: "market",
+    title: "ภาพตลาด",
+    emoji: "🌍",
+    items: [
+      { href: "/radar", label: "🌐 Radar เหตุการณ์", desc: "25 ธีมข่าวโลก (สงคราม/ดอกเบี้ย/AI...) → ห่วงโซ่หุ้นที่ได้-เสียประโยชน์" },
+      { href: "/supernova", label: "🛰️ มหภาค (Supernova)", desc: "ยีลด์ US10Y · VIX · ทอง · น้ำมัน · insider — รวมเป็นสัญญาณเดียว" },
+      { href: "/score", label: "🏆 อันดับ Score", desc: "คะแนน StockLens รวม 6 เสา — อันดับสูงสุด/ต่ำสุดของวัน" },
+    ],
+  },
+  {
+    id: "tools",
+    title: "เครื่องมือ",
+    emoji: "🧰",
+    items: [
+      { href: "/starter", label: "🧑‍🎓 พอร์ตมือใหม่รายวัน", desc: "ไอเดียพอร์ตเริ่มต้นสำหรับมือใหม่ ปรับทุกวัน" },
+      { href: "/model-portfolio", label: "💼 พอร์ตจำลอง AI", desc: "AI ปรับสมดุลพอร์ตจริงรายสัปดาห์ พร้อม NAV สะสม" },
+      { href: "/value", label: "🤿 ใต้น้ำ vs 🎈 แพงเกินตัว", desc: "หุ้นตกลึกเกินพื้นฐาน vs วิ่งเกินตัว — มุมมอง contrarian" },
+      { href: "/dividend", label: "📅 ปันผลรายเดือน", desc: "ปฏิทินรับปันผล + วางแผนกระแสเงินสด" },
+      { href: "/longterm", label: "💤 ระยะยาว & ปันผล", desc: "คัดหุ้นคุณภาพถือยาวสายปันผล" },
+      { href: "/backtest", label: "📊 Backtest กลยุทธ์", desc: "ทดสอบกลยุทธ์ย้อนหลัง เทียบ Buy & Hold" },
+      { href: "/timemachine", label: "🕰️ ไทม์แมชชีน", desc: "ถ้าซื้อเมื่อ N ปีก่อน วันนี้จะมีเท่าไหร่" },
+      { href: "/gurus", label: "🐋 พอร์ตกูรู 13F", desc: "หุ้นที่เหล่าฉลาม (Buffett ฯลฯ) ถือจริงตามฟิลิ่ง SEC" },
+      { href: "/advisor-test", label: "🧪 ทดสอบ AI ปรับพอร์ต", desc: "ลองยิง AI advisor ด้วยพอร์ตตัวอย่าง" },
+      { href: "/track-record", label: "📜 Track Record", desc: "สถิติคำแนะนำของระบบ เปิดให้ตรวจสอบทุกตัวเลข" },
+    ],
+  },
+];
+
+const PORTFOLIO = { href: "/portfolio", label: "พอร์ตของฉัน", desc: "พอร์ต + 🩻 X-ray + 🤖 AI ปรับพอร์ต + แจ้งเตือน" };
+
+const ALL_LINKS = [
   { href: "/", label: "หน้าแรก" },
-  { href: "/surge", label: "🚀 หุ้นซิ่ง" },
-  { href: "/radar", label: "Radar" },
-  { href: "/screener", label: "📡 Radars" },
-  { href: "/dr", label: "🪙 DR" },
-  { href: "/supernova", label: "🛰️ มหภาค" },
-  { href: "/score", label: "🏆 Score" },
-  { href: "/portfolio", label: "พอร์ต" },
+  ...GROUPS.flatMap((g) => g.items.map((i) => ({ href: i.href, label: i.label }))),
+  { href: PORTFOLIO.href, label: "💼 " + PORTFOLIO.label },
+  { href: "/pricing", label: "👑 VIP" },
 ];
-
-// เครื่องมือวิเคราะห์ — รวมเป็น dropdown เพื่อไม่ให้แถบบนแน่น
-const TOOLS = [
-  { href: "/starter", label: "🧑‍🎓 พอร์ตมือใหม่รายวัน" },
-  { href: "/model-portfolio", label: "💼 พอร์ตจำลอง AI รายสัปดาห์" },
-  { href: "/value", label: "🤿 ใต้น้ำ vs 🎈 แพงเกินตัว" },
-  { href: "/dividend", label: "📅 ปันผลรายเดือน + วางแผน" },
-  { href: "/longterm", label: "💤 ระยะยาว & ปันผล" },
-  { href: "/backtest", label: "📊 Backtest กลยุทธ์" },
-  { href: "/timemachine", label: "🕰️ ไทม์แมชชีน" },
-  { href: "/advisor-test", label: "🧪 ทดสอบ AI ปรับพอร์ต" },
-  { href: "/gurus", label: "🐋 พอร์ตกูรู 13F" },
-  { href: "/compare", label: "⚖️ เปรียบเทียบหุ้น" },
-  { href: "/track-record", label: "📜 Track Record" },
-];
-
-const ALL_LINKS = [...NAV, ...TOOLS, { href: "/pricing", label: "VIP" }];
 
 export default function Header() {
   const [q, setQ] = useState("");
@@ -57,6 +84,24 @@ export default function Header() {
     }, 300);
   }, [q]);
 
+  const Dropdown = ({ g }: { g: MenuGroup }) => (
+    <div className="relative group">
+      <button className="px-2.5 py-1.5 rounded-lg text-zinc-300 hover:text-zinc-50 hover:bg-base-800 whitespace-nowrap flex items-center gap-1">
+        {g.emoji} {g.title} <span className="text-[10px] opacity-60">▾</span>
+      </button>
+      <div className="hidden group-hover:block absolute left-0 top-full pt-1 z-50">
+        <div className="card min-w-80 p-1.5 shadow-xl shadow-black/40">
+          {g.items.map((t) => (
+            <Link key={t.href} href={t.href} className="block px-3 py-2 rounded-lg hover:bg-base-800">
+              <div className="text-sm text-zinc-200 whitespace-nowrap">{t.label}</div>
+              <div className="text-[10px] text-zinc-500 whitespace-nowrap">{t.desc}</div>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <header className="sticky top-0 z-40 bg-base-950/95 backdrop-blur border-b border-base-700/60">
       <div className="max-w-7xl mx-auto px-4 h-14 flex items-center gap-4">
@@ -68,26 +113,19 @@ export default function Header() {
         </Link>
 
         <nav className="hidden lg:flex items-center gap-0.5 text-sm">
-          {NAV.map((n) => (
-            <Link key={n.href} href={n.href} className="px-2.5 py-1.5 rounded-lg text-zinc-300 hover:text-zinc-50 hover:bg-base-800 whitespace-nowrap">
-              {n.label}
-            </Link>
-          ))}
-          {/* -dropdown เครื่องมือวิเคราะห์ */}
-          <div className="relative group">
-            <button className="px-2.5 py-1.5 rounded-lg text-zinc-300 hover:text-zinc-50 hover:bg-base-800 whitespace-nowrap flex items-center gap-1">
-              🧰 เครื่องมือ <span className="text-[10px] opacity-60">▾</span>
-            </button>
-            <div className="hidden group-hover:block absolute left-0 top-full pt-1 z-50">
-              <div className="card min-w-52 p-1.5">
-                {TOOLS.map((t) => (
-                  <Link key={t.href} href={t.href} className="block px-3 py-2 rounded-lg text-sm text-zinc-300 hover:text-zinc-50 hover:bg-base-800 whitespace-nowrap">
-                    {t.label}
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </div>
+          <Link href="/" className="px-2.5 py-1.5 rounded-lg text-zinc-300 hover:text-zinc-50 hover:bg-base-800 whitespace-nowrap">
+            หน้าแรก
+          </Link>
+          <Dropdown g={GROUPS[0]} />
+          <Dropdown g={GROUPS[1]} />
+          <Link
+            href={PORTFOLIO.href}
+            title={PORTFOLIO.desc}
+            className="px-2.5 py-1.5 rounded-lg text-zinc-300 hover:text-zinc-50 hover:bg-base-800 whitespace-nowrap"
+          >
+            💼 พอร์ตของฉัน
+          </Link>
+          <Dropdown g={GROUPS[2]} />
           <Link href="/pricing" className="ml-1 px-3 py-1.5 rounded-lg bg-accent/15 text-accent-soft font-bold hover:bg-accent/25 whitespace-nowrap">
             👑 VIP
           </Link>
@@ -137,12 +175,27 @@ export default function Header() {
         </button>
       </div>
       {menuOpen && (
-        <nav className="lg:hidden border-t border-base-700/60 px-4 py-2 flex flex-wrap gap-1">
-          {ALL_LINKS.map((n) => (
-            <Link key={n.href} href={n.href} className="px-3 py-1.5 rounded-lg text-sm text-zinc-300 hover:bg-base-800" onClick={() => setMenuOpen(false)}>
-              {n.label}
-            </Link>
+        <nav className="lg:hidden border-t border-base-700/60 px-4 py-3 space-y-2 max-h-[70vh] overflow-y-auto">
+          <Link href="/" className="block px-3 py-1.5 rounded-lg text-sm text-zinc-200" onClick={() => setMenuOpen(false)}>
+            🏠 หน้าแรก
+          </Link>
+          {GROUPS.map((g) => (
+            <div key={g.id}>
+              <div className="text-[10px] text-zinc-600 uppercase tracking-wide px-3 pt-1">{g.emoji} {g.title}</div>
+              {g.items.map((t) => (
+                <Link key={t.href} href={t.href} className="block px-3 py-1.5 rounded-lg text-sm text-zinc-300 hover:bg-base-800" onClick={() => setMenuOpen(false)}>
+                  {t.label}
+                  <span className="block text-[10px] text-zinc-600">{t.desc}</span>
+                </Link>
+              ))}
+            </div>
           ))}
+          <Link href={PORTFOLIO.href} className="block px-3 py-1.5 rounded-lg text-sm text-zinc-200" onClick={() => setMenuOpen(false)}>
+            💼 {PORTFOLIO.label}
+          </Link>
+          <Link href="/pricing" className="block px-3 py-1.5 rounded-lg text-sm text-accent-soft font-bold" onClick={() => setMenuOpen(false)}>
+            👑 VIP
+          </Link>
         </nav>
       )}
     </header>
