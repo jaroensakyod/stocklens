@@ -19,7 +19,8 @@ export interface ThemeNews {
 }
 
 // คิวรีอังกฤษให้ครอบคลุมกว่า (ข่าวไทยเรื่องมหภาคใน Yahoo/Google RSS มีน้อยกว่ามาก)
-const THEME_QUERIES: Record<string, string> = {
+// ธีมไทย (thaipol) ใช้คำค้นภาษาไทย + locale ไทย → ได้พาดหัวไทยจริง (จุดชนะฝั่งของไทย)
+const THEME_QUERIES: Record<string, string | { q: string; th?: true }> = {
   war: "war missile strike geopolitical tension",
   trade: "tariff trade war sanctions export controls",
   food: "food prices crop wheat harvest shortage",
@@ -33,16 +34,18 @@ const THEME_QUERIES: Record<string, string> = {
   credit: "bank failure credit crisis financial stress default",
   travel: "tourism travel airline passengers recovery",
   ai: "artificial intelligence chip data center",
-  thaipol: "Thailand politics government election parliament",
+  thaipol: { q: "การเมืองไทย รัฐบาล เลือกตั้ง สภา", th: true },
 };
 
 const CACHE_TTL = 15 * 60_000;
 let cache: { at: number; map: Record<string, ThemeNews> } | null = null;
 
 /** Google News RSS → ไอเทม (regex parse หัวข้อ/ลิงก์/เวลา — โครงสร้าง RSS คงที่พอ)
- *  window: "1d" = เฉพาะข่าว 24 ชม.ล่าสุด (ไว้ตีความร้อน) · "7d" = สัปดาห์ล่าสุด (context ยามไม่มีข่าวสด) */
-async function googleNewsRss(query: string, window: "1d" | "7d", limit = 8): Promise<ThemeNewsItem[]> {
-  const url = `https://news.google.com/rss/search?q=${encodeURIComponent(query + " when:" + window)}&hl=en-US&gl=US&ceid=US:en`;
+ *  window: "1d" = เฉพาะข่าว 24 ชม.ล่าสุด (ไว้ตีความร้อน) · "7d" = สัปดาห์ล่าสุด (context ยามไม่มีข่าวสด)
+ *  th = ค้นภาษาไทยจากฉบับไทย (hl=th) — ใช้กับธีมการเมืองไทย */
+async function googleNewsRss(query: string, window: "1d" | "7d", limit = 8, th = false): Promise<ThemeNewsItem[]> {
+  const loc = th ? "hl=th&gl=TH&ceid=TH:th" : "hl=en-US&gl=US&ceid=US:en";
+  const url = `https://news.google.com/rss/search?q=${encodeURIComponent(query + " when:" + window)}&${loc}`;
   try {
     const res = await fetch(url, {
       headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" },
@@ -84,10 +87,12 @@ export async function getThemeNewsMap(): Promise<Record<string, ThemeNews>> {
   const ids = Object.keys(THEME_QUERIES);
   const results = await Promise.allSettled(
     ids.map(async (id) => {
-      const q = THEME_QUERIES[id];
+      const cfg = THEME_QUERIES[id];
+      const q = typeof cfg === "string" ? cfg : cfg.q;
+      const isTh = typeof cfg === "object" && cfg.th === true;
       // Google News: เอาข่าวสด 24 ชม.ก่อน ถ้าเงียบมากค่อยขยายเป็นสัปดาห์ (weight ต่ำลงเอง)
-      let google = await googleNewsRss(q, "1d");
-      if (google.length < 2) google = await googleNewsRss(q, "7d");
+      let google = await googleNewsRss(q, "1d", 8, isTh);
+      if (google.length < 2) google = await googleNewsRss(q, "7d", 8, isTh);
       const [yahoo] = await Promise.all([getNews(q, 10, 36 * 3600e3).catch(() => [])]);
       const merged = [
         ...yahoo.map((n) => ({ title: n.title, source: n.publisher, link: n.link, time: n.time })),

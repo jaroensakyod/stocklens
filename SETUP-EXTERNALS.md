@@ -55,4 +55,26 @@ ALPACA_SECRET_KEY=<secret>
 |---|---|---|
 | `LINE_CHANNEL_ACCESS_TOKEN` | เปิด LINE ทั้งระบบ (broadcast/admin + Flash Report cron) | **ต้องใส่** |
 | `CRON_SECRET` | ล็อก `/api/cron/flash` | แนะนำใส่ตอน deploy |
-| `ALPACA_KEY_ID` + `ALPACA_SECRET_KEY` | real-time US (อนาคต) | เผื่อไว้ |
+| `ALPACA_KEY_ID` + `ALPACA_SECRET_KEY` | real-time US | ใส่แล้ว (paper) |
+| `FRED_API_KEY` | macro ทางการ US (ดอกเบี้ย/เงินเฟ้อ/ว่างงาน) เสริมคลัง kb | optional — สมัครฟรี 5 นาที ด้านล่าง |
+
+## 4) FRED — macro ทางการสหรัฐฯ (optional, แนะนำ)
+
+คลัง `kb:macro` ใช้ Yahoo indexes ได้อยู่แล้ว — ใส่ FRED key เมื่อไหร่จะได้ **ตัวเลขทางการ** (อัตรา 10 ปี/2 ปี, เงินเฟ้อ CPI YoY, อัตราว่างงาน) เข้าแชท AI ทันที:
+
+1. สมัครฟรี: https://fredaccount.stlouisfed.org/apikeys → ขอ API Key (กรอกว่าใช้ทำ research)
+2. ใส่ env: `FRED_API_KEY=<key>` (ทั้งเครื่องและ Vercel)
+
+ไม่มีค่าใช้จ่าย ไม่จำกัดโดย practical (อยู่ใน fair use สบาย)
+
+## 5) BOT API — macro ไทยทางการ (optional รอสมัคร)
+
+ธนาคารแห่งประเทศไทยมี API ฟรี (ดอกเบี้ยนโยบาย/อัตราแลกเปลี่ยน/เงินเฟ้อไทย) — ตอนนี้คลัง `kb:macro` ใช้ THB/SET จาก Yahoo ไปก่อน:
+
+1. สมัคร developer: https://apiportal.bot.or.th → สร้าง subscription key ฟรี
+2. เลือก dataset ที่อยากได้ (เช่น อัตราดอกเบี้ยนโยบาย, ค่าเงินบาท) แล้วส่งชื่อ endpoint + key มาให้ AI ต่อเข้า `src/lib/macro.ts` (โครงรองรับ env เพิ่มได้ทันทีแบบ FRED)
+
+## 6) KB Prewarm — อุ่นคลังความรู้
+
+- **อัตโนมัติ**: Vercel Cron `/api/cron/kb` รายวัน 01:30 เวลาไทย อุ่นหุ้นไทย top 25 (ผู้ใช้คนแรกของวันไม่ต้องรอโหลด)
+- **มือ (แอดมิน)**: `curl -X POST -H "x-admin-code: <ADMIN_CODE>" -H "Content-Type: application/json" -d '{"market":"us","n":15}' https://<เว็บ>/api/admin/kb-warm` — อุ่นหุ้น US พร้อม EDGAR ลึกขึ้น (ช้า ~13 วิ/ตัว)
