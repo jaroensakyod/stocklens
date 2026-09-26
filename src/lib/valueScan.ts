@@ -58,9 +58,9 @@ async function build(): Promise<ValueResult> {
 
   // ผู้สมัครฝั่ง "ใต้น้ำ": วันนี้ไม่วิ่งแรง — ครึ่งหนึ่งเอาตัวใหญ่สุด (สภาพคล่อง) อีกครึ่งเอาตัวที่ตกแรงสุดของวัน แล้วให้เกณฑ์ 52w/ปัจจัยกรองเอง
   const downPool = [...usAll, ...thAll].filter((r) => r.changePct <= 0.8).sort((a, b) => b.mcap - a.mcap);
-  const bigDown = downPool.slice(0, 14);
+  const bigDown = downPool.slice(0, 26);
   const bigSyms = new Set(bigDown.map((r) => r.sym));
-  const dropDown = downPool.filter((r) => !bigSyms.has(r.sym)).sort((a, b) => a.changePct - b.changePct).slice(0, 12);
+  const dropDown = downPool.filter((r) => !bigSyms.has(r.sym)).sort((a, b) => a.changePct - b.changePct).slice(0, 34);
   const downSel = [...bigDown, ...dropDown];
   // ผู้สมัครฝั่ง "แพงเกิน": กำลังวิ่งแรงวันนี้ (ตัวที่ตลาดปั๊ม — เช็คว่าแพงจริงไหม)
   const upSel = [...usAll]
@@ -139,7 +139,7 @@ async function build(): Promise<ValueResult> {
       };
     })
     .sort((a, b) => b.score - a.score)
-    .slice(0, 6);
+    .slice(0, 12);
 
   // 🎈 แพงเกินตัว: ความแพงต่ำ (≤45) + ร้อนเกิน (RSI≥68 หรือวิ่งเหนือ SMA200 ≥25% หรือติดยอด) + วันนี้วิ่งแรง
   const overpriced = rows
