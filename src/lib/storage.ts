@@ -24,11 +24,11 @@ export async function kvGet<T>(key: string): Promise<T | null> {
   }
 }
 
-/** เขียน JSON ลง Redis */
-export async function kvSet(key: string, value: unknown): Promise<boolean> {
+/** เขียน JSON ลง Redis (ttlSec = อายุ key แบบหมดเวลา เช่น cache 10 นาที = 600) */
+export async function kvSet(key: string, value: unknown, ttlSec?: number): Promise<boolean> {
   if (!hasDB()) return false;
   try {
-    const res = await fetch(`${URL_}/set/${key}`, {
+    const res = await fetch(`${URL_}/set/${key}${ttlSec ? `?EX=${ttlSec}` : ""}`, {
       method: "POST",
       headers: { Authorization: `Bearer ${TOKEN}`, "Content-Type": "application/json" },
       body: JSON.stringify(value),

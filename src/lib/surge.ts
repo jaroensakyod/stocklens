@@ -27,23 +27,33 @@ interface SurgeRow {
 export let cached: { at: number; data: { rows: SurgeRow[]; asOf: string } } | null = null;
 const TTL = 10 * 60 * 1000;
 
-async function scan(region: "america" | "thailand", out: SurgeRow[], usdThb: number) {
-  const all = await tvUniverse(region, region === "america" ? 600 : 400);
-  const minCap = region === "america" ? 3e8 : 3e8; // สภาพคล่องขั้นต่ำ ~300M USD เทียบเท่า
+// ตลาดที่สแกนหุ้นซิ่ง — เดิมมีแค่ US+ไทย ตอนนี้ครอบเอเชียหลัก (mcapMin แปลงเป็น "เทียบเท่า USD หยาบๆ" ตามสกุลท้องถิ่น)
+const SURGE_REGIONS: { id: string; flag: string; currency: string; univ: number; mcapMin: number; usOnly?: boolean }[] = [
+  { id: "america", flag: "🇺🇸", currency: "USD", univ: 600, mcapMin: 3e8, usOnly: true },
+  { id: "thailand", flag: "🇹🇭", currency: "THB", univ: 400, mcapMin: 1e10 }, // ~300M USD
+  { id: "hongkong", flag: "🇭🇰", currency: "HKD", univ: 400, mcapMin: 2.3e9 },
+  { id: "japan", flag: "🇯🇵", currency: "JPY", univ: 400, mcapMin: 4.5e10 },
+  { id: "korea", flag: "🇰🇷", currency: "KRW", univ: 300, mcapMin: 4e11 },
+  { id: "taiwan", flag: "🇹🇼", currency: "TWD", univ: 300, mcapMin: 9e9 },
+  { id: "china", flag: "🇨🇳", currency: "CNY", univ: 300, mcapMin: 2e9 },
+];
+
+async function scan(region: (typeof SURGE_REGIONS)[number], out: SurgeRow[], usdThb: number) {
+  const all = await tvUniverse(region.id, region.univ);
   const cands = all
     .filter(
       (r) =>
         r.price > 1 &&
-        r.mcap >= minCap &&
+        r.mcap >= region.mcapMin && // สภาพคล่องขั้นต่ำ ~300M USD เทียบเท่า (คร่าวๆ ตามสกุลท้องถิ่น)
         r.changePct >= 3 &&
         r.changePct <= 25 && // เกิน 25% มักเป็น halts/circuit หรือหุ้นปั๊ม
-        (region === "thailand" || (r.symbol.length <= 4 && /^[A-Z]+$/.test(r.symbol)))
+        (!region.usOnly || (r.symbol.length <= 4 && /^[A-Z]+$/.test(r.symbol)))
     )
     .sort((a, b) => b.changePct - a.changePct)
-    .slice(0, 14);
+    .slice(0, 10);
 
   for (const c of cands) {
-    const yahoo = toYahooSymbol(region, c.symbol);
+    const yahoo = toYahooSymbol(region.id, c.symbol);
     try {
       const candles = await getChart(yahoo, "1Y");
       if (candles.length < 25) continue;
@@ -72,9 +82,9 @@ async function scan(region: "america" | "thailand", out: SurgeRow[], usdThb: num
         ticker: yahoo,
         name: c.name.includes("_") ? c.name.split("_").pop()! : c.name,
         sector: c.sector || "—",
-        market: region === "america" ? "🇺🇸" : "🇹🇭",
+        market: region.flag,
         price: c.price,
-        currency: region === "america" ? "USD" : "THB",
+        currency: region.currency,
         changePct: Math.round(c.changePct * 100) / 100,
         volRatio: volRatio ? Math.round(volRatio * 10) / 10 : null,
         pctFrom52wHigh: Math.round(pctFromHigh * 10) / 10,
@@ -82,7 +92,7 @@ async function scan(region: "america" | "thailand", out: SurgeRow[], usdThb: num
         marketCapB: Math.round(c.mcap / 1e9 * 10) / 10,
         flags,
         surgeScore: Math.round(surgeScore),
-        dime: region === "america" ? `ซื้อได้ใน Dime ≈ ${(c.price * usdThb).toFixed(0)}฿` : null,
+        dime: region.id === "america" ? `ซื้อได้ใน Dime ≈ ${(c.price * usdThb).toFixed(0)}฿` : null,
       });
     } catch {
       // ตัวไหนดึงกราฟไม่ได้ข้ามไป
@@ -93,9 +103,12 @@ async function scan(region: "america" | "thailand", out: SurgeRow[], usdThb: num
 async function build(): Promise<{ rows: SurgeRow[]; asOf: string }> {
   const usdThb = await getUsdThb().catch(() => 33);
   const rows: SurgeRow[] = [];
-  await Promise.all([scan("america", rows, usdThb), scan("thailand", rows, usdThb)]);
+  // ทยอยเป็นกลุ่มๆ กันยิงพร้อมกันทีเดียวเต็มที่ (7 ตลาด × universe + chart ต่อตัว)
+  for (let i = 0; i < SURGE_REGIONS.length; i += 3) {
+    await Promise.all(SURGE_REGIONS.slice(i, i + 3).map((r) => scan(r, rows, usdThb)));
+  }
   rows.sort((a, b) => b.surgeScore - a.surgeScore);
-  return { rows: rows.slice(0, 12), asOf: new Date().toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" }) + " น." };
+  return { rows: rows.slice(0, 15), asOf: new Date().toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" }) + " น." };
 }
 
 export async function getSurge(): Promise<{ rows: SurgeRow[]; asOf: string }> {

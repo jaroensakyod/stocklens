@@ -121,6 +121,21 @@ export default function StockPage() {
               {sectorInfo.industry && <span className="chip bg-base-800 text-zinc-500 border border-base-700">{sectorInfo.industry}</span>}
             </div>
           )}
+          {/* ลิงก์ข้อมูลเชิงลึกจากต้นทาง — เราเป็นชั้นวิเคราะห์ อยากลึกกว่านี้ให้ไปต่อที่ต้นฉบับ */}
+          <div className="flex gap-1.5 mt-1.5 flex-wrap">
+            {q.symbol.endsWith(".BK") ? (
+              <>
+                <a className="chip bg-base-800 text-zinc-400 border border-base-700 hover:text-accent-soft" href={`https://www.set.or.th/th/market/product/stock/quotes/${q.symbol.replace(".BK", "")}/financial-analysis`} target="_blank" rel="noopener noreferrer">📊 งบการเงิน (SET)</a>
+                <a className="chip bg-base-800 text-zinc-400 border border-base-700 hover:text-accent-soft" href={`https://www.set.or.th/th/market/product/stock/quotes/${q.symbol.replace(".BK", "")}/company-highlight`} target="_blank" rel="noopener noreferrer">📄 ข้อมูลบริษัท / 56-1 (SET)</a>
+              </>
+            ) : (
+              <>
+                <a className="chip bg-base-800 text-zinc-400 border border-base-700 hover:text-accent-soft" href={`https://finance.yahoo.com/quote/${encodeURIComponent(q.symbol)}/financials/`} target="_blank" rel="noopener noreferrer">📊 งบการเงิน (Yahoo)</a>
+                <a className="chip bg-base-800 text-zinc-400 border border-base-700 hover:text-accent-soft" href={`https://finance.yahoo.com/quote/${encodeURIComponent(q.symbol)}/analysis/`} target="_blank" rel="noopener noreferrer">🎯 คอนเซนเซินัสวิเคราะห์ (Yahoo)</a>
+              </>
+            )}
+            <a className="chip bg-base-800 text-zinc-400 border border-base-700 hover:text-accent-soft" href={`https://finance.yahoo.com/quote/${encodeURIComponent(q.symbol)}/news/`} target="_blank" rel="noopener noreferrer">📰 ข่าวล่าสุด</a>
+          </div>
         </div>
         <div className="ml-auto text-right">
           <div className="num text-3xl font-bold text-zinc-50">{q.price.toFixed(2)} <span className="text-sm text-zinc-500">{q.currency}</span></div>

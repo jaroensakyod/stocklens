@@ -4,6 +4,7 @@ import { NextRequest } from "next/server";
 import { requireMember } from "@/lib/auth";
 import { assembleGrounding, type ChatHolding } from "@/lib/chatIntents";
 import { chatStream, hasAI, SYSTEM_ANALYST, friendlyAIError } from "@/lib/ai";
+import { kvGet, kvSet } from "@/lib/storage";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -66,13 +67,36 @@ export async function POST(req: NextRequest) {
   const sys = SYSTEM_ANALYST + CHAT_RULES;
   const aiMessages = [
     { role: "system" as const, content: sys },
-    ...(packet ? [{ role: "system" as const, content: `ข้อมูลจริงประกอบคำตอบ:\n${packet}` }] : []),
+    ...(packet ? [{ role: "system" as const, content: `ข้อมูลจริงประกอบคำตอบ (อ้างตัวเลขในนี้ตรงๆ ห้ามคำนวณยอดรวม/สัดส่วน/เปอร์เซ็นต์เพิ่มเอง):\n${packet}` }] : []),
     ...history,
   ];
 
   try {
+    // ===== Cache คำตอบ 10 นาที: คำถามสาธารณะ (หุ้น/ตลาด/กูรู/ศัพท์) ที่คนถามซ้ำกันเยอะ =====
+    // เว้น intent ส่วนตัว (portfolio/watchlist — ผูกข้อมูลรายบุคคล แคชไม่ได้)
+    const personal = intents.some((x) => x === "portfolio" || x === "watchlist");
+    const cacheKey = !personal
+      ? `aic:${isPro ? "p" : "s"}:${intents.slice().sort().join(",")}:${tickers.join(",")}:${Buffer.from(lastUser.trim().toLowerCase()).toString("base64url").slice(0, 60)}`
+      : null;
+    if (cacheKey) {
+      const hit = await kvGet<string>(cacheKey);
+      if (hit) {
+        return new Response(hit, { headers: { "Content-Type": "text/plain; charset=utf-8", "X-AI-Mode": "live", "X-Cache": "hit", "X-Intents": intents.join(","), "X-Tickers": tickers.join(",") } });
+      }
+    }
     const stream = await chatStream(aiMessages, 0.5, isPro ? 3500 : 2048);
-    return new Response(stream, { headers: { "Content-Type": "text/plain; charset=utf-8", "X-AI-Mode": "live", "X-Intents": intents.join(","), "X-Tickers": tickers.join(",") } });
+    if (!cacheKey) {
+      return new Response(stream, { headers: { "Content-Type": "text/plain; charset=utf-8", "X-AI-Mode": "live", "X-Intents": intents.join(","), "X-Tickers": tickers.join(",") } });
+    }
+    // ส่งต่อ stream ให้ผู้ใช้ทันที แล้วเก็บสำเนาแบบสงบๆ ลง cache (tee = แยกสายอ่าน 2 ทาง)
+    const [toUser, toCache] = stream.tee();
+    (async () => {
+      try {
+        const text = await new Response(toCache).text();
+        if (text.length > 40 && !text.startsWith("⚠️")) await kvSet(cacheKey!, text, 600);
+      } catch {}
+    })();
+    return new Response(toUser, { headers: { "Content-Type": "text/plain; charset=utf-8", "X-AI-Mode": "live", "X-Cache": "miss", "X-Intents": intents.join(","), "X-Tickers": tickers.join(",") } });
   } catch (e) {
     const msg = `⚠️ ${friendlyAIError(e)} — แสดงข้อมูลจริงแทน\n\n` + (demoReply || "ลองใหม่อีกครั้งครับ");
     return new Response(msg, { headers: { "Content-Type": "text/plain; charset=utf-8", "X-AI-Mode": "demo" } });
