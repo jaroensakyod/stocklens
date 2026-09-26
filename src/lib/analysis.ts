@@ -3,7 +3,8 @@ import { getChart, getFundamentals, getNews, getQuotes, getUsdThb, deriveRatios 
 import { computeFactors } from "./factors";
 import { readTechnicals } from "./indicators";
 import { buildScenarios, type Scenarios } from "./scenarios";
-import { scoreNewsMany, credibilityBadge } from "./typesafe";
+import { scoreNewsMany, credibilityBadge, heuristicRisk } from "./typesafe";
+import { saveNews } from "./turso";
 import type { StockAnalysis } from "./types";
 
 export interface AnalysisConfidence {
@@ -36,6 +37,12 @@ export async function buildAnalysis(ticker: string): Promise<StockAnalysis & { u
   });
   const newsReal = newsMarked.filter((n) => n.score?.substantive !== false);
   const newsScored = newsReal.length >= 3 ? newsReal : newsMarked;
+  // 📰 สะสมข่าวรายหุ้น + คะแนนเป็นของเรา (fire-and-forget ไม่กระทบความเร็วหน้า)
+  void saveNews(newsMarked.map((n) => ({
+    title: n.title, source: n.publisher, link: n.link, pubTime: n.time, themeId: sym,
+    jevSentiment: n.score?.sentiment, jevImpact: n.score?.impact, jevSubstantive: n.score?.substantive, jevSuspicious: n.score?.suspicious,
+    heuristicRisk: heuristicRisk(n.title), credibility: (n as { cred?: { label: string } }).cred?.label,
+  })));
 
   // อัตราแลกเปลี่ยนสำหรับหุ้นสหรัฐฯ (แสดงราคาบาท)
   const usdThb = quote.currency === "USD" ? await getUsdThb() : undefined;

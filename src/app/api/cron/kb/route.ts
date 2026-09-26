@@ -9,6 +9,9 @@ import { kbFundamentals } from "@/lib/kb";
 import { computeScore, recordScoreHistory } from "@/lib/score";
 import { getQuotes } from "@/lib/yahoo";
 import { kvGet, kvSet } from "@/lib/storage";
+import { savePrices, saveScore, saveNews, saveThemeDay } from "@/lib/turso";
+import { getThemeNewsMap } from "@/lib/themeNews";
+import { computeThemeHeat } from "@/lib/radar";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -39,8 +42,14 @@ export async function GET(req: NextRequest) {
   const quotes = await getQuotes(snapSymbols).catch(() => ({}));
   const today = new Date().toISOString().slice(0, 10);
   const snap: Record<string, number> = {};
-  for (const [k, q] of Object.entries(quotes)) if (isFinite(q.price)) snap[k] = q.price;
+  const priceRows = [];
+  for (const [k, q] of Object.entries(quotes)) {
+    if (isFinite(q.price)) snap[k] = q.price;
+    priceRows.push({ date: today, symbol: k, close: q.price, chgPct: q.changePct });
+  }
   await kvSet(`snap:q:${today}`, { at: Date.now(), prices: snap }, 800 * 86_400).catch(() => {});
+  // คลังถาวร Turso: ราคาปิดรายวัน (OHLCV เต็มได้จาก backfill script)
+  await savePrices(priceRows);
 
   // ---- 3) Score รายวัน + league ----
   let scored = 0;
@@ -48,9 +57,27 @@ export async function GET(req: NextRequest) {
     const s = await computeScore(sym).catch(() => null);
     if (s) {
       await recordScoreHistory(sym);
+      await saveScore({ date: today, symbol: sym, total: s.total, ...s.pillars, confidence: s.confidence });
       scored++;
     }
   }
+  // 📰 คลังข่าวประจำวัน + ธีม heat/mood → Turso (สะสมเป็นของเรา แทนที่จะระเหยหมด)
+  try {
+    const [heat, newsMap] = await Promise.all([computeThemeHeat(), getThemeNewsMap()]);
+    const newsRows = [];
+    for (const h of heat) {
+      await saveThemeDay(today, h.theme.id, h.heat, h.mood?.dir ?? null, h.mood?.score ?? null, h.newsCount);
+      for (const n of h.newsTop ?? []) {
+        const ns = (n as { score?: { sentiment?: string; impact?: number; substantive?: boolean; suspicious?: boolean } }).score;
+        newsRows.push({
+          title: n.title, source: n.source, link: n.link, pubTime: n.time, themeId: h.theme.id,
+          jevSentiment: ns?.sentiment, jevImpact: ns?.impact, jevSubstantive: ns?.substantive, jevSuspicious: ns?.suspicious,
+        });
+      }
+    }
+    void newsMap; // (news map ถูกใช้ผ่าน computeThemeHeat แล้ว)
+    await saveNews(newsRows);
+  } catch {}
   // league: รวมจาก history ล่าสุดของทุกตัวที่เคยบันทึก (สะสมไปเรื่อยๆ)
   const league = await buildLeague(targets);
 

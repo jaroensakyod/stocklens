@@ -110,3 +110,20 @@ ALPACA_SECRET_KEY=<secret>
 - โครงสร้างไฟล์ที่เจอะไว้แล้ว: `src/lib/earnings.ts` (fetch + cache Redis 24 ชม. ต่อวัน) + `/api/earnings-calendar?week=` + การ์ด "📅 งบสัปดาห์นี้" ในหน้าแรก + chip ในหน้าหุ้น (ต่อยอด nextEarnings ที่เตรียมไว้ใน `/api/analyst` แล้ว)
 - ตัวเลือกเสริมเมื่อออกงบจริง: ดึง actual EPS vs estimate จาก FMP + ให้ Jev สรุป "ดีกว่า/แย่กว่าคาด" ต่อหุ้น → ปรับเสา News/Street ของ StockLens Score อัตโนมัติ
 - ทางเลือกฟรีที่ยังไม่ได้ลองทั้งหมด: Nasdaq.com earnings calendar (scrape ได้แต่เปราะ), Alpha Vantage earnings calendar (ฟรี 25 req/วัน — น้อยไปสำหรับทั้งตลาด)
+
+---
+
+## 🗄️ Turso — คลังข้อมูลถาวรของเรา (ราคา OHLCV · Score · ข่าว · ธีม) เพื่อพัฒนา AI
+
+**สมัคร:** [turso.tech](https://turso.tech) ด้วย GitHub (ไม่ต้องบัตร) → `turso db create stocklens` → `turso db show stocklens --url` + `--auth-token`
+**Env:** `TURSO_DATABASE_URL` + `TURSO_AUTH_TOKEN` (ทั้ง .env.local และ Vercel)
+
+**ตาราง:** `prices_daily` (OHLCV รายวัน) · `scores_daily` (Score 6 เสา) · `news` (พาดหัว+คะแนน Jev สะสมถาวร) · `themes_daily` (heat/mood)
+
+**ทำงานอัตโนมัติ:** cron รายวัน (/api/cron/kb) dual-write ราคา+Score+ข่าวทั้ง 25 ธีม · หน้าหุ้นทุกครั้งที่เปิด = เก็บข่าวรายหุ้น fire-and-forget
+
+**Backfill ครั้งแรก (สำคัญ):** `node scripts/backfill-turso.mjs` — ย้อนราคา 5 ปี ไทย 300 + US 200 ตัว (~10 นาที) · เพิ่มเติม: `node scripts/backfill-turso.mjs 876 500` = ครบทั้งตลาด
+
+**เช็คคลัง:** `curl -H "x-admin-code: <ADMIN_CODE>" https://<เว็บ>/api/admin/data-status`
+
+**พัฒนา AI บนของเรา:** export Turso → Parquet/DuckDB → Python ในเครื่อง (เทรน/ตรวจสอบ Score, ทำ news→price signal) — ข่าว+Score ย้อนหลังต้องสะสมเอง ราคาย้อนหลังมี backfill
