@@ -127,3 +127,10 @@ ALPACA_SECRET_KEY=<secret>
 **เช็คคลัง:** `curl -H "x-admin-code: <ADMIN_CODE>" https://<เว็บ>/api/admin/data-status`
 
 **พัฒนา AI บนของเรา:** export Turso → Parquet/DuckDB → Python ในเครื่อง (เทรน/ตรวจสอบ Score, ทำ news→price signal) — ข่าว+Score ย้อนหลังต้องสะสมเอง ราคาย้อนหลังมี backfill
+
+## 🌏 เติมหุ้นตลาดอื่นๆ ลงคลัง Turso (เอเชีย+ยุโรป 16 ตลาด)
+```
+BF_WORKERS=2 BF_DELAY=600 BF_REGIONS="vietnam:100,indonesia:100,singapore:100,malaysia:100,philippines:60,hongkong:120,china:120,taiwan:100,japan:150,korea:100,india:120,australia:100,canada:100,uk:100,germany:80,france:80" node scripts/backfill-turso.mjs 0 0
+```
+- ข้ามตัวที่มีแล้วอัตโนมัติ รันซ้ำได้เรื่อยๆ จนครบ · ถ้าได้ 0 หมด = Yahoo อั้น IP ชั่วคราว (429) ให้รอ 1-2 ชม. แล้วรันใหม่
+- เติม US ที่เหลือ: `BF_WORKERS=1 BF_DELAY=1500 node scripts/backfill-turso.mjs 0 1000`

@@ -38,14 +38,14 @@ const N_TH = Number(process.argv[2] ?? 300);
 const N_US = Number(process.argv[3] ?? 200);
 const UA = { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120" };
 
-async function universe(region, n) {
+async function universe(region, n, minCap = 3e8) {
   const FIELDS = ["name", "close", "change", "market_cap_basic", "sector", "industry", "exchange", "ipo_date", "premarket_change", "country", "dividends_yield"];
   const out = [];
   for (let from = 0; from < n; from += 200) {
     const body = {
       filter: [
         { left: "type", operation: "equal", right: "stock" },
-        { left: "market_cap_basic", operation: "in_range", right: [region === "thailand" ? 3e7 : 3e8, 1e16] },
+        { left: "market_cap_basic", operation: "in_range", right: [minCap, 1e16] },
       ],
       columns: FIELDS,
       sort: { sortBy: "market_cap_basic", sortOrder: "desc" },
@@ -93,15 +93,47 @@ async function chartDaily(sym, reg) {
 const SQL = `INSERT INTO prices_daily (date, symbol, open, high, low, close, volume, chg_pct) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   ON CONFLICT (date, symbol) DO UPDATE SET open=excluded.open, high=excluded.high, low=excluded.low, close=excluded.close, volume=excluded.volume, chg_pct=excluded.chg_pct`;
 
+// suffix Yahoo ของแต่ละตลาด (ตรงกับที่ screener ใช้) + กติกาพิเศษของจีน
+const YSUFFIX = {
+  america: "", thailand: ".BK", vietnam: ".HM", indonesia: ".JK", singapore: ".SI", malaysia: ".KL",
+  philippines: ".PS", hongkong: ".HK", taiwan: ".TW", japan: ".T", korea: ".KS", india: ".NS",
+  australia: ".AX", canada: ".TO", uk: ".L", germany: ".DE", france: ".PA", netherlands: ".AS",
+  switzerland: ".SW", sweden: ".ST", italy: ".MI", spain: ".MC", turkey: ".IS", israel: ".TA",
+  uae: ".AD", saudiarabia: ".SR", southafrica: ".JO", brazil: ".SA", mexico: ".MX",
+};
+const MINCAP = { thailand: 3e7, vietnam: 1e8, indonesia: 1e8, singapore: 1e8, malaysia: 1e8, philippines: 1e8, taiwan: 1e8 };
+const toY2 = (reg, s) => {
+  if (reg === "china") return /^6/.test(s) ? s + ".SS" : /^[03]/.test(s) ? s + ".SZ" : s + ".SS";
+  return s + (YSUFFIX[reg] ?? "");
+};
+
+// BF_REGIONS="vietnam:100,japan:150" — เติมตลาดอื่นๆ นอกเหนือไทย/US (ตัวเลข = จำนวนหุ้น top ตาม mcap)
+const extraRegions = (process.env.BF_REGIONS ?? "")
+  .split(",")
+  .map((x) => x.trim())
+  .filter(Boolean)
+  .map((x) => {
+    const [r, n] = x.split(":");
+    return [r, Number(n) || 100];
+  });
+
 // ข้ามตัวที่มีข้อมูลแล้ว (รอบเติมเต็มไม่ต้องดึงซ้ำ)
 const existing = new Set((await c.execute("SELECT DISTINCT symbol FROM prices_daily")).rows.map((r) => String(r.symbol)));
 console.log("มีอยู่แล้ว:", existing.size, "ตัว — จะข้าม");
 
 const WORKERS = Number(process.env.BF_WORKERS ?? 5); // ขนาน 5 ชุด (Yahoo อึดอัดน้อยกว่า batch quotes)
-for (const [reg, n] of [["thailand", N_TH], ["america", N_US]]) {
-  let syms = await universe(reg, n);
+for (const [reg, n] of [["thailand", N_TH], ["america", N_US], ...extraRegions]) {
+  if (!n) continue;
+  const minCap = MINCAP[reg] ?? 3e8;
+  let syms = [];
+  try {
+    syms = await universe(reg, n, minCap);
+  } catch {
+    console.log(`== ${reg}: ดึง universe ไม่ได้ — ข้าม ==`);
+    continue;
+  }
   const before = syms.length;
-  syms = syms.filter((s) => !existing.has(toYahoo(reg, s)));
+  syms = syms.filter((s) => !existing.has(toY2(reg, s)));
   console.log(`\n== ${reg}: เติม ${syms.length}/${before} ตัว (ขนาน ${WORKERS}) ==`);
   let done = 0;
   let idx = 0;
@@ -112,7 +144,7 @@ for (const [reg, n] of [["thailand", N_TH], ["america", N_US]]) {
         const my = idx++;
         const s = syms[my];
         if (!s) break;
-        const y = toYahoo(reg, s);
+        const y = toY2(reg, s);
         const rows = await chartDaily(y, reg);
         if (rows.length) {
           try {
