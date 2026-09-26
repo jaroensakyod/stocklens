@@ -18,6 +18,8 @@ export interface Holding {
   ticker: string;
   qty: number;
   avgCost: number;
+  /** 📌 หุ้นแกน — เจ้าของตั้งใจถือระยะยาว: AI ไม่แนะนำตัดเพราะ "น้ำหนักใหญ่/ราคาวิ่งแรง" เพียงอย่างเดียว */
+  core?: boolean;
 }
 
 const KEYS = {
@@ -116,11 +118,20 @@ export function usePortfolio() {
     (ticker: string, qty: number, avgCost: number) => {
       const t = ticker.toUpperCase();
       const rest = holdings.filter((h) => h.ticker !== t);
-      if (qty > 0) setHoldings([...rest, { ticker: t, qty, avgCost }]);
+      const prev = holdings.find((h) => h.ticker === t);
+      if (qty > 0) setHoldings([...rest, { ticker: t, qty, avgCost, ...(prev?.core ? { core: true } : {}) }]);
       else setHoldings(rest);
     },
     [holdings, setHoldings]
   );
   const remove = useCallback((ticker: string) => setHoldings(holdings.filter((h) => h.ticker !== ticker.toUpperCase())), [holdings, setHoldings]);
-  return { holdings, upsert, remove };
+  /** ตั้ง/ถอด 📌 หุ้นแกน */
+  const setCore = useCallback(
+    (ticker: string, core: boolean) => {
+      const t = ticker.toUpperCase();
+      setHoldings(holdings.map((h) => (h.ticker === t ? { ...h, core } : h)));
+    },
+    [holdings, setHoldings]
+  );
+  return { holdings, upsert, remove, setCore, setHoldings };
 }

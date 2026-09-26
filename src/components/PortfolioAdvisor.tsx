@@ -7,7 +7,7 @@ import { usePortfolio } from "@/lib/store";
 
 interface AdviceItem { action: string; title: string; detail: string; tone: "warn" | "info" | "good" }
 interface AdvisorResult {
-  totalValue: number; topHoldingPct: number; topHolding: string; topSector: string; topSectorPct: number;
+  totalValue: number; truncated?: number; topHoldingPct: number; topHolding: string; topSector: string; topSectorPct: number;
   avgFactors: { valuation: number; growth: number; profitability: number; momentum: number; health: number };
   bullishCount: number; bearishCount: number; count: number;
   radarTop: { name: string; emoji: string; heat: number }[];
@@ -54,6 +54,9 @@ function PortfolioAdvisorInner() {
       </div>
 
       {err && <p className="text-xs text-down mb-2">{err}</p>}
+      {!!result?.truncated && (
+        <p className="text-xs text-amber-400/90 mb-2">⚠️ พอร์ตมี {holdings.length} ตัว — รอบนี้วิเคราะห์ 8 ตัวใหญ่สุดก่อน อีก {result.truncated} ตัวยังไม่ถูกนับ (จะเก็บเป็นรอบถัดไป)</p>
+      )}
       {holdings.length < 2 && !busy && <p className="text-xs text-zinc-600">ต้องมี holdings อย่างน้อย 2 ตัว — ไปแท็บ 💼 เพิ่มก่อน</p>}
 
       {result && (

@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import StarButton from "@/components/StarButton";
 import BrokerBadge from "@/components/BrokerBadge";
+import { useAuth } from "@/lib/authContext";
 import { useAlerts, usePortfolio, useWatchlist } from "@/lib/store";
 import impactJson from "@/data/impact-map.json";
 import themesJson from "@/data/radar-themes.json";
@@ -19,8 +20,38 @@ interface RadarThemeInfo {
 export default function PortfolioPage() {
   const [tab, setTab] = useState<Tab>("watchlist");
   const { list: watchlist, toggle } = useWatchlist();
-  const { holdings, upsert, remove: removeHolding } = usePortfolio();
+  const { holdings, upsert, remove: removeHolding, setCore, setHoldings } = usePortfolio();
   const { alerts, add: addAlert, remove: removeAlert, reset: resetAlert } = useAlerts();
+  const { member, loading: authLoading } = useAuth();
+
+  // ===== ซิงก์พอร์ตกับบัญชีสมาชิก (มี login + มี DB) =====
+  // โหลด: ครั้งแรกถ้าเครื่องนี้ยังไม่มีข้อมูล → ดึงจากบัญชี | เซฟ: auto-save ทุกครั้งที่แก้ (debounce)
+  const loadedFromServer = useRef(false);
+  const holdingsRef = useRef(holdings);
+  holdingsRef.current = holdings;
+  useEffect(() => {
+    if (authLoading || !member || loadedFromServer.current) return;
+    loadedFromServer.current = true;
+    fetch("/api/portfolio")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => {
+        // ยังว่างอยู่เท่านั้น (ไม่ทับข้อมูลที่ผู้ใช้เพิ่งแก้ระหว่างโหลด)
+        if (j?.holdings?.length && holdingsRef.current.length === 0) setHoldings(j.holdings);
+      })
+      .catch(() => {});
+  }, [authLoading, member, setHoldings]);
+
+  useEffect(() => {
+    if (authLoading || !member) return; // ไม่ได้ login = เก็บในเครื่องเท่านั้น (พฤติกรรมเดิม)
+    const id = setTimeout(() => {
+      fetch("/api/portfolio", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ holdings }),
+      }).catch(() => {});
+    }, 1200);
+    return () => clearTimeout(id);
+  }, [holdings, member, authLoading]);
 
   const allSymbols = useMemo(
     () => [...new Set([...watchlist, ...holdings.map((h) => h.ticker), ...alerts.map((a) => a.ticker)])],
@@ -29,6 +60,7 @@ export default function PortfolioPage() {
   const [quotes, setQuotes] = useState<Record<string, Quote>>({});
   const [usdThb, setUsdThb] = useState<number | null>(null);
   const [themes, setThemes] = useState<RadarThemeInfo[]>([]);
+  const [quotesAt, setQuotesAt] = useState<Date | null>(null);
 
   const load = useCallback(async () => {
     if (!allSymbols.length) return;
@@ -38,6 +70,7 @@ export default function PortfolioPage() {
       const map: Record<string, Quote> = {};
       for (const q of json.quotes ?? []) if (isFinite(q.price)) map[q.symbol] = q;
       setQuotes(map);
+      setQuotesAt(new Date());
       if (json.usdThb) setUsdThb(json.usdThb);
     } catch {}
   }, [allSymbols]);
@@ -64,7 +97,11 @@ export default function PortfolioPage() {
       <div>
         <h1 className="text-2xl font-bold text-zinc-50">พอร์ต & Watchlist ของฉัน</h1>
         <p className="text-sm text-zinc-400 mt-1">
-          เก็บในเครื่องคุณเอง (ไม่ต้องสมัครสมาชิก) — เพิ่มหุ้นด้วยปุ่ม ★ ที่หน้ารายตัว แล้วมาดูราคา/กำไร/เหตุการณ์ที่กระทบที่นี่ทุกวัน
+          {member ? (
+            <>☁️ ซิงก์กับบัญชี <span className="text-accent-soft font-semibold">{member.name}</span> อัตโนมัติ — เปลี่ยนเครื่อง/ล้างเบราว์เซอร์ ข้อมูลพอร์ตตามคุณมา · กด 📌 ตั้ง "หุ้นแกน" เพื่อบอก AI ว่าตัวไหนตั้งใจถือระยะยาว (AI จะไม่แนะนำตัดเพราะน้ำหนักใหญ่/ราคาวิ่งแรงเพียงอย่างเดียว)</>
+          ) : (
+            <>เก็บในเครื่องคุณเอง (ไม่ต้องสมัครสมาชิก) — <Link href="/login" className="link">เข้าสู่ระบบสมาชิก</Link> เพื่อซิงก์พอร์ตข้ามเครื่อง · เพิ่มหุ้นด้วยปุ่ม ★ ที่หน้ารายตัว</>
+          )}
         </p>
       </div>
 
@@ -80,8 +117,14 @@ export default function PortfolioPage() {
         ))}
       </div>
 
+      {quotesAt && (
+        <p className="text-[11px] text-zinc-600 -mt-3">
+          ราคาอัปเดต ณ {quotesAt.toLocaleTimeString("th-TH")} · ข้อมูล delay ~15 นาทีตามแหล่งข้อมูล — เพียงพอต่อการตัดสินใจระยะกลาง ไม่เหมาะกับการเทรดรายวัน
+        </p>
+      )}
+
       {tab === "watchlist" && <WatchlistTab watchlist={watchlist} quotes={quotes} toggle={toggle} />}
-      {tab === "portfolio" && <PortfolioTab holdings={holdings} quotes={quotes} usdThb={usdThb} upsert={upsert} remove={removeHolding} themes={themes} />}
+      {tab === "portfolio" && <PortfolioTab holdings={holdings} quotes={quotes} usdThb={usdThb} upsert={upsert} remove={removeHolding} setCore={setCore} themes={themes} />}
       {tab === "advisor" && <PortfolioAdvisor />}
       {tab === "alerts" && <AlertsTab alerts={alerts} quotes={quotes} add={addAlert} remove={removeAlert} reset={resetAlert} />}
     </div>
@@ -143,29 +186,42 @@ function WatchlistTab({ watchlist, quotes, toggle }: { watchlist: string[]; quot
 
 // ================= Portfolio =================
 function PortfolioTab({
-  holdings, quotes, usdThb, upsert, remove, themes,
+  holdings, quotes, usdThb, upsert, remove, setCore, themes,
 }: {
-  holdings: { ticker: string; qty: number; avgCost: number }[];
+  holdings: { ticker: string; qty: number; avgCost: number; core?: boolean }[];
   quotes: Record<string, Quote>;
   usdThb: number | null;
   upsert: (t: string, q: number, c: number) => void;
   remove: (t: string) => void;
+  setCore: (t: string, core: boolean) => void;
   themes: RadarThemeInfo[];
 }) {
   const [form, setForm] = useState({ ticker: "", qty: "", avgCost: "" });
 
+  const fx = usdThb ?? null; // USD→THB (โหลดจาก /api/quote พร้อมราคา) — ใช้รวมพอร์ตหลายสกุลเงินให้เป็นบาท
   const rows = holdings.map((h) => {
     const q = quotes[h.ticker];
     const price = q?.price ?? NaN;
-    const value = isFinite(price) ? price * h.qty : NaN;
-    const cost = h.avgCost * h.qty;
+    const isThb = q?.currency === "THB";
+    const sym = isThb ? "฿" : "$";
+    const value = isFinite(price) ? price * h.qty : NaN; // มูลค่าในสกุลของหุ้นนั้นๆ
+    const cost = h.avgCost * h.qty; // ต้นทุนในสกุลของหุ้นนั้นๆ (ผู้ใช้กรอกราคาซื้อตามสกุลหุ้น)
     const pl = isFinite(value) ? value - cost : NaN;
-    return { ...h, q, price, value, cost, pl, plPct: isFinite(pl) ? (pl / cost) * 100 : NaN };
+    return {
+      ...h, q, price, value, cost, pl, sym,
+      valueThb: isFinite(value) && fx ? value * (isThb ? 1 : fx) : NaN,
+      costThb: fx ? cost * (isThb ? 1 : fx) : NaN,
+      plPct: isFinite(pl) ? (pl / cost) * 100 : NaN,
+    };
   });
   const totalValue = rows.reduce((a, r) => a + (isFinite(r.value) ? r.value : 0), 0);
   const totalCost = rows.reduce((a, r) => a + r.cost, 0);
   const totalPL = totalValue - totalCost;
-  const thb = usdThb && rows.every((r) => !r.q || r.q.currency === "USD") ? usdThb : null;
+  // ยอดรวมที่ถูกต้อง: แปลงทุกตัวเป็นบาทก่อนรวม (ใช้เมื่อรู้อัตราแลกเปลี่ยน)
+  const totalValueThb = rows.reduce((a, r) => a + (isFinite(r.valueThb) ? r.valueThb : 0), 0);
+  const totalCostThb = rows.reduce((a, r) => a + (isFinite(r.costThb) ? r.costThb : 0), 0);
+  const totalPLThb = totalValueThb - totalCostThb;
+  const fmtThb = (n: number) => n.toLocaleString("th-TH", { maximumFractionDigits: 0 });
 
   // Radar ที่กระทบหุ้นในพอร์ต (จาก impact-map + ความร้อนธีมล่าสุด)
   const impactByTheme = useMemo(() => {
@@ -214,15 +270,22 @@ function PortfolioTab({
         </div>
       </div>
 
-      {/* สรุปพอร์ต */}
-      {holdings.length > 0 && (
+      {/* สรุปพอร์ต — ถ้ารู้อัตราแลกเปลี่ยน: รวมทุกสกุลเป็นบาท (ถูกต้องแม้พอร์ตผสมไทย+ต่างชาติ) */}
+      {holdings.length > 0 && (fx ? (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <Stat k="มูลค่าพอร์ต" v={`$${totalValue.toFixed(0)}`} sub={thb ? `≈ ${(totalValue * thb).toLocaleString("th-TH", { maximumFractionDigits: 0 })} ฿` : undefined} />
+          <Stat k="มูลค่าพอร์ต" v={`฿${fmtThb(totalValueThb)}`} sub={`≈ $${(totalValueThb / fx).toFixed(0)}`} />
+          <Stat k="ต้นทุนรวม" v={`฿${fmtThb(totalCostThb)}`} sub={`≈ $${(totalCostThb / fx).toFixed(0)}`} />
+          <Stat k="กำไร/ขาดทุน" v={`${totalPLThb >= 0 ? "+" : "-"}฿${fmtThb(Math.abs(totalPLThb))}`} tone={totalPLThb >= 0 ? "up" : "down"} />
+          <Stat k="% รวม" v={`${totalCostThb > 0 ? ((totalPLThb / totalCostThb) * 100).toFixed(2) : "0"}%`} tone={totalPLThb >= 0 ? "up" : "down"} />
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <Stat k="มูลค่าพอร์ต" v={`$${totalValue.toFixed(0)}`} sub="กำลังโหลดอัตราแลกเปลี่ยน… (ยอดรวมชั่วคราวยังไม่แปลงสกุล)" />
           <Stat k="ต้นทุนรวม" v={`$${totalCost.toFixed(0)}`} />
-          <Stat k="กำไร/ขาดทุน" v={`${totalPL >= 0 ? "+" : ""}$${totalPL.toFixed(0)}`} tone={totalPL >= 0 ? "up" : "down"} sub={thb ? `${totalPL >= 0 ? "+" : ""}${(totalPL * thb).toLocaleString("th-TH", { maximumFractionDigits: 0 })} ฿` : undefined} />
+          <Stat k="กำไร/ขาดทุน" v={`${totalPL >= 0 ? "+" : ""}$${totalPL.toFixed(0)}`} tone={totalPL >= 0 ? "up" : "down"} />
           <Stat k="% รวม" v={`${totalCost > 0 ? ((totalPL / totalCost) * 100).toFixed(2) : "0"}%`} tone={totalPL >= 0 ? "up" : "down"} />
         </div>
-      )}
+      ))}
 
       {/* ตาราง */}
       {holdings.length === 0 ? (
@@ -242,6 +305,7 @@ function PortfolioTab({
                 <th className="text-right px-4 py-2">ราคาตอนนี้</th>
                 <th className="text-right px-4 py-2">มูลค่า</th>
                 <th className="text-right px-4 py-2">กำไร/ขาดทุน</th>
+                <th className="px-2 py-2 w-10" title="หุ้นแกน: AI ไม่แนะนำตัดเพราะน้ำหนักใหญ่/ราคาวิ่งแรงเพียงอย่างเดียว">แกน</th>
                 <th className="px-4 py-2 w-10"></th>
               </tr>
             </thead>
@@ -253,11 +317,21 @@ function PortfolioTab({
                     <span className="text-zinc-500 text-xs ml-2">{r.q?.name}</span>
                   </td>
                   <td className="px-4 py-2 text-right num text-zinc-300">{r.qty}</td>
-                  <td className="px-4 py-2 text-right num text-zinc-400">{r.avgCost.toFixed(2)}</td>
-                  <td className="px-4 py-2 text-right num text-zinc-200">{isFinite(r.price) ? r.price.toFixed(2) : "…"}</td>
-                  <td className="px-4 py-2 text-right num text-zinc-200">{isFinite(r.value) ? `$${r.value.toFixed(0)}` : "—"}</td>
+                  <td className="px-4 py-2 text-right num text-zinc-400">{r.avgCost.toFixed(2)} {r.sym}</td>
+                  <td className="px-4 py-2 text-right num text-zinc-200">{isFinite(r.price) ? `${r.price.toFixed(2)} ${r.sym}` : "…"}</td>
+                  <td className="px-4 py-2 text-right num text-zinc-200">{isFinite(r.value) ? `${r.sym}${r.value.toFixed(0)}` : "—"}</td>
                   <td className={`px-4 py-2 text-right num font-semibold ${r.pl >= 0 ? "text-up" : "text-down"}`}>
-                    {isFinite(r.pl) ? `${r.pl >= 0 ? "+" : ""}$${r.pl.toFixed(0)} (${r.plPct >= 0 ? "+" : ""}${r.plPct.toFixed(1)}%)` : "—"}
+                    {isFinite(r.pl) ? `${r.pl >= 0 ? "+" : "-"}${r.sym}${Math.abs(r.pl).toFixed(0)} (${r.plPct >= 0 ? "+" : ""}${r.plPct.toFixed(1)}%)` : "—"}
+                  </td>
+                  <td className="px-2 py-2 text-center">
+                    <button
+                      className={`text-lg leading-none transition-colors ${r.core ? "text-accent" : "text-zinc-700 hover:text-zinc-400"}`}
+                      onClick={() => setCore(r.ticker, !r.core)}
+                      aria-label={r.core ? `ถอดหุ้นแกน ${r.ticker}` : `ตั้ง ${r.ticker} เป็นหุ้นแกน`}
+                      title={r.core ? "หุ้นแกน — แตะเพื่อถอด" : "ตั้งเป็นหุ้นแกน (AI ไม่แนะนำตัดเพราะน้ำหนัก/ราคาเพียงอย่างเดียว)"}
+                    >
+                      {r.core ? "📌" : "📎"}
+                    </button>
                   </td>
                   <td className="px-4 py-2 text-right">
                     <button className="text-zinc-600 hover:text-down" onClick={() => remove(r.ticker)} aria-label="ลบ">✕</button>

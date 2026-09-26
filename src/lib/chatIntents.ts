@@ -28,6 +28,8 @@ export interface ChatHolding {
   ticker: string;
   qty: number;
   avgCost: number;
+  /** 📌 หุ้นแกน — ยกเว้นกฎ trim น้ำหนัก/RSI (เหมือน advisor) */
+  core?: boolean;
 }
 
 export interface Grounding {
@@ -312,7 +314,7 @@ async function buildPortfolioPacket(holdings: ChatHolding[]): Promise<{ packet: 
     if (a?.technicals?.rsi14 !== undefined && a.technicals.rsi14 >= 75) flags.push(`RSI ${a.technicals.rsi14.toFixed(0)} ร้อนแรง`);
     if (plPct <= -45) flags.push("ขาดทุนเกิน 45% (จุด stop-loss ตามกฎ advisor)");
     lines.push(
-      `${q.symbol} ${r.h.qty}@${r.h.avgCost} → ราคาตลาด ${q.price.toFixed(2)}${q.currency} · P/L ${pl >= 0 ? "+" : ""}${pl.toFixed(0)}${q.currency === "THB" ? "฿" : "$"} (${plPct >= 0 ? "+" : ""}${plPct.toFixed(1)}%) · น้ำหนัก${weight.toFixed(0)}%${flags.length ? ` · ⚠️ ${flags.join(" · ")}` : ""}`
+      `${q.symbol} ${r.h.qty}@${r.h.avgCost} → ราคาตลาด ${q.price.toFixed(2)}${q.currency} · P/L ${pl >= 0 ? "+" : ""}${pl.toFixed(0)}${q.currency === "THB" ? "฿" : "$"} (${plPct >= 0 ? "+" : ""}${plPct.toFixed(1)}%) · น้ำหนัก${weight.toFixed(0)}%${r.h.core ? " · 📌หุ้นแกน (เจ้าของตั้งใจถือระยะยาว ห้ามแนะนำตัดเพราะน้ำหนัก/ราคาเพียงอย่างเดียว)" : ""}${flags.length ? ` · ⚠️ ${flags.join(" · ")}` : ""}`
     );
     demoLines.push(`- **${q.symbol}** ${spct(q.changePct) ?? "?"} วันนี้ · P/L ${plPct >= 0 ? "+" : ""}${plPct.toFixed(1)}% · น้ำหนัก ${weight.toFixed(0)}%`);
   }
@@ -329,6 +331,7 @@ async function buildPortfolioPacket(holdings: ChatHolding[]): Promise<{ packet: 
         weight: totalThb > 0 && isFinite(r.valueThb) ? (r.valueThb / totalThb) * 100 : 0,
         rsi: a?.technicals?.rsi14 ?? null,
         sma200: a?.technicals?.sma200 ?? null,
+        ...(r.h.core ? { core: true } : {}),
       };
     });
   if (ruleInput.length) {

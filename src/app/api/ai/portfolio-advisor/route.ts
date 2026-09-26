@@ -4,7 +4,7 @@ import { buildAnalysis } from "@/lib/analysis";
 import { chatOnce, hasAI, friendlyAIError } from "@/lib/ai";
 import { findSectorInfo, tvUniverse } from "@/lib/tvscanner";
 import { computeThemeHeat } from "@/lib/radar";
-import { getQuotes } from "@/lib/yahoo";
+import { getQuotes, getUsdThb } from "@/lib/yahoo";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120;
@@ -13,9 +13,11 @@ interface Holding {
   ticker: string;
   qty: number;
   avgCost: number;
+  /** 📌 หุ้นแกน — เจ้าของเลือกถือระยะยาว: ไม่แนะนำตัดเพราะน้ำหนักใหญ่/ราคาร้อนเพียงอย่างเดียว */
+  core?: boolean;
 }
 
-// POST /api/ai/portfolio-advisor { holdings: [{ticker, qty, avgCost}] }
+// POST /api/ai/portfolio-advisor { holdings: [{ticker, qty, avgCost, core?}] }
 // ดึงข้อมูลจริงทั้งหมด (sector/factors/technicals/radar) → วิเคราะห์ 4 มิติ → AI แนะนำปรับพอร์ตเป็นข้อๆ
 export async function POST(req: NextRequest) {
   // 🔒 AI ปรับพอร์ตส่วนตัว = สิทธิ์สมาชิก 🥇 Pro
@@ -29,11 +31,15 @@ export async function POST(req: NextRequest) {
   if (!holdings?.length || holdings.length < 2) {
     return NextResponse.json({ error: "ต้องมี holdings อย่างน้อย 2 ตัว (ใส่ที่หน้าพอร์ต)" }, { status: 400 });
   }
+  const MAX_H = 8; // วิเคราะห์ได้สูงสุด 8 ตัวต่อรอบ (buildAnalysis หนัก) — เกินต้องบอกผู้ใช้ ไม่ตัดเงียบ
+  const truncated = Math.max(0, holdings.length - MAX_H);
 
   // ===== 1) ดึงข้อมูลจริงทุกตัว (ขนานกัน + แยก isolation ต่อขั้น เพื่อ sector lookup ล่มไม่พังทั้งแถว) =====
+  // อัตราแลกเปลี่ยน USD/THB — หุ้นไทย (.BK) ราคาเป็นบาท ต้องแปลงเป็น USD ก่อนคิดน้ำหนักพอร์ต (ไม่งั้นน้ำหนักเพี้ยน ~36 เท่า)
+  const usdThb = await getUsdThb();
   const rows: {
-    ticker: string; qty: number; avgCost: number;
-    price: number; value: number; pl: number; plPct: number;
+    ticker: string; qty: number; avgCost: number; core: boolean;
+    price: number; value: number; currency: string; pl: number; plPct: number;
     sector?: string; industry?: string;
     factors?: { valuation: number; growth: number; profitability: number; momentum: number; health: number; overall: number };
     signal?: string;
@@ -42,7 +48,7 @@ export async function POST(req: NextRequest) {
   const failed: string[] = [];
 
   const results = await Promise.allSettled(
-    holdings.slice(0, 8).map(async (h) => {
+    holdings.slice(0, MAX_H).map(async (h) => {
       // พิมพ์ไม่มี suffix แล้วดึงไม่ได้ → ลองเป็นหุ้นไทย .BK อีกรอบ (เช่น "PTT" → "PTT.BK")
       let a = await buildAnalysis(h.ticker).catch(() => null);
       if (!a || !isFinite(a.quote.price)) {
@@ -58,8 +64,12 @@ export async function POST(req: NextRequest) {
         sec = a.profile ? { sector: a.profile.sector, industry: a.profile.industry } : null;
       }
       return {
-        ticker: a.quote.symbol, qty: h.qty, avgCost: h.avgCost,
-        price: a.quote.price, value: a.quote.price * h.qty, pl: (a.quote.price - h.avgCost) * h.qty, plPct: h.avgCost > 0 ? ((a.quote.price - h.avgCost) / h.avgCost) * 100 : 0,
+        ticker: a.quote.symbol, qty: h.qty, avgCost: h.avgCost, core: h.core === true,
+        price: a.quote.price,
+        value: (a.quote.price * h.qty) / (a.quote.currency === "THB" ? usdThb : 1), // มูลค่ารวมเป็น USD เพื่อคิดน้ำหนัก/sector ให้ถูกต้อง
+        currency: a.quote.currency,
+        pl: (a.quote.price - h.avgCost) * h.qty, // P/L คิดในสกุลของหุ้นนั้น (ใช้เฉพาะ plPct ต่อ)
+        plPct: h.avgCost > 0 ? ((a.quote.price - h.avgCost) / h.avgCost) * 100 : 0,
         sector: sec?.sector || a.profile?.sector, industry: sec?.industry || a.profile?.industry,
         factors: a.factors ? { valuation: a.factors.valuation, growth: a.factors.growth, profitability: a.factors.profitability, momentum: a.factors.momentum, health: a.factors.health, overall: a.factors.overall } : undefined,
         signal: a.technicals?.signal,
@@ -107,10 +117,10 @@ export async function POST(req: NextRequest) {
 
   // ===== 3) สร้าง truth packet =====
   const holdingsText = rows
-    .map((r) => `${r.ticker}: ${((r.value / totalValue) * 100).toFixed(1)}% of portfolio, $${(r.value / 1000).toFixed(1)}K, P/L ${(r.plPct >= 0 ? "+" : "") + r.plPct.toFixed(1)}%, sector=${r.sector || "?"}${r.factors ? `, factors V${r.factors.valuation}/G${r.factors.growth}/P${r.factors.profitability}/M${r.factors.momentum}/H${r.factors.health} (รวม${r.factors.overall})` : ""}, tech=${r.signalLabel}`)
+    .map((r) => `${r.ticker}: ${((r.value / totalValue) * 100).toFixed(1)}% of portfolio, $${(r.value / 1000).toFixed(1)}K (แปลงจาก ${r.currency} เรียบร้อย), P/L ${(r.plPct >= 0 ? "+" : "") + r.plPct.toFixed(1)}%, sector=${r.sector || "?"}${r.factors ? `, factors V${r.factors.valuation}/G${r.factors.growth}/P${r.factors.profitability}/M${r.factors.momentum}/H${r.factors.health} (รวม${r.factors.overall})` : ""}, tech=${r.signalLabel}${r.core ? ", 📌หุ้นแกน (เจ้าของตั้งใจถือระยะยาว)" : ""}`)
     .join("\n");
 
-  const metricsText = `มูลค่าพอร์ต: $${(totalValue / 1000).toFixed(1)}K
+  const metricsText = `มูลค่าพอร์ต: $${(totalValue / 1000).toFixed(1)}K (รวมทุกสกุลเงินเป็น USD แล้ว)${truncated ? `\nหมายเหตุ: สมาชิกส่งมา ${holdings.length} ตัว วิเคราะห์ได้ 8 ตัวแรก (${rows.map((r) => r.ticker).join(", ")}) ตัวที่เหลือยังไม่ได้นับ` : ""}
 หุ้นใหญ่สุด: ${topHolding.ticker} (${topHoldingPct.toFixed(1)}%) ${topHoldingPct > 30 ? "⚠️ เข้มข้นเกิน" : ""}
 Sector ใหญ่สุด: ${topSector[0]} (${topSectorPct.toFixed(1)}%) ${topSectorPct > 60 ? "⚠️ กระจุกเกิน" : ""}
 จำนวนหุ้น: ${rows.length} ตัว
@@ -122,8 +132,10 @@ Sector ใหญ่สุด: ${topSector[0]} (${topSectorPct.toFixed(1)}%) ${to
 
   // ===== 4) โหมด demo (ไม่มี AI key) — วิเคราะห์เชิงกฎ =====
   const demoAdvice: { action: string; title: string; detail: string; tone: "warn" | "info" | "good" }[] = [];
-  if (topHoldingPct > 30) {
-    demoAdvice.push({ action: "ลด", title: `⚠️ ${topHolding.ticker} ใหญ่เกิน (${topHoldingPct.toFixed(0)}%)`, detail: `พิจารณา trim ลงเหลือไม่เกิน 25% แล้วย้ายไปหุ้น sector อื่น เพื่อลด single-stock risk`, tone: "warn" });
+  if (topHoldingPct > 30 && topHolding.core) {
+    demoAdvice.push({ action: "หุ้นแกน", title: `📌 ${topHolding.ticker} ${topHoldingPct.toFixed(0)}% — เจ้าของเลือกเป็นหุ้นแกน`, detail: `ไม่แนะนำตัดเพียงเพราะน้ำหนักใหญ่ (นี่คือทางเลือกของเจ้าของพอร์ต) — แต่จำไว้ว่าครึ่งพอร์ตขึ้นลงอยู่ตัวเดียว ถ้าพื้นฐานเปลี่ยนจะเจ็บหนัก ติดตาม factors ทุกไตรมาส`, tone: "info" });
+  } else if (topHoldingPct > 30) {
+    demoAdvice.push({ action: "ลด", title: `⚠️ ${topHolding.ticker} ใหญ่เกิน (${topHoldingPct.toFixed(0)}%)`, detail: `พิจารณา trim ลงเหลือไม่เกิน 25% แล้วย้ายไปหุ้น sector อื่น เพื่อลด single-stock risk — หรือกด 📌 ตั้งเป็นหุ้นแกนถ้าตั้งใจถือระยะยาว`, tone: "warn" });
   }
   if (topSectorPct > 60) {
     demoAdvice.push({ action: "กระจาย", title: `⚠️ Sector "${topSector[0]}" กิน ${topSectorPct.toFixed(0)}% ของพอร์ต`, detail: `กระจายออกไปอย่างน้อย 3 sector เพื่อลดความเสี่ยงเชิงวัฏจักร`, tone: "warn" });
@@ -153,6 +165,9 @@ Sector ใหญ่สุด: ${topSector[0]} (${topSectorPct.toFixed(1)}%) ${to
 **[ปรับอะไร] — [ทำไม]**
 เช่น "ลด NVDA จาก 35% เหลือ 25% — Momentum สูงแต่ Valuation 11/100 เสี่ยงตอนตลาดหมุน"
 รวม: (1) ความเสี่ยงที่ต้องจัดการทันที (2) สมดุล sector/factor (3) สิ่งที่ทำได้ดีอยู่แล้ว (4) ข้อเสนอ 1 อย่างที่ควรเพิ่ม (พร้อมเหตุผลเชิงปัจจัย)
+กติกาสำคัญ:
+- ตัวที่ระบุ "📌หุ้นแกน" = เจ้าของตั้งใจถือระยะยาว — ห้ามแนะนำลดสัดส่วนด้วยเหตุผล "น้ำหนักใหญ่/ราคาวิ่งแรง/Valuation แพง" เพียงอย่างเดียว ให้วิเคราะห์เฉพาะคุณภาพธุรกิจและความเสี่ยงพื้นฐานที่เปลี่ยนแปลง
+- อ้างอิงตัวเลข (มูลค่าพอร์ต/%/P/L/factors) จากข้อมูลที่ให้ไว้ตรงๆ เท่านั้น ห้ามคำนวณหรือสรุปยอดรวมเพิ่มเอง
 ห้ามใช้คำ "ควรซื้อ/ควรขาย" ตรงๆ ใช้ "พิจารณา/อาจลด/น่าเพิ่ม" + ระบุเสมอว่าเป็นการวิเคราะห์เชิงข้อมูล ไม่ใช่คำแนะนำการลงทุน`,
           },
           { role: "user", content: packet },
@@ -166,6 +181,7 @@ Sector ใหญ่สุด: ${topSector[0]} (${topSectorPct.toFixed(1)}%) ${to
 
   return NextResponse.json({
     totalValue,
+    truncated,
     topHoldingPct: Math.round(topHoldingPct),
     topHolding: topHolding.ticker,
     topSector: topSector[0],
