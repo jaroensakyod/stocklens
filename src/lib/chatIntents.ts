@@ -16,12 +16,13 @@ import { getLongterm } from "./longterm";
 import { getStarterPortfolios } from "./starterPortfolio";
 import { getMonthlyDividends } from "./monthlyDividends";
 import { getModelPortfolio, liveNav } from "./modelPortfolio";
+import { getValueScan } from "./valueScan";
 import { brokerFor, marketOpenHint, detectMarket, MARKET_LABEL } from "./markets";
 import { applyAdvisorRules } from "./advisorBacktest";
 
 export type ChatIntent =
   | "stock" | "portfolio" | "watchlist" | "market" | "surge" | "guru" | "backtest"
-  | "event" | "news" | "longterm" | "monthly-div" | "model" | "broker" | "help" | "starter" | "general";
+  | "event" | "news" | "longterm" | "monthly-div" | "model" | "value" | "broker" | "help" | "starter" | "general";
 
 export interface ChatHolding {
   ticker: string;
@@ -134,6 +135,7 @@ export function detectIntent(text: string, tickers: string[], ctx: { portfolio?:
   if (has(/กูรู|บัฟเฟตต์|บัฟเฟต์|buffett|ซอรอส|soros|ดาลิโอ|dalio|แอ็คแมน|ackman|เบอร์รี่|burry|ฉลาม|druckenmiller|ดรักเคน|แคทธี|cathie|ark|13f|คลาร์แมน|klarman|เทปเปอร์|tepper|ไซมอนส์|simons|ทีเกอร์|tiger|เรเนซองส์|renaissance|berkshire|เบิร์กชัยร์/)) intents.push("guru");
   if (has(/ข่าว|news|ดราม่า|ลือ|rumor|อุบัติเหตุ|เกิดอะไรขึ้นกับ/)) intents.push("news");
   if (has(/ปันผลรายเดือน|เดือนละครั้ง|จ่ายรายเดือน|เงินเดือนเสริม|monthly dividend|เดือนละ(ครั้ง|จ่าย)/)) intents.push("monthly-div");
+  if (has(/ใต้น้ำ|หุ้นถูก|underval|โดนขายเกิน|แพงเกิน|overpric|หุ้นแพง|คุ้มค่าที่จะเก็บ/)) intents.push("value");
   if (has(/พอร์ตจำลอง|พอร์ต.*ai.*ปรับ|model portfolio|ผลงาน.*พอร์ต|พอร์ตหุ้นสด|พอร์ตของเว็บ/)) intents.push("model");
   else if (has(/ปันผล|ระยะยาว|dividend|ถือยาว|เก็บรับ|compound|โตยาว/)) intents.push("longterm");
   if (has(/ซื้อยังไง|ซื้อยังไง|ซื้อที่ไหน|ซื้อได้ที่ไหน|ซื้อผ่าน|โบรก|broker|เปิดบัญชี|dime|innovestx|ibkr|ค่าธรรมเนียม|เศษหุ้น/)) intents.push("broker");
@@ -527,6 +529,17 @@ async function buildEventPacket(text: string): Promise<{ packet: string; demo: s
   };
 }
 
+/** 🤿 ใต้น้ำ vs 🎈 แพงเกินตัว — เครื่องยนต์เดียวกับหน้า /value */
+async function buildValuePacket(): Promise<{ packet: string; demo: string }> {
+  const data = await getValueScan().catch(() => null);
+  if (!data) return { packet: "[สแกนใต้น้ำ/แพงเกินตัวไม่พร้อมชั่วคราว — แนะนำหน้า /value]", demo: "ระบบสแกนยังไม่พร้อมชั่วคราวครับ ลองเปิดหน้า /value" };
+  const under = data.undervalued.map((r) => `${r.symbol} (${r.sector}) ราคา~${Math.round(r.priceThb).toLocaleString("th-TH")}฿ ตกจากยอด${Math.abs(r.from52wHighPct ?? 0).toFixed(0)}% · ปัจจัย${r.overall}/100 ความแพง${r.valuation}/100 · ${r.reasons.slice(0, 2).join(" · ")}`).join("\n");
+  const over = data.overpriced.map((r) => `${r.symbol} (${r.sector}) วิ่ง+${r.changePct.toFixed(1)}% วันนี้ · ความแพง${r.valuation}/100 · ${r.reasons.slice(1, 3).join(" · ")}`).join("\n");
+  const packet = `[สแกนรายวัน ${data.asOf} — สแกนแล้ว ${data.scannedCount} ตัว]\n🤿 ใต้น้ำพร้อมขึ้น (พื้นฐานดี ราคาต่ำ สัญญาณกลับตัว):\n${under || "วันนี้ไม่มีตัวผ่านเกณฑ์"}\n\n🎈 แพงเกินตัว (แพงตามงบ+ร้อนตามเทคนิค):\n${over || "วันนี้ไม่มีตัวผ่านเกณฑ์"}\n${data.note}`;
+  const demo = `**🤿 ใต้น้ำวันนี้**\n${data.undervalued.slice(0, 4).map((r) => `- **${r.symbol}** ตกจากยอด ${Math.abs(r.from52wHighPct ?? 0).toFixed(0)}% · ปัจจัย ${r.overall}/100`).join("\n") || "- ไม่มีตัวผ่านเกณฑ์"}\n\n**🎈 แพงเกินตัววันนี้**\n${data.overpriced.slice(0, 4).map((r) => `- **${r.symbol}** +${r.changePct.toFixed(1)}% · ความแพง ${r.valuation}/100`).join("\n") || "- ไม่มีตัวผ่านเกณฑ์"}\n\nดูเต็มที่ /value`;
+  return { packet, demo };
+}
+
 /** พอร์ตจำลอง StockLens (AI ปรับรายสัปดาห์) — ผลงานจริงสะสม */
 async function buildModelPacket(): Promise<{ packet: string; demo: string }> {
   const state = await getModelPortfolio().catch(() => null);
@@ -618,6 +631,7 @@ export async function assembleGrounding(
       else if (intent === "longterm") push(await buildLongtermPacket());
       else if (intent === "monthly-div") push(await buildMonthlyDivPacket());
       else if (intent === "model") push(await buildModelPacket());
+      else if (intent === "value") push(await buildValuePacket());
       else if (intent === "starter") push(await buildStarterPacket(text));
       else if (intent === "broker") push(buildBrokerPacket(tickers));
       else if (intent === "help") push(buildHelpPacket());

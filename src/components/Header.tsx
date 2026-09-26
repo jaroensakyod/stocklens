@@ -17,6 +17,7 @@ const NAV = [
 const TOOLS = [
   { href: "/starter", label: "🧑‍🎓 พอร์ตมือใหม่รายวัน" },
   { href: "/model-portfolio", label: "💼 พอร์ตจำลอง AI รายสัปดาห์" },
+  { href: "/value", label: "🤿 ใต้น้ำ vs 🎈 แพงเกินตัว" },
   { href: "/dividend", label: "📅 ปันผลรายเดือน + วางแผน" },
   { href: "/longterm", label: "💤 ระยะยาว & ปันผล" },
   { href: "/backtest", label: "📊 Backtest กลยุทธ์" },
