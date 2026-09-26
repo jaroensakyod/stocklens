@@ -32,6 +32,8 @@ export interface AdvisorBacktestResult {
   hold: { totalPct: number; cagrPct: number; maxDrawdownPct: number };
   spy: { totalPct: number; cagrPct: number };
   actionCount: number;
+  totalFeesPct: number; // ค่าธรรมเนียมสะสมที่หักแล้ว (% ของพอร์ตเริ่มต้น)
+  coreTickers: string[]; // 📌 หุ้นแกนที่ยกเว้นกฎ trim
   grade: string; // S/A/B/C/D — ตัดสินจากชนะ B&H และ SPY มากแค่ไหน
   note: string;
 }
@@ -60,28 +62,28 @@ function rsi14(closes: number[]): number | null {
 }
 
 // ---------- กฎเดียวกับ /api/ai/portfolio-advisor (ส่วนที่ตัดสินใจได้จริง = กติกาเชิงตัวเลข) ----------
-// R1 ตัวใหญ่เกิน 30% → เหลือ 25% (กัน single-stock risk เหมือน advisor จริง)
-// R2 ร้อนแรง RSI≥75 → ลด 20% ของ position
+// R1 ตัวใหญ่เกิน 30% → เหลือ 25% (กัน single-stock risk เหมือน advisor จริง) — ยกเว้น 📌หุ้นแกน (เจ้าของตั้งใจถือ)
+// R2 ร้อนแรง RSI≥75 → ลด 20% ของ position — ยกเว้นหุ้นแกน (เหตุผลเดียวกัน: อย่ากัดกำไรตัวที่เจ้าของเลือกถือ)
 // R3 ต่ำกว่า SMA200 และ RSI<45 → ลด 25% (สัญญาณเอียงลบทั้งระบบ)
 // R4 ติดลบเกิน 45% จากราคาเข้า → ตัดครึ่ง (stop-loss ที่ advisor แนะนำเสมอ)
 // R5 ถ้าตัวที่สัญญาณลบ ≥ ครึ่งพอร์ต → เก็บเงินสด 15% (de-risk เหมือน advisor)
 export function applyAdvisorRules(
-  holdings: { ticker: string; price: number; entryPrice: number; weight: number; rsi: number | null; sma200: number | null }[]
+  holdings: { ticker: string; price: number; entryPrice: number; weight: number; rsi: number | null; sma200: number | null; core?: boolean }[]
 ): { targets: Record<string, number>; actions: AdvisorAction[]; cashPct: number } {
   const actions: AdvisorAction[] = [];
   const targets: Record<string, number> = {};
   for (const h of holdings) targets[h.ticker] = h.weight;
 
-  // R1 ความเข้มข้น
+  // R1 ความเข้มข้น (หุ้นแกนยกเว้น)
   for (const h of holdings) {
-    if (h.weight > 30) {
+    if (h.weight > 30 && !h.core) {
       actions.push({ ticker: h.ticker, rule: "ตัวใหญ่เกิน 30% → เหลือ 25%", from: h.weight, to: 25 });
       targets[h.ticker] = 25;
     }
   }
-  // R2 ร้อนแรง
+  // R2 ร้อนแรง (หุ้นแกนยกเว้น)
   for (const h of holdings) {
-    if (h.rsi !== null && h.rsi >= 75 && targets[h.ticker] > 4) {
+    if (h.rsi !== null && h.rsi >= 75 && targets[h.ticker] > 4 && !h.core) {
       const to = Math.max(3, targets[h.ticker] * 0.8);
       actions.push({ ticker: h.ticker, rule: `RSI ${h.rsi.toFixed(0)} ร้อนแรง → ลด 20%`, from: targets[h.ticker], to });
       targets[h.ticker] = to;
@@ -147,13 +149,17 @@ function cagr(series: number[]): number {
 
 const TH_Q = ["ไตรมาส 1", "ไตรมาส 2", "ไตรมาส 3", "ไตรมาส 4"];
 
-export async function runAdvisorBacktest(tickers: string[], opts?: { endDate?: string }): Promise<AdvisorBacktestResult> {
+// ค่าธรรมเนียมจำลอง: 0.15% ต่อฝั่งซื้อ/ขาย (ประมาณโบรกไทย/ส่วนต่างราคาจริง) — หักจากพอร์ต advisor ตามปริมาณที่ rebalance จริง
+const FEE_PER_SIDE = 0.0015;
+
+export async function runAdvisorBacktest(tickers: string[], opts?: { endDate?: string; cores?: string[] }): Promise<AdvisorBacktestResult> {
   const symbols = [...new Set(tickers.map((t) => t.trim().toUpperCase()).filter(Boolean))].slice(0, 12);
   if (symbols.length < 2) throw new Error("ต้องมีอย่างน้อย 2 ตัว");
+  const coreSet = new Set((opts?.cores ?? []).map((c) => c.trim().toUpperCase()));
 
-  // ข้อมูล 5 ปีรายวัน — เอา 3 ปีหลังสุด (หรือช่วงที่ระบุ endDate) มาทดสอบ
-  // สำคัญ: ต้องใช้ "5YD" (แท่งรายวัน) — "5Y" เป็นแท่งรายสัปดาห์ (~263 แท่ง) คำนวณ SMA200/RSI รายวันไม่ได้
-  const [spyC, ...charts] = await Promise.all([getChart("SPY", "5YD"), ...symbols.map((s) => getChart(s, "5YD"))]);
+  // ข้อมูล 10 ปีรายวัน — ทดสอบ 3 ปีล่าสุดของช่วงที่ระบุ (endDate ย้อนหลังได้ = walk-forward หลายหน้าต่าง)
+  // สำคัญ: ต้องใช้ "10YD" (แท่งรายวัน) — แท่งรายสัปดาห์คำนวณ SMA200/RSI รายวันไม่ได้
+  const [spyC, ...charts] = await Promise.all([getChart("SPY", "10YD"), ...symbols.map((s) => getChart(s, "10YD"))]);
   const data: Record<string, Candle[]> = {};
   symbols.forEach((s, i) => (data[s] = charts[i]));
   const valid = symbols.filter((s) => (data[s]?.length ?? 0) > 500); // ต้องมีประวัติยาวพอ
@@ -200,6 +206,7 @@ export async function runAdvisorBacktest(tickers: string[], opts?: { endDate?: s
   const spySeries: number[] = [100];
   let cashPct = 0;
   let actionCount = 0;
+  let totalFeePct = 0; // ค่าธรรมเนียมสะสม (% ของมูลค่าพอร์ตเริ่มต้น)
 
   for (let q = 1; q < idxs.length; q++) {
     const prevIdx = idxs[q - 1];
@@ -253,11 +260,20 @@ export async function runAdvisorBacktest(tickers: string[], opts?: { endDate?: s
       weight: weights[s],
       rsi: rsiNow[s],
       sma200: smaNow[s],
+      ...(coreSet.has(s) ? { core: true } : {}),
     }));
     const decision = applyAdvisorRules(holdingsNow);
     targetWeights = decision.targets;
     cashPct = decision.cashPct;
     actionCount += decision.actions.length;
+
+    // ค่าธรรมเนียม rebalance: ปริมาณซื้อขาย = ผลรวมส่วนต่างน้ำหนัก ÷ 2 (ฝั่งขาย = ฝั่งซื้อ) × อัตราต่อฝั่ง
+    let turnover = 0;
+    for (const s of valid) turnover += Math.abs((targetWeights[s] ?? 0) - weights[s]) / 100;
+    turnover /= 2;
+    const fee = turnover * FEE_PER_SIDE;
+    advisorValue *= 1 - fee;
+    totalFeePct += fee * 100;
 
     const d = new Date(spy[curIdx].time * 1000);
     quarters.push({
@@ -298,7 +314,9 @@ export async function runAdvisorBacktest(tickers: string[], opts?: { endDate?: s
     hold: { totalPct: Math.round(holdTotal * 10) / 10, cagrPct: Math.round(cagr(holdSeries) * 10) / 10, maxDrawdownPct: Math.round(ddH * 10) / 10 },
     spy: { totalPct: Math.round(spyTotal * 10) / 10, cagrPct: Math.round(cagr(spySeries) * 10) / 10 },
     actionCount,
+    totalFeesPct: Math.round(totalFeePct * 100) / 100,
+    coreTickers: valid.filter((s) => coreSet.has(s)),
     grade,
-    note: "เครื่องยนต์กฎตัวเลขชุดเดียวกับที่ AI Advisor ใช้ใน /portfolio (ส่วนที่ตัดสินใจได้จริง) — ตัวสรุปภาษาไทยของ AI ไม่ได้ backtest · ทุกการตัดสินใจใช้ข้อมูลถึงวันนั้นเท่านั้น · ไม่หักค่าธรรมเนียม/ภาษี",
+    note: "เครื่องยนต์กฎตัวเลขชุดเดียวกับที่ AI Advisor ใช้ใน /portfolio (ส่วนที่ตัดสินใจได้จริง) — ตัวสรุปภาษาไทยของ AI ไม่ได้ backtest · ทุกการตัดสินใจใช้ข้อมูลถึงวันนั้นเท่านั้น · หักค่าธรรมเนียมจำลอง 0.15% ต่อฝั่งตามปริมาณ rebalance จริงแล้ว (ยังไม่รวมภาษี)",
   };
 }

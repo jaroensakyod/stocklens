@@ -61,6 +61,44 @@ function metaToQuote(m: Record<string, unknown>): Quote | undefined {
   };
 }
 
+// ---------- Alpaca real-time (US) — ทางเลือก: ใส่ ALPACA_KEY_ID/SECRET เมื่อไหร่ เปิดอัตโนมัติ ----------
+// ใช้ snapshot: ราคาล่าสุด (real-time IEX) + แท่งวันก่อน → change% — เขียนทับ quote ของ Yahoo เฉพาะหุ้น US
+export function hasAlpaca(): boolean {
+  return !!(process.env.ALPACA_KEY_ID && process.env.ALPACA_SECRET_KEY);
+}
+async function alpacaOverwrite(out: Record<string, Quote>) {
+  if (!hasAlpaca()) return;
+  const usSyms = Object.keys(out).filter((s) => /^[A-Z]{1,5}$/.test(s));
+  if (!usSyms.length) return;
+  for (let i = 0; i < usSyms.length; i += 50) {
+    const batch = usSyms.slice(i, i + 50);
+    try {
+      const res = await fetch(`https://data.alpaca.markets/v2/stocks/snapshots?symbols=${encodeURIComponent(batch.join(","))}&feed=ipse`, {
+        headers: { "APCA-API-KEY-ID": process.env.ALPACA_KEY_ID!, "APCA-API-SECRET-KEY": process.env.ALPACA_SECRET_KEY! },
+        signal: AbortSignal.timeout(8_000),
+      });
+      if (!res.ok) continue;
+      const j = (await res.json()) as Record<string, { latestTrade?: { p?: number }; prevDailyBar?: { c?: number }; dailyBar?: { c?: number } }>;
+      for (const [sym, snap] of Object.entries(j)) {
+        const price = snap.latestTrade?.p ?? snap.dailyBar?.c;
+        const prev = snap.prevDailyBar?.c;
+        if (price === undefined || !isFinite(price) || !price) continue;
+        const prevClose = prev !== undefined && isFinite(prev) && prev > 0 ? prev : out[sym]?.price;
+        const q = out[sym];
+        if (q) {
+          q.price = price;
+          q.change = prevClose ? price - prevClose : (q.change ?? 0);
+          q.changePct = prevClose ? ((price - prevClose) / prevClose) * 100 : q.changePct;
+          q.exchange = "Alpaca real-time";
+          setCached("q:" + sym, q);
+        }
+      }
+    } catch {
+      // Alpaca ล่ม = คงราคา Yahoo ไว้ตามเดิม
+    }
+  }
+}
+
 export async function getQuotes(symbols: string[]): Promise<Record<string, Quote>> {
   const out: Record<string, Quote> = {};
   const need: string[] = [];
@@ -97,6 +135,7 @@ export async function getQuotes(symbols: string[]): Promise<Record<string, Quote
       }
     }
   }
+  await alpacaOverwrite(out); // มี key Alpaca = อัปเดตหุ้น US เป็น real-time (ไม่มี = ข้ามเงียบๆ)
   return out;
 }
 
@@ -116,6 +155,7 @@ const RANGE_MAP: Record<string, { range: string; interval: string }> = {
   "1Y": { range: "1y", interval: "1d" },
   "5Y": { range: "5y", interval: "1wk" },
   "5YD": { range: "5y", interval: "1d" }, // ใช้กับ backtest
+  "10YD": { range: "10y", interval: "1d" }, // backtest + walk-forward หลายหน้าต่างเวลา
 };
 
 export async function getChart(symbol: string, range = "1Y"): Promise<Candle[]> {
