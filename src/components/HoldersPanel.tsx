@@ -7,7 +7,7 @@ interface Data {
   available: boolean;
   institutions?: { org: string; pctHeld: number; pctChange: number; value: number; reportDate: string }[];
   insiders?: { name: string; position: string; shares: number; latestTrans: string }[];
-  insiderNetPct?: number | null;
+  insiderActivity?: { buyCount: number; sellCount: number; netShares: number; netPctOfInsider: number } | null;
 }
 
 const fmtVal = (v: number) => (v >= 1e12 ? (v / 1e12).toFixed(1) + "T$" : v >= 1e9 ? (v / 1e9).toFixed(1) + "B$" : v >= 1e6 ? (v / 1e6).toFixed(0) + "M$" : v.toLocaleString());
@@ -56,11 +56,11 @@ export default function HoldersPanel({ ticker, market }: { ticker: string; marke
     <div className="card p-5 mt-6">
       <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
         <h3 className="text-sm font-bold text-zinc-100">🏛️ ใครถือหุ้นนี้ (Top Shareholders)</h3>
-        {typeof data.insiderNetPct === "number" && (
-          <span className={`chip num border ${data.insiderNetPct >= 0 ? "bg-up/10 text-up border-up/30" : "bg-down/10 text-down border-down/30"}`}>
-            Insider {data.insiderNetPct >= 0 ? "ซื้อสุทธิ +" : "ขายสุทธิ "}{(data.insiderNetPct * 100).toFixed(2)}% (6 ด.)
+        {data.insiderActivity && (data.insiderActivity.buyCount || data.insiderActivity.sellCount) ? (
+          <span className={`chip num border ${data.insiderActivity.netShares >= 0 ? "bg-up/10 text-up border-up/30" : "bg-down/10 text-down border-down/30"}`}>
+            Insider {data.insiderActivity.netShares >= 0 ? "ซื้อสุทธิ" : "ขายสุทธิ"} {Math.abs(data.insiderActivity.netShares).toLocaleString()} หุ้น (ซื้อ {data.insiderActivity.buyCount}/ขาย {data.insiderActivity.sellCount} ดีล · 6 ด.)
           </span>
-        )}
+        ) : null}
       </div>
 
       <div className="grid md:grid-cols-2 gap-5">

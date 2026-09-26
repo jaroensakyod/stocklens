@@ -9,7 +9,7 @@ interface Data {
   rows: Row[];
   regime: string;
   regimeDetail: string;
-  insider: { avg: number | null; n: number; rows: { symbol: string; insiderNetPct: number | null }[] };
+  insider: { netBuyers: number; n: number; rows: { symbol: string; netShares: number; buyCount: number; sellCount: number }[] };
   note: string;
 }
 
@@ -77,22 +77,22 @@ export default function SupernovaPage() {
 
           <div className="card p-5">
             <h3 className="text-sm font-bold text-zinc-100 mb-2">👔 Insider ซื้อ/ขายสุทธิ — หุ้นยักษ์ US ({data.insider.n} ตัว)</h3>
-            {data.insider.avg !== null ? (
+            {data.insider.n > 0 ? (
               <>
-                <div className={`num text-2xl font-bold ${(data.insider.avg ?? 0) >= 0 ? "text-up" : "text-down"}`}>
-                  {data.insider.avg >= 0 ? "+" : ""}{(data.insider.avg * 100).toFixed(2)}% <span className="text-xs text-zinc-500 font-normal">เฉลี่ย (6 เดือน)</span>
+                <div className={`num text-2xl font-bold ${data.insider.netBuyers >= data.insider.n / 2 ? "text-up" : "text-down"}`}>
+                  {data.insider.netBuyers}/{data.insider.n} <span className="text-xs text-zinc-500 font-normal">ตัวที่ insider ซื้อสุทธิ (6 เดือน)</span>
                 </div>
                 <div className="flex flex-wrap gap-1.5 mt-2">
                   {data.insider.rows.map((x) => (
-                    <span key={x.symbol} className={`chip num border text-[11px] ${(x.insiderNetPct ?? 0) >= 0 ? "bg-up/10 text-up border-up/30" : "bg-down/10 text-down border-down/30"}`}>
-                      {x.symbol} {(x.insiderNetPct ?? 0) >= 0 ? "+" : ""}{((x.insiderNetPct ?? 0) * 100).toFixed(2)}%
+                    <span key={x.symbol} className={`chip num border text-[11px] ${x.netShares >= 0 ? "bg-up/10 text-up border-up/30" : "bg-down/10 text-down border-down/30"}`} title={`ซื้อ ${x.buyCount} ดีล · ขาย ${x.sellCount} ดีล`}>
+                      {x.symbol} {x.netShares >= 0 ? "▲" : "▼"} {Math.abs(x.netShares) >= 1e6 ? (Math.abs(x.netShares) / 1e6).toFixed(1) + "M" : (Math.abs(x.netShares) / 1e3).toFixed(0) + "K"}หุ้น
                     </span>
                   ))}
                 </div>
-                <p className="text-[11px] text-zinc-500 mt-2">ค่าลบ = ผู้บริหารขายสุทธิ — สัญญาณที่นักวิเคราะห์สาย "ดูพฤติกรรมคนใน" ใช้ประกอบ (ขายเพื่อกระจายภาษีเป็นเรื่องปกติ ดูแนวโน้มรวม)</p>
+                <p className="text-[11px] text-zinc-500 mt-2">ดีลของผู้บริหารรอบ 6 เดือน — ขายเพื่อกระจายภาษีเป็นเรื่องปกติ ดูแนวโน้มรวมประกอบ</p>
               </>
             ) : (
-              <p className="text-xs text-zinc-500">ยังไม่มีข้อมูล insider รอบนี้ (ระบบจะเติมเอง)</p>
+              <p className="text-xs text-zinc-500">ยังไม่มีข้อมูล insider รอบนี้</p>
             )}
           </div>
 

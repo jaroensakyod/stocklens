@@ -485,7 +485,7 @@ export interface InsiderHolder {
 export interface HoldersData {
   institutions: InstitutionHolder[]; // เรียงมาก→น้อย สูงสุด 10
   insiders: InsiderHolder[]; // สูงสุด 5
-  insiderNetPct: number | null; // ซื้อขายสุทธิของ insider (% ของทั้งหมด 6 เดือน)
+  insiderActivity: { buyCount: number; sellCount: number; netShares: number; netPctOfInsider: number } | null; // ซื้อขายสุทธิของ insider (ฟิลด์จริง: buyInfoCount/sellInfoCount/netInfoShares รอบ 6 เดือน)
 }
 export async function getHolders(symbol: string): Promise<HoldersData | null> {
   const key = "hd:" + symbol;
@@ -503,7 +503,7 @@ export async function getHolders(symbol: string): Promise<HoldersData | null> {
         result?: {
           institutionOwnership?: { ownershipList?: { organization?: string; pctHeld?: { raw?: number }; pctChange?: { raw?: number }; position?: { raw?: number }; reportDate?: { fmt?: string } }[] };
           insiderHolders?: { holders?: { name?: string; position?: { fmt?: string } | string; shares?: { raw?: number }; latestTransDate?: { fmt?: string } }[] };
-          netSharePurchaseActivity?: { netInsiderPctPurchase?: { raw?: number } };
+          netSharePurchaseActivity?: { buyInfoCount?: { raw?: number }; sellInfoCount?: { raw?: number }; netInfoShares?: { raw?: number }; netPercentInsiderShares?: { raw?: number } };
         }[];
       };
     };
@@ -534,7 +534,16 @@ export async function getHolders(symbol: string): Promise<HoldersData | null> {
     const out: HoldersData = {
       institutions,
       insiders,
-      insiderNetPct: r.netSharePurchaseActivity?.netInsiderPctPurchase?.raw ?? null,
+      insiderActivity: (() => {
+        const na = r.netSharePurchaseActivity;
+        if (!na || typeof na.netInfoShares?.raw !== "number") return null;
+        return {
+          buyCount: na.buyInfoCount?.raw ?? 0,
+          sellCount: na.sellInfoCount?.raw ?? 0,
+          netShares: na.netInfoShares.raw,
+          netPctOfInsider: na.netPercentInsiderShares?.raw ?? 0,
+        };
+      })(),
     };
     setCached(key, out);
     return out;

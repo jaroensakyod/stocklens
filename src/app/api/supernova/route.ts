@@ -75,17 +75,19 @@ export async function GET() {
     .map((r, i) => {
       const sym = ["AAPL", "MSFT", "NVDA", "AMZN", "GOOGL", "META", "TSLA", "JPM"][i];
       if (r.status !== "fulfilled" || !r.value) return null;
-      return { symbol: sym, insiderNetPct: r.value.insiderNetPct };
+      const a = r.value.insiderActivity;
+      if (!a || (!a.buyCount && !a.sellCount)) return null;
+      return { symbol: sym, netShares: a.netShares, buyCount: a.buyCount, sellCount: a.sellCount };
     })
-    .filter((x): x is { symbol: string; insiderNetPct: number | null } => !!x && x.insiderNetPct !== null);
-  const insiderNetAvg = insiderRows.length ? insiderRows.reduce((a, x) => a + (x.insiderNetPct ?? 0), 0) / insiderRows.length : null;
+    .filter((x): x is { symbol: string; netShares: number; buyCount: number; sellCount: number } => !!x);
+  const netBuyers = insiderRows.filter((x) => x.netShares > 0).length;
 
   return NextResponse.json({
     updatedAt: Date.now(),
     rows,
     regime,
     regimeDetail,
-    insider: { avg: insiderNetAvg, n: insiderRows.length, rows: insiderRows },
+    insider: { netBuyers, n: insiderRows.length, rows: insiderRows },
     note: "กรอบการอ่านสัญญาณแบบสาธารณะ (เกจวัดมหภาคที่นักวิเคราะห์สายมหภาคใช้ทั่วไป) — เป็นข้อมูล ไม่ใช่คำแนะนำการลงทุน",
   });
 }
