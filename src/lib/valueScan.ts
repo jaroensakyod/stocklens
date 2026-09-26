@@ -4,6 +4,9 @@
 import { tvUniverse, toYahooSymbol } from "./tvscanner";
 import { buildAnalysis } from "./analysis";
 import { getChart, getUsdThb } from "./yahoo";
+import { kvGet, kvSet, hasDB } from "./storage";
+import { promises as fs } from "fs";
+import path from "path";
 
 export interface ValueRow {
   symbol: string;
@@ -31,6 +34,67 @@ export interface ValueResult {
 
 let cached: { at: number; data: ValueResult } | null = null;
 const TTL = 30 * 60_000; // เหมือน Picks — คำนวณใหม่ทุก 30 นาที (ข้อมูลพื้นฐาน cache อยู่แล้ว)
+
+// ===== บันทึกประวัติรายวัน — วันแรกที่มีคนเปิดแต่ละวันจะจด snapshot เก็บไว้ 30 วัน ย้อนดูได้ =====
+const HISTORY_FILE = path.join(process.cwd(), "src/data/value-history.json");
+const HISTORY_KEY = "value-history";
+const HISTORY_KEEP = 30;
+
+export interface ValueDay {
+  date: string; // yyyy-mm-dd (local)
+  dateTh: string;
+  undervalued: ValueRow[];
+  overpriced: ValueRow[];
+  scannedCount: number;
+}
+
+async function readHistory(): Promise<ValueDay[]> {
+  if (hasDB()) return (await kvGet<ValueDay[]>(HISTORY_KEY)) ?? [];
+  try {
+    const j = JSON.parse(await fs.readFile(HISTORY_FILE, "utf8")) as { days?: ValueDay[] };
+    return j.days ?? [];
+  } catch {
+    return [];
+  }
+}
+
+async function writeHistory(days: ValueDay[]) {
+  if (hasDB()) {
+    await kvSet(HISTORY_KEY, days);
+    return;
+  }
+  await fs.writeFile(HISTORY_FILE, JSON.stringify({ _note: "ประวัติสแกนหุ้นใต้น้ำรายวัน (dev file — บน Vercel อยู่ใน Redis)", days }, null, 2));
+}
+
+const todayKey = () => new Date().toLocaleDateString("sv-SE"); // yyyy-mm-dd ตามเวลาท้องถิ่น
+
+async function recordDay(data: ValueResult) {
+  const day = todayKey();
+  const hist = await readHistory();
+  if (hist.some((h) => h.date === day)) return hist;
+  const next: ValueDay[] = [
+    {
+      date: day,
+      dateTh: new Date().toLocaleDateString("th-TH", { year: "numeric", month: "short", day: "numeric" }),
+      undervalued: data.undervalued,
+      overpriced: data.overpriced,
+      scannedCount: data.scannedCount,
+    },
+    ...hist,
+  ].slice(0, HISTORY_KEEP);
+  await writeHistory(next);
+  return next;
+}
+
+/** รายการวันที่มีบันทึก (วันใหม่สุดก่อน) */
+export async function getValueHistory(): Promise<{ date: string; dateTh: string }[]> {
+  return (await readHistory()).map((d) => ({ date: d.date, dateTh: d.dateTh }));
+}
+
+/** ดู snapshot ของวันใดวันหนึ่งย้อนหลัง */
+export async function getValueDay(date: string): Promise<ValueDay | null> {
+  return (await readHistory()).find((d) => d.date === date) ?? null;
+}
 
 interface Cand {
   sym: string;
@@ -192,5 +256,6 @@ export async function getValueScan(): Promise<ValueResult> {
   if (cached && Date.now() - cached.at < TTL) return cached.data;
   const data = await build();
   cached = { at: Date.now(), data };
+  await recordDay(data).catch(() => {}); // จดประวัติวันนี้ (ครั้งแรกของวัน) — พังไม่ดึงฟีเจอร์หลักลง
   return data;
 }

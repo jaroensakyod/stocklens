@@ -12,6 +12,8 @@ interface ApiData {
   overpriced: ValueRow[];
   scannedCount: number;
   note: string;
+  history?: { date: string; dateTh: string }[];
+  isHistory?: boolean;
 }
 
 const baht = (n: number) => n.toLocaleString("th-TH", { maximumFractionDigits: 0 });
@@ -56,13 +58,31 @@ function Row({ r, side }: { r: ValueRow; side: "under" | "over" }) {
 
 export default function ValuePage() {
   const [data, setData] = useState<ApiData | null>(null);
+  const [history, setHistory] = useState<{ date: string; dateTh: string }[]>([]);
+  const [selectedDate, setSelectedDate] = useState<string>("");
 
   useEffect(() => {
     fetch("/api/value")
       .then((r) => r.json())
-      .then(setData)
+      .then((j) => {
+        setData(j);
+        if (j.history) setHistory(j.history);
+      })
       .catch(() => {});
   }, []);
+
+  // ดูย้อนหลัง: โหลด snapshot ของวันที่เลือก / ว่าง = กลับมาดูสดวันนี้
+  const pickDate = async (date: string) => {
+    setSelectedDate(date);
+    if (!date) {
+      const j = await fetch("/api/value").then((r) => r.json());
+      setData(j);
+      if (j.history) setHistory(j.history);
+      return;
+    }
+    const j = await fetch(`/api/value?date=${date}`).then((r) => r.json());
+    if (!j.error) setData(j);
+  };
 
   return (
     <div className="space-y-8 max-w-6xl mx-auto">
@@ -76,8 +96,30 @@ export default function ValuePage() {
         </p>
         {data && (
           <p className="text-[11px] text-zinc-500 mt-2">
-            คำนวณล่าสุด {data.asOf} · สแกนแล้ว {data.scannedCount} ตัว · เรียงใหม่ทุก 30 นาที
+            {data.isHistory
+              ? `📜 ข้อมูลย้อนหลัง ณ วันที่ ${new Date(selectedDate).toLocaleDateString("th-TH", { year: "numeric", month: "long", day: "numeric" })}`
+              : `คำนวณล่าสุด ${data.asOf} · สแกนแล้ว ${data.scannedCount} ตัว · เรียงใหม่ทุก 30 นาที`}
           </p>
+        )}
+        {/* เลือกวัน — บันทึกรายวัน (ครั้งแรกที่มีคนเปิดหน้าในแต่ละวัน) เก็บ 30 วันล่าสุด */}
+        {history.length > 1 && (
+          <div className="flex flex-wrap gap-1.5 justify-center mt-3">
+            <button
+              onClick={() => pickDate("")}
+              className={`chip text-[11px] ${!selectedDate ? "bg-accent text-zinc-950" : "bg-base-800 text-zinc-400 border border-base-700"}`}
+            >
+              🔴 วันนี้ (สด)
+            </button>
+            {history.filter((h) => h.date !== new Date().toLocaleDateString("sv-SE")).slice(0, 10).map((h) => (
+              <button
+                key={h.date}
+                onClick={() => pickDate(h.date)}
+                className={`chip text-[11px] num ${selectedDate === h.date ? "bg-accent text-zinc-950" : "bg-base-800 text-zinc-400 border border-base-700"}`}
+              >
+                {h.dateTh}
+              </button>
+            ))}
+          </div>
         )}
       </section>
 

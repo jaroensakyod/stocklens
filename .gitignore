@@ -11,3 +11,4 @@ out/
 # ไฟล์ state ที่มีข้อมูลส่วนตัว/เปลี่ยนตลอด — ห้าม push (บน Vercel ใช้ Upstash Redis)
 src/data/members.json
 src/data/model-portfolio.json
+src/data/value-history.json
