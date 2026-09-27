@@ -26,7 +26,7 @@ export async function getProlensDashboard() {
     if (!st.status) st.status = "yellow";
     return st;
   });
-  return { signals, predictions: methodology.predictions, framework: methodology.framework, supernova: sn, jiangSignals: (methodology as Record<string, unknown>).jiangSignals ?? [], jiangPredictions: (methodology as Record<string, unknown>).jiangPredictions ?? [], compareView: (methodology as Record<string, unknown>).compareView ?? null, jevMining: (methodology as Record<string, unknown>).jevMining ?? null };
+  return { signals, predictions: methodology.predictions, framework: methodology.framework, supernova: sn, jiangSignals: (methodology as Record<string, unknown>).jiangSignals ?? [], jiangPredictions: (methodology as Record<string, unknown>).jiangPredictions ?? [], compareView: (methodology as Record<string, unknown>).compareView ?? null, jevMining: (methodology as Record<string, unknown>).jevMining ?? null }; // jevMining.fullSuite อยู่ในนั้นแล้ว
 }
 
 export async function analyzeEventProlens(text: string): Promise<{ signals: ProlensSignal[]; chains: { name: string; stocks: string[] }[]; note: string }> {

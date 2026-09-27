@@ -10,7 +10,14 @@ import LockGate from "@/components/LockGate";
 interface Signal { id: string; emoji: string; name: string; clips: number; desc: string; rule: string; watch: string[]; up: string[]; down: string[]; status?: string; currentValue?: string }
 interface Prediction { date: string; text: string; status: string; result?: string; note?: string }
 interface Framework { howHeReadsHistory: string[]; howHeSeesFuture: string[] }
-interface Data { signals: Signal[]; predictions: Prediction[]; framework: Framework; supernova?: { rows: { id: string; label: string; price: number | null; chg5d: number | null }[]; insider?: { netBuyers: number; n: number } }; jiangSignals?: Signal[]; jiangPredictions?: Prediction[]; compareView?: { agree: { topic: string; thaweesakh: string; jiang: string }[]; differ: { topic: string; thaweesakh: string; jiang: string }[] }; jevMining?: { ranAt: string; calls: number; summary: { chunks: number; hotChunks: number; predictionsFound: number; causalChunks: number; byAsset: Record<string, number> }; predictions: { clip: string; quote: string; assets: string | null; timeframe: string | null; predScore: number; direction?: string | null; confidence?: number | null }[]; causalQuotes: { clip: string; quote: string }[]; directionSummary?: Record<string, number>; scenario?: { dominant: string | null; evidenceScore: number | null; goldLean: number | null; note: string } } }
+interface Data { signals: Signal[]; predictions: Prediction[]; framework: Framework; supernova?: { rows: { id: string; label: string; price: number | null; chg5d: number | null }[]; insider?: { netBuyers: number; n: number } }; jiangSignals?: Signal[]; jiangPredictions?: Prediction[]; compareView?: { agree: { topic: string; thaweesakh: string; jiang: string }[]; differ: { topic: string; thaweesakh: string; jiang: string }[] }; jevMining?: { ranAt: string; calls: number; summary: { chunks: number; hotChunks: number; predictionsFound: number; causalChunks: number; byAsset: Record<string, number> }; predictions: { clip: string; quote: string; assets: string | null; timeframe: string | null; predScore: number; direction?: string | null; confidence?: number | null }[]; causalQuotes: { clip: string; quote: string }[]; directionSummary?: Record<string, number>; scenario?: { dominant: string | null; evidenceScore: number | null; goldLean: number | null; note: string };
+  fullSuite?: {
+    phaseCount: Record<string, number>; adviceCount: Record<string, number>; convictionAvg: number | null;
+    highConviction: { asset: string; direction: string; clipCount: number; quoteCount: number; avgConfidence: number; sample: string[] }[];
+    contradictions: { asset: string; bear: { quote: string; clip: string }; bull: { quote: string; clip: string }; verdict: string | null; lean: number | null }[];
+    stockCalls: { ticker: string; chunks: number; priceRange: { min: number; max: number; n: number } | null; sample: { clip: string; ctx: string } | null }[];
+    allocation: { posture: string | null; cashRole: number | null; note: string };
+  } } }
 interface AnalyzeResult { signals: Signal[]; chains: { name: string; stocks: string[] }[]; note: string }
 
 const STATUS_ICON: Record<string, string> = { green: "🟢", yellow: "🟡", red: "🔴" };
@@ -19,6 +26,10 @@ const PRED_ICON: Record<string, string> = { verified: "✅", pending: "⏳", act
 const DIR_STYLE: Record<string, { label: string; cls: string }> = { bull: { label: "▲ บวก", cls: "bg-up/15 text-up border-up/30" }, bear: { label: "▼ ลบ", cls: "bg-down/15 text-down border-down/30" }, conditional: { label: "⇄ มีเงื่อนไข", cls: "bg-amber-500/15 text-amber-400 border-amber-500/30" }, neutral: { label: "● เล่าสถานะ", cls: "bg-base-800 text-zinc-500 border-base-700" } };
 const SCEN_TH: Record<string, string> = { warInflationReset: "⚔️ สงคราม+เงินเฟ้อ+Reset ราว 2030 (ทอง/สินค้าโภคภัณฑ์/กลาโหมชนะ)", softLanding: "🕊️ ผ่านพ้นแบบนุ่ม หุ้นโตต่อ", stagflationGrind: "🐢 เงินเฟ้อสูง+เติบโตต่ำยาว (ทองแข็ง หุ้น sideways)" };
 
+const PHASE_TH: Record<string, string> = { buildup: "🧱 สะสม/เตรียม", war: "⚔️ สงคราม/วิกฤต", reset: "🔄 รีเซ็ต", rebuild: "🏗️ สร้างใหม่" };
+const ADVICE_TH: Record<string, string> = { buy: "🟢 ซื้อ/สะสม", sell: "🔴 ขาย/ลด", holdcash: "💵 ถือเงินสด/รอ", prepare: "🎒 เตรียมตัว", debt: "📉 ลดหนี้", diversify: "⚖️ กระจาย" };
+const POSTURE_TH: Record<string, string> = { maxCashGold: "เงินสดสูง+ทองหนัก รอซื้อวิกฤต", barbell: "บาร์เบล: ทอง/สินค้าโภคภัณฑ์ + หุ้นคุณภาพนิดหน่อย", allIn: "ลงหุ้นเต็มตัว", diversified: "กระจายทุกสินทรัพย์เท่ากัน" };
+const VERDICT_TH: Record<string, string> = { changed: "⚡ เปลี่ยนความเห็นจริง", timeframe: "✓ ไม่ขัดกัน — ต่าง timeframe/เงื่อนไข", differentAsset: "✓ คนละประเด็นในสินทรัพย์เดียวกัน" };
 const ASSET_TH: Record<string, string> = { gold: "🥇 ทองคำ", oil: "🛢️ น้ำมัน/พลังงาน", thb: "🇹🇭 เงินบาท", set: "📊 SET", bonds: "🏛️ พันธบัตร/ดอกเบี้ย", land: "🌱 ที่ดิน", usd: "💵 ดอลลาร์", defense: "🛡️ กลาโหม" };
 const TF_TH: Record<string, string> = { days: "ระยะสั้น (วัน-สัปดาห์)", months: "ไตรมาส-ไม่กี่เดือน", year: "ภายในปีเดียว", years: "หลายปี-2030+" };
 
@@ -240,6 +251,82 @@ export default function ProlensPage() {
                 <p className="text-[12px] text-zinc-300 mt-1 leading-relaxed">“{p.quote}”</p>
               </div>
             ))}
+          {/* ▼▼▼ Full Suite เพิ่ม 27 ก.ย. 2026 ▼▼▼ */}
+          {data.jevMining.fullSuite && (
+            <>
+              <div className="mt-4 pt-3 border-t border-base-700/60 grid sm:grid-cols-3 gap-3 text-center">
+                <div className="bg-base-900 rounded-lg px-3 py-2">
+                  <div className="text-[10px] text-zinc-500">เฟสที่พูดถึงบ่อยสุด (380 chunks)</div>
+                  <div className="text-[13px] text-zinc-200 mt-1 leading-relaxed">{Object.entries(data.jevMining.fullSuite.phaseCount).sort((a, b) => b[1] - a[1]).map(([k, v]) => <span key={k} className="mr-2">{PHASE_TH[k] ?? k} <b className="num text-accent-soft">{v}</b></span>)}</div>
+                </div>
+                <div className="bg-base-900 rounded-lg px-3 py-2">
+                  <div className="text-[10px] text-zinc-500">คำแนะนำที่บอกผู้ชม</div>
+                  <div className="text-[13px] text-zinc-200 mt-1 leading-relaxed">{Object.entries(data.jevMining.fullSuite.adviceCount).sort((a, b) => b[1] - a[1]).map(([k, v]) => <span key={k} className="mr-2">{ADVICE_TH[k] ?? k} <b className="num text-accent-soft">{v}</b></span>)}</div>
+                </div>
+                <div className="bg-accent/10 border border-accent/25 rounded-lg px-3 py-2">
+                  <div className="text-[10px] text-zinc-500">Posture ที่คำแนะนำสื่อ (Jev สังเคราะห์)</div>
+                  <div className="text-[13px] font-bold text-accent-soft mt-1">{POSTURE_TH[data.jevMining.fullSuite.allocation.posture ?? ""] ?? data.jevMining.fullSuite.allocation.posture}</div>
+                  <div className="text-[10px] text-zinc-500 mt-0.5">บทบาทเงินสด (รอซื้อวิกฤต) {(data.jevMining.fullSuite.allocation.cashRole ?? 0).toFixed(0)}/3 · conviction เฉลี่ย {(data.jevMining.fullSuite.convictionAvg ?? 0).toFixed(1)}/3</div>
+                </div>
+              </div>
+
+              {data.jevMining.fullSuite.highConviction.length > 0 && (
+                <div className="mt-4">
+                  <div className="text-xs font-bold text-zinc-300 mb-2">📌 พยากรณ์หนักแน่น — ทิศทางเดียวกันซ้ำ ≥3 คลิป ({data.jevMining.fullSuite.highConviction.length} กลุ่ม)</div>
+                  <div className="grid sm:grid-cols-2 gap-2">
+                    {data.jevMining.fullSuite.highConviction.map((h, i) => (
+                      <div key={i} className="bg-base-850 rounded-lg px-3 py-2">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="chip bg-base-800 text-zinc-300 border border-base-700 !text-[10px]">{ASSET_TH[h.asset] ?? h.asset}</span>
+                          <span className={`chip border !text-[10px] ${h.direction === "bull" ? "bg-up/15 text-up border-up/30" : "bg-down/15 text-down border-down/30"}`}>{h.direction === "bull" ? "▲ บวกต่อเนื่อง" : "▼ ลบต่อเนื่อง"}</span>
+                          <span className="text-[10px] text-zinc-500 num">{h.clipCount} คลิป · {h.quoteCount} พูด · มั่นใจเฉลี่ย {h.avgConfidence.toFixed(1)}/3</span>
+                        </div>
+                        <p className="text-[11px] text-zinc-400 mt-1 leading-relaxed line-clamp-2">“{h.sample[0]}”</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {data.jevMining.fullSuite.contradictions.length > 0 && (
+                <div className="mt-4">
+                  <div className="text-xs font-bold text-zinc-300 mb-2">⚖️ ตรวจความขัดแย้ง — bull กับ bear ในสินทรัพย์เดียวกัน (Jev ตัดสิน)</div>
+                  <div className="space-y-2">
+                    {data.jevMining.fullSuite.contradictions.map((c, i) => (
+                      <div key={i} className="bg-base-850 rounded-lg px-3 py-2">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="chip bg-base-800 text-zinc-300 border border-base-700 !text-[10px]">{ASSET_TH[c.asset] ?? c.asset}</span>
+                          {c.verdict && <span className={`chip border !text-[10px] ${c.verdict === "changed" ? "bg-amber-500/15 text-amber-400 border-amber-500/30" : "bg-up/10 text-up border-up/25"}`}>{VERDICT_TH[c.verdict] ?? c.verdict}</span>}
+                          {c.lean !== null && <span className="text-[10px] text-zinc-500 num">น้ำหนักรวมเอียงบวก {c.lean.toFixed(1)}/4</span>}
+                        </div>
+                        <div className="grid sm:grid-cols-2 gap-2 mt-1.5">
+                          <p className="text-[11px] text-down leading-snug">▼ “{c.bear.quote.slice(0, 140)}”</p>
+                          <p className="text-[11px] text-up leading-snug">▲ “{c.bull.quote.slice(0, 140)}”</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {data.jevMining.fullSuite.stockCalls.length > 0 && (
+                <div className="mt-4">
+                  <div className="text-xs font-bold text-zinc-300 mb-2">💼 หุ้นที่พูดถึงพร้อมคำแนะนำ + ราคาตอนพูด (ตรวจย้อนกับราคาปัจจุบันได้ที่หน้าหุ้น)</div>
+                  <div className="grid sm:grid-cols-2 gap-2">
+                    {data.jevMining.fullSuite.stockCalls.map((sc) => (
+                      <div key={sc.ticker} className="bg-base-850 rounded-lg px-3 py-2 flex items-start gap-2">
+                        <Link href={`/stock/${encodeURIComponent(sc.ticker.replace(" หรือ NVDA", ""))}`} className="chip bg-accent/15 text-accent-soft border border-accent/30 !text-[11px] shrink-0">{sc.ticker.replace(" หรือ NVDA", "")}</Link>
+                        <div className="min-w-0">
+                          <span className="text-[10px] text-zinc-500 num">พูดใน {sc.chunks} chunks{sc.priceRange ? ` · ราคาตอนพูด ${sc.priceRange.min}–${sc.priceRange.max} บาท (${sc.priceRange.n} ครั้ง)` : ""}</span>
+                          {sc.sample && <p className="text-[11px] text-zinc-400 leading-snug line-clamp-2">{sc.sample.ctx.slice(0, 160)}</p>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
           </div>
         </div>
       )}
