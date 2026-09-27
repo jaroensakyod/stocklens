@@ -4,6 +4,37 @@
 // ข้อมูล: FINRA consolidatedShortInterest (ทั้งตลาดสหรัฐ ฟรี อัปเดต 2 ครั้ง/เดือน) + Yahoo float/ราคา
 
 import { cached, getQuotes, getQuoteSummaryModule } from "./yahoo";
+import { jevAsk } from "./typesafe";
+
+export interface JevSqueezeVerdict {
+  squeezeLikely: number; // 0-4 โอกาสถูกบีบแรงใน ~3 เดือน
+  trap: number; // 0-4 โอกาสเป็นกับดัก (พื้นฐานแยกจริง ฝั่ง short ถูก)
+  text: string;
+}
+
+/** Jev ชี้ขาดต่อตัว: หลักสวนสั้น vs กับดักพื้นฐานแยก — cache 12 ชม. */
+async function jevSqueezeVerdict(symbol: string, r: { dtc: number; shortPctFloat: number | null; chgPct: number; dayChangePct: number | null; price: number | null }): Promise<JevSqueezeVerdict | null> {
+  return cached("squeeze:jev:" + symbol, 12 * 3600_000, async () => {
+    const a = await jevAsk(
+      `Short squeeze analysis for US stock ${symbol}: price ${r.price ?? "?"} (today ${r.dayChangePct !== null ? r.dayChangePct.toFixed(1) + "%" : "?"}), days-to-cover ${r.dtc.toFixed(1)}, short % of float ${r.shortPctFloat !== null ? r.shortPctFloat.toFixed(0) + "%" : "unknown"}, short interest change vs last period ${r.chgPct.toFixed(1)}%.`,
+      {
+        squeezeLikely: { type: "score", instructions: "Probability of a violent short squeeze (>30% rally within ~3 months) given these positioning metrics?", criteria: ["ต่ำมาก", "มีบ้าง", "สูงพอมีนัย", "สูงชัดเจน"] },
+        trap: { type: "score", instructions: "Probability this is a VALUE TRAP — company fundamentals genuinely bad, shorts are right, and retail buying the squeeze loses?", criteria: ["พื้นฐานปกติดี", "มีความเสี่ยงบ้าง", "เสี่ยงสูง", "กับดักชัดเจน"] },
+      }
+    );
+    if (!a) return null;
+    const sq = Number((a.squeezeLikely as { score?: number })?.score ?? -1);
+    const tp = Number((a.trap as { score?: number })?.score ?? -1);
+    if (sq < 0) return null;
+    const text = tp >= 3
+      ? `🧠 Jev: โอกาส squeeze ${sq.toFixed(0)}/4 แต่เสี่ยงกับดักสูง (${tp.toFixed(0)}/4) — พื้นฐานมักแยกจริง เล่นฝั่งสวนต้องถือสั้นและยอมขาดทุนเร็ว`
+      : sq >= 3
+        ? `🧠 Jev: โอกาสถูกบีบสูง (${sq.toFixed(0)}/4) และยังไม่ใช่กับดักชัด (${tp.toFixed(0)}/4) — เงื่อนไข positioning เหมือนตำรา แต่จังหวะยังสำคัญ`
+        : `🧠 Jev: โอกาส squeeze ปานกลาง (${sq.toFixed(0)}/4) · ความเสี่ยงกับดัก ${tp.toFixed(0)}/4`;
+    return { squeezeLikely: sq, trap: tp, text };
+  });
+}
+
 
 export interface FinraRow {
   symbol: string;
@@ -119,6 +150,7 @@ async function getShortStats(symbol: string): Promise<YahooShortStats | null> {
 // ---------- Squeeze Score ----------
 
 export interface SqueezeRow extends FinraRow {
+  jev?: { squeezeLikely: number; trap: number; text: string } | null;
   score: number; // 0-10
   tier: "🔥" | "⚠️" | "👁";
   tierLabel: string;
@@ -276,6 +308,10 @@ export async function getSqueezeDashboard(): Promise<SqueezeDashboard | null> {
   }
   enriched.sort((a, b) => b.score - a.score || (b.shortPctFloat ?? 0) - (a.shortPctFloat ?? 0));
 
+  // Jev ชี้ขาด 8 อันดับแรก (cache 12 ชม. — ไม่ทำให้ช้ารอบถัดไป)
+  const top8 = enriched.slice(0, 8);
+  (await Promise.all(top8.map(async (r) => ({ sym: r.symbol, j: await jevSqueezeVerdict(r.symbol, { dtc: r.dtc, shortPctFloat: r.shortPctFloat, chgPct: r.chgPct, dayChangePct: r.dayChangePct, price: r.price }) })))).forEach(({ sym, j }) => { const t = enriched.find(e => e.symbol === sym); if (t) (t as SqueezeRow & { jev?: JevSqueezeVerdict | null }).jev = j; });
+
   // Shorts กำลังถอย: ยอด short ลดเร็ว (>15%) แต่ยังสูงพอจะมีความหมาย (กรอง micro-cap เงียบเช่นกัน)
   const covering: CoverRow[] = finra.rows
     .filter(LIQUID)
@@ -299,6 +335,7 @@ export async function getSqueezeDashboard(): Promise<SqueezeDashboard | null> {
 // ---------- วิเคราะห์รายตัว ----------
 
 export interface SqueezeAnalysis extends SqueezeRow {
+  jev?: JevSqueezeVerdict | null;
   yahoo: { shortPctFloat: number | null; sharesShort: number | null; sharesShortPrior: number | null; shortRatio: number | null; floatShares: number | null } | null;
   verdict: string;
   explain: string[];
@@ -345,8 +382,10 @@ export async function analyzeSqueeze(input: string): Promise<SqueezeAnalysis | {
     : row.score >= 6
       ? "⚠️ มีความเสี่ยงถูกบีบพอควร — ตามต่อว่าราคาเริ่มวิ่ง+วอลุ่มพุ่งหรือยัง"
       : "👁 ยังไม่มีสัญญาณ squeeze พอ — เก็บไว้ใน watchlist ได้";
+  const jev = await jevSqueezeVerdict(symbol, { dtc: row.dtc, shortPctFloat: row.shortPctFloat, chgPct: row.chgPct, dayChangePct: row.dayChangePct, price: row.price });
   return {
     ...row,
+    jev,
     name: f?.name ?? ys?.name ?? symbol,
     yahoo: ys ? { shortPctFloat: ys.shortPctFloat, sharesShort: ys.sharesShort, sharesShortPrior: ys.sharesShortPrior, shortRatio: ys.shortRatio, floatShares: ys.floatShares } : null,
     verdict,

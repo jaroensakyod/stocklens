@@ -375,7 +375,11 @@
       "deals": "Microsoft ลงทุนสะสม $13B+ · Stargate JV ดาต้าเซ็นเตอร์ $500B (Oracle/SoftBank) · Nvidia ลงทุน $100B (รายงาน 2025)",
       "valuation": "$852B (มี.ค. 2026 ระดม $122B — รอบใหญ่สุดในประวัติศาสตร์) → คุยรอบใหม่เกิน $1.2T",
       "expect": "รายงานเตรียมยื่น IPO ครึ่งหลัง 2026 — จะเป็น IPO ใหญ่ที่สุดเท่าที่เคยมีมา · รายได้ประมาณ $36B (2026) มุ่ง ~$350B (2030) พร้อมเผาเงิน ~$278B ใน 5 ปี",
-      "flag": "🔥"
+      "flag": "🔥",
+      "jevOutlook": {
+        "path": "ipo",
+        "quality": 0.77
+      }
     },
     {
       "name": "Anthropic",
@@ -386,7 +390,11 @@
       "deals": "Google/Amazon ลงทุนรวมหลายหมื่นล้าน · AWS เป็นคลาวด์หลัก",
       "valuation": "~$965B (พ.ค. 2026 Series H $65B) — ช่วงหนึ่งแซง OpenAI",
       "expect": "รายงาน pitch IPO มูลค่า ~$2 ล้านล้าน (TAM $30T) · รายได้ annualized ไต่จาก $2.5B (ก.พ. 2026) → ~$8B (กลางปี)",
-      "flag": "🔥"
+      "flag": "🔥",
+      "jevOutlook": {
+        "path": "ipo",
+        "quality": 0.62
+      }
     },
     {
       "name": "xAI",
@@ -397,7 +405,11 @@
       "deals": "Series E $20B (ม.ค. 2026) Nvidia ร่วมลงทุน · เครื่องจาก Dell/Supermicro",
       "valuation": "~$230B (ม.ค. 2026)",
       "expect": "ไม่มีสัญญาณ IPO — พึ่งวงจรเงิน Musk + ผูกกับเครือ X/Tesla/SpaceX",
-      "flag": "🔥"
+      "flag": "🔥",
+      "jevOutlook": {
+        "path": "raise",
+        "quality": 0.4
+      }
     },
     {
       "name": "Figure AI",
@@ -408,7 +420,11 @@
       "deals": "BMW ปรับใช้ Figure 03 จริงที่โรงงาน Spartanburg (มิ.ย. 2026) · คู่มือกับ Google DeepMind เรื่องโมเดล",
       "valuation": "~$39B (Series C 2026) จาก $2.6B ต้นปี 2024 — ขยับเร็วสุดในกลุ่มหุ่นยนต์",
       "expect": "ตลาดจับตา IPO เป็น 'บททดสอบ valuation หุ่นยนต์ humanoid' ทั้งอุตสาหกรรม",
-      "flag": "🤖"
+      "flag": "🤖",
+      "jevOutlook": {
+        "path": "ipo",
+        "quality": 0.69
+      }
     },
     {
       "name": "Skild AI",
@@ -419,7 +435,11 @@
       "deals": "SoftBank นำทุน Series B $500M → Series C $1.4B (ม.ค. 2026)",
       "valuation": "$14B (ม.ค. 2026) จาก $4.7B (พ.ค. 2025)",
       "expect": "รายได้โตจาก 0 → ~$30M ในเวลาไม่กี่เดือนปี 2025 — สัญญาณ monetize เร็วกว่าคู่แข่ง",
-      "flag": "🤖"
+      "flag": "🤖",
+      "jevOutlook": {
+        "path": "raise",
+        "quality": 0.66
+      }
     },
     {
       "name": "Physical Intelligence",
@@ -430,7 +450,11 @@
       "deals": "Bezos/OpenAI/Thrive ลงทุน · มีรายงาน Anthropic สนใจเข้าซื้อ",
       "valuation": "$5.6B → คุยรอบใหม่ ~$11B (มี.ค. 2026)",
       "expect": "แพ้ benchmark ทางกายภาพเร็วกว่าคาด (~3 เดือน) — เส้นทางอาจจบด้วย M&A ไม่ใช่ IPO",
-      "flag": "🤖"
+      "flag": "🤖",
+      "jevOutlook": {
+        "path": "acquired",
+        "quality": 0.3
+      }
     },
     {
       "name": "SSI (Safe Superintelligence)",
@@ -441,7 +465,11 @@
       "deals": "Greenoaks นำรอบ $2B — ผู้ลงทุนซื้อ 'ทีม+แนวคิด' ล้วน",
       "valuation": "$32B (เม.ย. 2025) จาก $5B seed ใน 7 เดือน — เร็วที่สุดในประวัติศาสตร์",
       "expect": "เดิมพันสูงสุดของยุค: ไร้รายได้ ไร้สินค้า แต่ได้มูลค่าเท่าบริษัท SET ใหญ่ๆ — ตัวชี้วัดฟองความเชื่อล้วนๆ",
-      "flag": "🧪"
+      "flag": "🧪",
+      "jevOutlook": {
+        "path": "raise",
+        "quality": 0.1
+      }
     },
     {
       "name": "Mistral AI",
@@ -452,7 +480,11 @@
       "deals": "Series D €3B (ก.ย. 2026) โดย Samsung นำ · ASML ร่วมก่อนหน้า",
       "valuation": ">€21B post-money (ก.ย. 2026)",
       "expect": "การ์ดตัวแทน 'AI อธิปไตย' — ถ้าโลกแบ่ง bloc ยิ่งชัด มูลค่าฝั่งนี้ยิ่งได้ลม",
-      "flag": "🇪🇺"
+      "flag": "🇪🇺",
+      "jevOutlook": {
+        "path": "raise",
+        "quality": 0.94
+      }
     },
     {
       "name": "Perplexity",
@@ -463,7 +495,11 @@
       "deals": "ดีลจัดจำหน่ายกับ SoftBank/Deutsche Telekom · คุยกับ Samsung เรื่องลงทุน/ติดตั้ง",
       "valuation": "ไต่จาก $9B → รายงานล่าสุดแวดวง $18-20B (2026)",
       "expect": "แนวทางสู้กับ Google ด้วย ads+browser — วัดกันที่ query volume จริง",
-      "flag": "🔎"
+      "flag": "🔎",
+      "jevOutlook": {
+        "path": "raise",
+        "quality": 1.24
+      }
     },
     {
       "name": "SandboxAQ",
@@ -474,7 +510,11 @@
       "deals": "ระดม $300M (สะสม ~$800M) · Eric Schmidt เป็นประธาน",
       "valuation": "$5.6B (ธ.ค. 2025) → ตลาดรองประเมิน ~$12B (2026)",
       "expect": "คาด IPO 2026-27 — ผู้เล่น 'หลังควอนตัม' ที่จับตัวได้ที่สุด (งานบังคับ migrate ของธนาคารทั้งโลก)",
-      "flag": "🔬"
+      "flag": "🔬",
+      "jevOutlook": {
+        "path": "ipo",
+        "quality": 1.18
+      }
     },
     {
       "name": "PsiQuantum",
@@ -485,7 +525,11 @@
       "deals": "Series E $1B (BlackRock/Temasek) → $1.5B รอบใหม่ (พ.ค. 2026)",
       "valuation": "$7B (ก.ย. 2025) → ~$10.5B (พ.ค. 2026) → รายงานเป้า IPO ~$20B",
       "expect": "จะเป็น 'IPO ควอนตัมใหญ่ที่สุด' ถ้าเกิด — เทียบ IonQ แคป ~$17.6B ที่จดทะเบียนแล้ว",
-      "flag": "🔬"
+      "flag": "🔬",
+      "jevOutlook": {
+        "path": "ipo",
+        "quality": 0.81
+      }
     },
     {
       "name": "Scale AI",
@@ -496,7 +540,11 @@
       "deals": "Meta จ่าย $14.3B ได้ 49% — Alexandr Wang ย้ายเป็นหัวหน้า Meta Superintelligence Labs",
       "valuation": "~$29B (ตามดีล Meta 2025)",
       "expect": "กลายเป็น 'บริวารของ Meta' โดยพฤตินัย — โอกาส IPO แยกตัวต่ำลง แต่เป็นบทเรียนว่า data layer มีค่าแค่ไหน",
-      "flag": "🗄️"
+      "flag": "🗄️",
+      "jevOutlook": {
+        "path": "acquired",
+        "quality": 0.36
+      }
     },
     {
       "name": "Groq",
@@ -507,7 +555,11 @@
       "deals": "ดีล sovereign cloud ตะวันออกกลาง (Aramco Digital) + พันธมิตรอินทิเกรชันหลายราย",
       "valuation": "~$6.7-6.9B (2025)",
       "expect": "เดิมพัน 'ยุคอนุมาน' (หลังเทรนครบ) — คู่แข่งตรงคือชิปอนุมานของยักษ์ใหญ่เอง",
-      "flag": "⚡"
+      "flag": "⚡",
+      "jevOutlook": {
+        "path": "raise",
+        "quality": 1.04
+      }
     },
     {
       "name": "Anysphere (Cursor)",
@@ -519,7 +571,11 @@
       "gov": "—",
       "deals": "Series D นำโดย Accel+Coatue · ก่อนหน้าราคาเสนอ $18-20B (Bloomberg กลางปี 2025) ก็ข้ามไปเลย",
       "valuation": "$29.3B (ม.ค. 2026) จาก $9B ปลายปี 2025",
-      "expect": "ARR ~$2B (ก.พ. 2026) — B2B ที่โตเร็วที่สุดเท่าที่เคยมีมาระดับหนึ่ง · Jev ให้น้ำหนักสูงสุดในบรรดาผู้สมัคร (0.35)"
+      "expect": "ARR ~$2B (ก.พ. 2026) — B2B ที่โตเร็วที่สุดเท่าที่เคยมีมาระดับหนึ่ง · Jev ให้น้ำหนักสูงสุดในบรรดาผู้สมัคร (0.35)",
+      "jevOutlook": {
+        "path": "ipo",
+        "quality": 1.62
+      }
     },
     {
       "name": "Harvey",
@@ -531,7 +587,11 @@
       "gov": "—",
       "deals": "ระดม $550M (ก.ย. 2026) นักลงทุนใหม่ร่วมนำ · OpenAI Startup Fund ลงก่อนหน้า",
       "valuation": "$15.5B (ก.ย. 2026 ตาม Reuters)",
-      "expect": "ตัวจริงกลุ่ม 'AI อาชีพสูง' — งานที่เรียกเก็บเงินแพงจริง โดนแทนยากที่สุดกลุ่มหนึ่ง"
+      "expect": "ตัวจริงกลุ่ม 'AI อาชีพสูง' — งานที่เรียกเก็บเงินแพงจริง โดนแทนยากที่สุดกลุ่มหนึ่ง",
+      "jevOutlook": {
+        "path": "ipo",
+        "quality": 1.38
+      }
     },
     {
       "name": "Anduril Industries",
@@ -543,7 +603,11 @@
       "gov": "สัญญากองทัพสหรัฐฯ ต่อเนื่องหลายโครงการ — ผู้รับประโยชน์ตรงจากงบกลาโหม re-rate ทั้งโลก",
       "deals": "คุยระดมทุน $8B รอบใหม่ · เดิม a16z/Founders Fund",
       "valuation": "รายงานเป้า ~$60B (จาก $30.5B ธ.ค. 2025)",
-      "expect": "ผู้ชนะโครงสร้าง 'สงคราม+AI' ฝั่งสหรัฐฯ — เชื่อมตรงกับธีมงบกลาโหม/หุ้นกลาโหมใน Atlas"
+      "expect": "ผู้ชนะโครงสร้าง 'สงคราม+AI' ฝั่งสหรัฐฯ — เชื่อมตรงกับธีมงบกลาโหม/หุ้นกลาโหมใน Atlas",
+      "jevOutlook": {
+        "path": "ipo",
+        "quality": 0.98
+      }
     },
     {
       "name": "Tenstorrent",
@@ -555,7 +619,11 @@
       "gov": "ดีล sovereign: กองทุนหลังรัฐบาลญี่ปุ่น/เกาหลีเข้าลงทุน — การ์ด 'ชิปไม่พึ่ง Nvidia ราคาถูก'",
       "deals": "Series D ~$700M (Samsung Securities นำ, ม.ค. 2025) → Fidelity ~$800M → +$200M (ก.ย. 2026)",
       "valuation": "~$3.2B (ยืนยัน) — มีรายงานดีลล่าสุดประเมินสูงถึง ~$10B (ตัวเลขขัดแย้งระหว่างแหล่ง)",
-      "expect": "'ทางเลือกที่ไม่ใช่ Nvidia' ที่จับต้องได้ที่สุดตัวหนึ่ง — ถ้ายุค open-chip มาจริง มูลค่าพุ่งตาม"
+      "expect": "'ทางเลือกที่ไม่ใช่ Nvidia' ที่จับต้องได้ที่สุดตัวหนึ่ง — ถ้ายุค open-chip มาจริง มูลค่าพุ่งตาม",
+      "jevOutlook": {
+        "path": "raise",
+        "quality": 1.28
+      }
     },
     {
       "name": "Apptronik",
@@ -567,7 +635,11 @@
       "gov": "—",
       "deals": "Series A-X $520M (ก.พ. 2026) — Google/Alphabet, Mercedes-Benz, B Capital, AT&T Ventures · Mercedes ปรับใช้ Apollo ในโรงงานจริง",
       "valuation": "~$5.3B (ก.พ. 2026) — โต ~3 เท่าจากรอบก่อน (ระดมสะสม ~$935M)",
-      "expect": "คู่แข่งตรง Figure — จุดต่างคือแบ็คเกอร์เป็นยักษ์อุตสาหกรรม (Google+Mercedes) ไม่ใช่ VC ล้วน"
+      "expect": "คู่แข่งตรง Figure — จุดต่างคือแบ็คเกอร์เป็นยักษ์อุตสาหกรรม (Google+Mercedes) ไม่ใช่ VC ล้วน",
+      "jevOutlook": {
+        "path": "raise",
+        "quality": 1.02
+      }
     }
   ]
 }

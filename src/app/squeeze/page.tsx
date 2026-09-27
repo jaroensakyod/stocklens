@@ -12,12 +12,12 @@ interface SqueezeRow {
   symbol: string; name: string; shortInterest: number; prevShort: number; adv: number; dtc: number;
   chgPct: number; settlementDate: string; score: number; tier: string; tierLabel: string; gmeZone: boolean;
   shortPctFloat: number | null; floatShares: number | null; mcap: number | null; price: number | null;
-  dayChangePct: number | null; reasons: string[];
+  dayChangePct: number | null; reasons: string[]; jev?: { squeezeLikely: number; trap: number; text: string } | null;
 }
 interface CoverRow { symbol: string; name: string; shortInterest: number; chgPct: number; dtc: number; price: number | null; dayChangePct: number | null }
 interface ThaiRow { symbol: string; name: string; price: number; chg1m: number; chg3m: number; mcap: number; sector: string }
 interface Dashboard { asOf: string; scanned: number; risky: SqueezeRow[]; gmeZoneCount: number; covering: CoverRow[]; thai: ThaiRow[] }
-interface Analysis extends SqueezeRow { verdict: string; explain: string[]; yahoo: { shortPctFloat: number | null; sharesShort: number | null; sharesShortPrior: number | null; shortRatio: number | null; floatShares: number | null } | null }
+interface Analysis extends SqueezeRow { verdict: string; explain: string[]; jev?: { squeezeLikely: number; trap: number; text: string } | null; yahoo: { shortPctFloat: number | null; sharesShort: number | null; sharesShortPrior: number | null; shortRatio: number | null; floatShares: number | null } | null }
 
 const fmtM = (n: number | null) => (n === null ? "-" : n >= 1e9 ? (n / 1e9).toFixed(1) + "B" : n >= 1e6 ? (n / 1e6).toFixed(1) + "M" : n >= 1e3 ? (n / 1e3).toFixed(0) + "K" : String(n));
 
@@ -72,6 +72,7 @@ export default function SqueezePage() {
               {analysis.price !== null && <span className="text-sm num">ราคา ${analysis.price.toFixed(2)} {analysis.dayChangePct !== null && <span className={analysis.dayChangePct >= 0 ? "text-up" : "text-down"}>({analysis.dayChangePct >= 0 ? "+" : ""}{analysis.dayChangePct.toFixed(1)}%)</span>}</span>}
             </div>
             <div className="rounded-lg bg-accent/10 border border-accent/25 px-3 py-2 text-sm text-zinc-200">{analysis.verdict}</div>
+            {analysis.jev && <div className="rounded-lg bg-base-900 border border-base-700 px-3 py-2 text-sm text-zinc-300">{analysis.jev.text}</div>}
             <div className="grid sm:grid-cols-3 gap-2 text-center">
               <Stat label="Short % ของ float" value={analysis.shortPctFloat !== null ? analysis.shortPctFloat.toFixed(1) + "%" : "-"} hot={analysis.gmeZone} />
               <Stat label="Days to Cover" value={analysis.dtc > 0 ? analysis.dtc.toFixed(1) + " วัน" : "-"} hot={analysis.dtc >= 7} />
@@ -106,7 +107,7 @@ export default function SqueezePage() {
               <thead><tr className="text-[10px] text-zinc-500 uppercase border-b border-base-700">
                 <th className="px-3 py-2 text-left">Score</th><th className="px-3 py-2 text-left">หุ้น</th>
                 <th className="px-3 py-2 text-right">Short% Float</th><th className="px-3 py-2 text-right">DTC</th>
-                <th className="px-3 py-2 text-right">ΔShort</th><th className="px-3 py-2 text-right">ราคา/วันนี้</th><th className="px-3 py-2 text-left">เหตุผล</th>
+                <th className="px-3 py-2 text-right">ΔShort</th><th className="px-3 py-2 text-center">🧠 Jev</th><th className="px-3 py-2 text-right">ราคา/วันนี้</th><th className="px-3 py-2 text-left">เหตุผล</th>
               </tr></thead>
               <tbody>
                 {data.risky.slice(0, locked ? 5 : 40).map((r) => (
@@ -123,6 +124,7 @@ export default function SqueezePage() {
                     </td>
                     <td className="px-3 py-2 text-right num text-zinc-300">{r.dtc > 0 ? r.dtc.toFixed(1) : "-"}</td>
                     <td className={`px-3 py-2 text-right num ${r.chgPct >= 0 ? "text-down" : "text-up"}`}>{r.chgPct > 0 ? "+" : ""}{r.chgPct.toFixed(0)}%</td>
+                    <td className="px-3 py-2 text-center whitespace-nowrap" title={r.jev?.text ?? "Jev ยังไม่ประเมินตัวนี้ (เฉพาะ top 8)"}>{r.jev ? <span className="text-[10px] num"><span className={r.jev.squeezeLikely >= 3 ? "text-up font-bold" : "text-zinc-300"}>บีป {r.jev.squeezeLikely.toFixed(0)}</span><span className="text-zinc-600">/</span><span className={r.jev.trap >= 3 ? "text-down font-bold" : "text-zinc-300"}>กับดัก {r.jev.trap.toFixed(0)}</span></span> : <span className="text-[10px] text-zinc-700">—</span>}</td>
                     <td className="px-3 py-2 text-right num whitespace-nowrap text-zinc-300">
                       {r.price !== null ? "$" + r.price.toFixed(2) : "-"}
                       {r.dayChangePct !== null && <span className={`ml-1 ${r.dayChangePct >= 0 ? "text-up" : "text-down"}`}>{r.dayChangePct >= 0 ? "+" : ""}{r.dayChangePct.toFixed(1)}%</span>}

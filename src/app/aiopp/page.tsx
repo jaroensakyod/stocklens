@@ -11,7 +11,7 @@ interface Stock { t: string; n: string; why: string }
 interface Theme { name: string; why: string; stocks: Stock[] }
 interface Rung { id: string; title: string; desc: string; themes: Theme[] }
 interface Ipo { name: string; ticker: string; country: string; what: string; ipo: string; now: string; note: string }
-interface Watch { name: string; country: string; cat: string; product: string; gov: string; deals: string; valuation: string; expect: string; flag: string; jev?: number }
+interface Watch { name: string; country: string; cat: string; product: string; gov: string; deals: string; valuation: string; expect: string; flag: string; jev?: number; jevOutlook?: { path: string | null; quality: number | null } }
 
 const D = data as unknown as { asOf: string; rungs: Rung[]; recentIpo: Ipo[]; watchlist: Watch[] };
 
@@ -89,7 +89,8 @@ export default function AiOppPage() {
                   <span className="text-sm font-bold text-zinc-50">{w.name}</span>
                   <span className="text-xs">{w.country}</span>
                   <span className="chip bg-base-800 text-zinc-400 border border-base-700 !text-[10px] shrink-0">{w.cat}</span>
-                  {w.jev !== undefined && <span title="คะแนนความมีค่าต่อการจับตา จัดอันดับโดย Jev (TypeSafe System One)" className="chip bg-accent/15 text-accent-soft border border-accent/30 !text-[10px] ml-auto num">🧠 Jev {(w.jev * 100).toFixed(0)}</span>}
+                  {w.jev !== undefined && <span title="คะแนนความมีค่าต่อการจับตา จัดอันดับโดย Jev (TypeSafe System One)" className="chip bg-accent/15 text-accent-soft border border-accent/30 !text-[10px] num">🧠 {(w.jev * 100).toFixed(0)}</span>}
+                  {w.jevOutlook?.path && <span title="เส้นทาง 24 เดือนข้างหน้า ตามการประเมินของ Jev (คุณภาพ 0-3)" className={"chip border !text-[10px] ml-auto " + (w.jevOutlook.path === "ipo" ? "bg-up/15 text-up border-up/30" : w.jevOutlook.path === "acquired" ? "bg-orange-500/15 text-orange-400 border-orange-500/30" : "bg-base-800 text-zinc-400 border-base-700")}>{w.jevOutlook.path === "ipo" ? "IPO" : w.jevOutlook.path === "acquired" ? "ถูกซื้อกิจการ" : w.jevOutlook.path === "struggle" ? "เสี่ยงชะงัก" : "ระดมเอกชนต่อ"}{w.jevOutlook.quality !== null && w.jevOutlook.quality !== undefined ? " " + w.jevOutlook.quality.toFixed(1) : ""}</span>}
                 </div>
                 <Field label="ผลิตภัณฑ์" v={w.product} />
                 <Field label="สัญญาภาครัฐ" v={w.gov} />

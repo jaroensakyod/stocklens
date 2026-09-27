@@ -1,6 +1,6 @@
 {
   "_note": "กรอบวิเคราะห์ T — สกัดจาก 27 คลิป YouTube (1,019,059 ตัวอักษร) + SYSTEM ARCHITECTURE 8 เล่ม + Rothschild",
-  "_updatedAt": "2026-09-27T11:32:11.110Z",
+  "_updatedAt": "2026-09-27T11:37:53.875Z",
   "signals": [
     {
       "id": "ww3",
@@ -1092,7 +1092,9 @@
         "assets": "gold",
         "timeframe": "year",
         "predScore": 2.97,
-        "causal": 0.96
+        "causal": 0.96,
+        "direction": "bull",
+        "confidence": 2.16
       },
       {
         "clip": "4Agdd2DOQiU",
@@ -1101,7 +1103,9 @@
         "assets": "gold",
         "timeframe": "year",
         "predScore": 2.97,
-        "causal": 0.96
+        "causal": 0.96,
+        "direction": "bull",
+        "confidence": 1.58
       },
       {
         "clip": "4Agdd2DOQiU",
@@ -1110,7 +1114,9 @@
         "assets": "gold",
         "timeframe": "year",
         "predScore": 2.97,
-        "causal": 0.96
+        "causal": 0.96,
+        "direction": "bull",
+        "confidence": 1.43
       },
       {
         "clip": "4Agdd2DOQiU",
@@ -1119,7 +1125,9 @@
         "assets": "gold",
         "timeframe": "year",
         "predScore": 2.97,
-        "causal": 0.96
+        "causal": 0.96,
+        "direction": "bull",
+        "confidence": 0.7
       },
       {
         "clip": "wSRaBZa7lZw",
@@ -1128,7 +1136,9 @@
         "assets": "oil",
         "timeframe": "months",
         "predScore": 2.96,
-        "causal": 0.4
+        "causal": 0.4,
+        "direction": "neutral",
+        "confidence": 0.49
       },
       {
         "clip": "wSRaBZa7lZw",
@@ -1137,7 +1147,9 @@
         "assets": "oil",
         "timeframe": "months",
         "predScore": 2.96,
-        "causal": 0.4
+        "causal": 0.4,
+        "direction": "bull",
+        "confidence": 0.86
       },
       {
         "clip": "FPYiCNtI2Qg",
@@ -1146,7 +1158,9 @@
         "assets": "gold",
         "timeframe": "months",
         "predScore": 2.91,
-        "causal": 0.85
+        "causal": 0.85,
+        "direction": "neutral",
+        "confidence": 1.01
       },
       {
         "clip": "FPYiCNtI2Qg",
@@ -1155,7 +1169,9 @@
         "assets": "gold",
         "timeframe": "months",
         "predScore": 2.91,
-        "causal": 0.85
+        "causal": 0.85,
+        "direction": "neutral",
+        "confidence": 1.94
       },
       {
         "clip": "FPYiCNtI2Qg",
@@ -1164,7 +1180,9 @@
         "assets": "gold",
         "timeframe": "months",
         "predScore": 2.91,
-        "causal": 0.85
+        "causal": 0.85,
+        "direction": "bull",
+        "confidence": 2.22
       },
       {
         "clip": "4Agdd2DOQiU",
@@ -1173,7 +1191,9 @@
         "assets": "bonds",
         "timeframe": "year",
         "predScore": 2.91,
-        "causal": 0.86
+        "causal": 0.86,
+        "direction": "neutral",
+        "confidence": 1.57
       },
       {
         "clip": "4Agdd2DOQiU",
@@ -1182,7 +1202,9 @@
         "assets": "bonds",
         "timeframe": "year",
         "predScore": 2.91,
-        "causal": 0.86
+        "causal": 0.86,
+        "direction": "neutral",
+        "confidence": 1.99
       },
       {
         "clip": "4Agdd2DOQiU",
@@ -1191,7 +1213,9 @@
         "assets": "bonds",
         "timeframe": "year",
         "predScore": 2.91,
-        "causal": 0.86
+        "causal": 0.86,
+        "direction": "conditional",
+        "confidence": 1.39
       },
       {
         "clip": "4Agdd2DOQiU",
@@ -1200,7 +1224,9 @@
         "assets": "bonds",
         "timeframe": "year",
         "predScore": 2.91,
-        "causal": 0.86
+        "causal": 0.86,
+        "direction": "conditional",
+        "confidence": 1.76
       },
       {
         "clip": "FPYiCNtI2Qg",
@@ -1209,7 +1235,9 @@
         "assets": "oil",
         "timeframe": "years",
         "predScore": 2.9,
-        "causal": 0.81
+        "causal": 0.81,
+        "direction": "bull",
+        "confidence": 2.49
       },
       {
         "clip": "FPYiCNtI2Qg",
@@ -1218,7 +1246,9 @@
         "assets": "oil",
         "timeframe": "years",
         "predScore": 2.9,
-        "causal": 0.81
+        "causal": 0.81,
+        "direction": "bull",
+        "confidence": 2.03
       },
       {
         "clip": "wSRaBZa7lZw",
@@ -1227,7 +1257,9 @@
         "assets": "bonds",
         "timeframe": "months",
         "predScore": 2.89,
-        "causal": 0.35
+        "causal": 0.35,
+        "direction": "bear",
+        "confidence": 0.92
       },
       {
         "clip": "wSRaBZa7lZw",
@@ -1236,7 +1268,9 @@
         "assets": "bonds",
         "timeframe": "months",
         "predScore": 2.89,
-        "causal": 0.35
+        "causal": 0.35,
+        "direction": "bear",
+        "confidence": 0.63
       },
       {
         "clip": "wSRaBZa7lZw",
@@ -1245,7 +1279,9 @@
         "assets": "bonds",
         "timeframe": "months",
         "predScore": 2.89,
-        "causal": 0.35
+        "causal": 0.35,
+        "direction": "bull",
+        "confidence": 1.16
       },
       {
         "clip": "wSRaBZa7lZw",
@@ -1254,7 +1290,9 @@
         "assets": "bonds",
         "timeframe": "months",
         "predScore": 2.89,
-        "causal": 0.35
+        "causal": 0.35,
+        "direction": "neutral",
+        "confidence": 0.21
       },
       {
         "clip": "HCNNzcL-YOQ",
@@ -1263,7 +1301,9 @@
         "assets": "gold",
         "timeframe": "months",
         "predScore": 2.88,
-        "causal": 0.9
+        "causal": 0.9,
+        "direction": "bull",
+        "confidence": 1.94
       },
       {
         "clip": "HCNNzcL-YOQ",
@@ -1272,7 +1312,9 @@
         "assets": "gold",
         "timeframe": "months",
         "predScore": 2.88,
-        "causal": 0.9
+        "causal": 0.9,
+        "direction": "neutral",
+        "confidence": 1.68
       },
       {
         "clip": "HCNNzcL-YOQ",
@@ -1281,7 +1323,9 @@
         "assets": "gold",
         "timeframe": "months",
         "predScore": 2.88,
-        "causal": 0.9
+        "causal": 0.9,
+        "direction": "bull",
+        "confidence": 1.13
       },
       {
         "clip": "ac8NunoKbz8",
@@ -1290,7 +1334,9 @@
         "assets": "bonds",
         "timeframe": "years",
         "predScore": 2.87,
-        "causal": 0.91
+        "causal": 0.91,
+        "direction": "bear",
+        "confidence": 2.17
       },
       {
         "clip": "ac8NunoKbz8",
@@ -1299,7 +1345,9 @@
         "assets": "bonds",
         "timeframe": "years",
         "predScore": 2.87,
-        "causal": 0.91
+        "causal": 0.91,
+        "direction": "neutral",
+        "confidence": 1.83
       },
       {
         "clip": "ac8NunoKbz8",
@@ -1308,7 +1356,9 @@
         "assets": "bonds",
         "timeframe": "years",
         "predScore": 2.87,
-        "causal": 0.91
+        "causal": 0.91,
+        "direction": "bear",
+        "confidence": 1.83
       },
       {
         "clip": "xTplZh02-BY",
@@ -1317,7 +1367,9 @@
         "assets": "none",
         "timeframe": "years",
         "predScore": 2.87,
-        "causal": 0.78
+        "causal": 0.78,
+        "direction": "bear",
+        "confidence": 1.61
       },
       {
         "clip": "xTplZh02-BY",
@@ -1326,7 +1378,9 @@
         "assets": "none",
         "timeframe": "years",
         "predScore": 2.87,
-        "causal": 0.78
+        "causal": 0.78,
+        "direction": "bear",
+        "confidence": 1.66
       },
       {
         "clip": "xTplZh02-BY",
@@ -1335,7 +1389,9 @@
         "assets": "none",
         "timeframe": "years",
         "predScore": 2.87,
-        "causal": 0.78
+        "causal": 0.78,
+        "direction": "bear",
+        "confidence": 1.38
       },
       {
         "clip": "FPYiCNtI2Qg",
@@ -1344,7 +1400,9 @@
         "assets": "none",
         "timeframe": "year",
         "predScore": 2.86,
-        "causal": 0.76
+        "causal": 0.76,
+        "direction": "neutral",
+        "confidence": 0.66
       },
       {
         "clip": "FPYiCNtI2Qg",
@@ -1353,7 +1411,9 @@
         "assets": "none",
         "timeframe": "year",
         "predScore": 2.86,
-        "causal": 0.76
+        "causal": 0.76,
+        "direction": "neutral",
+        "confidence": 1.05
       },
       {
         "clip": "FPYiCNtI2Qg",
@@ -1362,7 +1422,9 @@
         "assets": "none",
         "timeframe": "year",
         "predScore": 2.86,
-        "causal": 0.76
+        "causal": 0.76,
+        "direction": "bear",
+        "confidence": 2.59
       },
       {
         "clip": "FPYiCNtI2Qg",
@@ -1371,7 +1433,9 @@
         "assets": "none",
         "timeframe": "year",
         "predScore": 2.86,
-        "causal": 0.76
+        "causal": 0.76,
+        "direction": "neutral",
+        "confidence": 1.62
       },
       {
         "clip": "I79eF-gW-q4",
@@ -1380,7 +1444,9 @@
         "assets": "bonds",
         "timeframe": "none",
         "predScore": 2.86,
-        "causal": 0.86
+        "causal": 0.86,
+        "direction": "neutral",
+        "confidence": 1.23
       },
       {
         "clip": "I79eF-gW-q4",
@@ -1389,7 +1455,9 @@
         "assets": "bonds",
         "timeframe": "none",
         "predScore": 2.86,
-        "causal": 0.86
+        "causal": 0.86,
+        "direction": "bull",
+        "confidence": 2.74
       },
       {
         "clip": "wSRaBZa7lZw",
@@ -1398,7 +1466,9 @@
         "assets": "set",
         "timeframe": "months",
         "predScore": 2.85,
-        "causal": 0.58
+        "causal": 0.58,
+        "direction": "bear",
+        "confidence": 0.67
       },
       {
         "clip": "wSRaBZa7lZw",
@@ -1407,7 +1477,9 @@
         "assets": "set",
         "timeframe": "months",
         "predScore": 2.85,
-        "causal": 0.58
+        "causal": 0.58,
+        "direction": "conditional",
+        "confidence": 0.3
       },
       {
         "clip": "wSRaBZa7lZw",
@@ -1416,7 +1488,9 @@
         "assets": "set",
         "timeframe": "months",
         "predScore": 2.85,
-        "causal": 0.58
+        "causal": 0.58,
+        "direction": "neutral",
+        "confidence": 0.49
       },
       {
         "clip": "HCNNzcL-YOQ",
@@ -1425,7 +1499,9 @@
         "assets": "gold",
         "timeframe": "months",
         "predScore": 2.84,
-        "causal": 0.91
+        "causal": 0.91,
+        "direction": "bull",
+        "confidence": 2.64
       },
       {
         "clip": "ac8NunoKbz8",
@@ -1434,7 +1510,9 @@
         "assets": "bonds",
         "timeframe": "years",
         "predScore": 2.83,
-        "causal": 0.9
+        "causal": 0.9,
+        "direction": "conditional",
+        "confidence": 2.1
       },
       {
         "clip": "ac8NunoKbz8",
@@ -1443,7 +1521,9 @@
         "assets": "bonds",
         "timeframe": "years",
         "predScore": 2.83,
-        "causal": 0.9
+        "causal": 0.9,
+        "direction": "neutral",
+        "confidence": 2.26
       },
       {
         "clip": "ac8NunoKbz8",
@@ -1452,7 +1532,9 @@
         "assets": "bonds",
         "timeframe": "years",
         "predScore": 2.83,
-        "causal": 0.9
+        "causal": 0.9,
+        "direction": "neutral",
+        "confidence": 1.78
       },
       {
         "clip": "ac8NunoKbz8",
@@ -1461,7 +1543,9 @@
         "assets": "bonds",
         "timeframe": "years",
         "predScore": 2.83,
-        "causal": 0.9
+        "causal": 0.9,
+        "direction": "bull",
+        "confidence": 0.94
       },
       {
         "clip": "ac8NunoKbz8",
@@ -1470,7 +1554,9 @@
         "assets": "bonds",
         "timeframe": "years",
         "predScore": 2.83,
-        "causal": 0.9
+        "causal": 0.9,
+        "direction": "conditional",
+        "confidence": 1.08
       },
       {
         "clip": "8X3dB7JPsIs",
@@ -1479,7 +1565,9 @@
         "assets": "gold",
         "timeframe": "year",
         "predScore": 2.8,
-        "causal": 0.76
+        "causal": 0.76,
+        "direction": "neutral",
+        "confidence": 0.14
       },
       {
         "clip": "8X3dB7JPsIs",
@@ -1488,7 +1576,9 @@
         "assets": "gold",
         "timeframe": "year",
         "predScore": 2.8,
-        "causal": 0.76
+        "causal": 0.76,
+        "direction": "bull",
+        "confidence": 1.5
       },
       {
         "clip": "8X3dB7JPsIs",
@@ -1497,7 +1587,9 @@
         "assets": "gold",
         "timeframe": "year",
         "predScore": 2.8,
-        "causal": 0.76
+        "causal": 0.76,
+        "direction": "bear",
+        "confidence": 1.14
       },
       {
         "clip": "8X3dB7JPsIs",
@@ -1506,7 +1598,9 @@
         "assets": "gold",
         "timeframe": "year",
         "predScore": 2.8,
-        "causal": 0.76
+        "causal": 0.76,
+        "direction": "bull",
+        "confidence": 1.98
       },
       {
         "clip": "8X3dB7JPsIs",
@@ -1515,7 +1609,9 @@
         "assets": "gold",
         "timeframe": "year",
         "predScore": 2.8,
-        "causal": 0.76
+        "causal": 0.76,
+        "direction": "bull",
+        "confidence": 0.26
       },
       {
         "clip": "ac8NunoKbz8",
@@ -1524,7 +1620,9 @@
         "assets": "bonds",
         "timeframe": "years",
         "predScore": 2.79,
-        "causal": 0.76
+        "causal": 0.76,
+        "direction": "bear",
+        "confidence": 2.47
       },
       {
         "clip": "ac8NunoKbz8",
@@ -1533,7 +1631,9 @@
         "assets": "bonds",
         "timeframe": "years",
         "predScore": 2.79,
-        "causal": 0.76
+        "causal": 0.76,
+        "direction": "bull",
+        "confidence": 1.53
       },
       {
         "clip": "ac8NunoKbz8",
@@ -1542,7 +1642,9 @@
         "assets": "bonds",
         "timeframe": "years",
         "predScore": 2.79,
-        "causal": 0.76
+        "causal": 0.76,
+        "direction": "bull",
+        "confidence": 2.05
       },
       {
         "clip": "wSRaBZa7lZw",
@@ -1551,7 +1653,9 @@
         "assets": "bonds",
         "timeframe": "months",
         "predScore": 2.79,
-        "causal": 0.69
+        "causal": 0.69,
+        "direction": "bull",
+        "confidence": 1.9
       },
       {
         "clip": "4Agdd2DOQiU",
@@ -1560,7 +1664,9 @@
         "assets": "gold",
         "timeframe": "years",
         "predScore": 2.76,
-        "causal": 0.93
+        "causal": 0.93,
+        "direction": "conditional",
+        "confidence": 0.98
       },
       {
         "clip": "4Agdd2DOQiU",
@@ -1569,7 +1675,9 @@
         "assets": "gold",
         "timeframe": "years",
         "predScore": 2.76,
-        "causal": 0.93
+        "causal": 0.93,
+        "direction": "bull",
+        "confidence": 0.6
       },
       {
         "clip": "4Agdd2DOQiU",
@@ -1578,7 +1686,9 @@
         "assets": "gold",
         "timeframe": "years",
         "predScore": 2.76,
-        "causal": 0.93
+        "causal": 0.93,
+        "direction": "conditional",
+        "confidence": 1.96
       },
       {
         "clip": "Jyn65oQaFqw",
@@ -1587,7 +1697,9 @@
         "assets": "gold",
         "timeframe": "year",
         "predScore": 2.76,
-        "causal": 0.79
+        "causal": 0.79,
+        "direction": "bull",
+        "confidence": 1.76
       },
       {
         "clip": "Jyn65oQaFqw",
@@ -1596,7 +1708,9 @@
         "assets": "gold",
         "timeframe": "year",
         "predScore": 2.76,
-        "causal": 0.79
+        "causal": 0.79,
+        "direction": "bear",
+        "confidence": 2.23
       },
       {
         "clip": "Jyn65oQaFqw",
@@ -1605,7 +1719,9 @@
         "assets": "gold",
         "timeframe": "year",
         "predScore": 2.76,
-        "causal": 0.79
+        "causal": 0.79,
+        "direction": "neutral",
+        "confidence": 2.13
       },
       {
         "clip": "FPYiCNtI2Qg",
@@ -1614,7 +1730,9 @@
         "assets": "bonds",
         "timeframe": "years",
         "predScore": 2.74,
-        "causal": 0.92
+        "causal": 0.92,
+        "direction": "neutral",
+        "confidence": 0.1
       },
       {
         "clip": "FPYiCNtI2Qg",
@@ -1623,7 +1741,9 @@
         "assets": "bonds",
         "timeframe": "years",
         "predScore": 2.74,
-        "causal": 0.92
+        "causal": 0.92,
+        "direction": "bear",
+        "confidence": 1
       }
     ],
     "causalQuotes": [
@@ -1828,6 +1948,19 @@
         "causal": 0.85
       }
     ],
-    "note": "ขุดด้วย Jev (jev-1.13.0) จาก 27 คลิป 380 chunks — ครั้งแรกที่ Jev กลับมาใช้ได้หลัง 402 (รอบก่อนใช้ regex ได้ 21 รายการ)"
+    "note": "ขุดด้วย Jev (jev-1.13.0) จาก 27 คลิป 380 chunks — ครั้งแรกที่ Jev กลับมาใช้ได้หลัง 402 (รอบก่อนใช้ regex ได้ 21 รายการ)",
+    "directionSummary": {
+      "bull": 44,
+      "neutral": 46,
+      "conditional": 15,
+      "bear": 35
+    },
+    "scenario": {
+      "builtAt": "2026-09-27T11:36:35.212Z",
+      "dominant": "warInflationReset",
+      "evidenceScore": 1,
+      "goldLean": 1.78,
+      "note": "สังเคราะห์โดย Jev จากพยากรณ์ 45 อันดับแรกของคลัง T"
+    }
   }
 }
