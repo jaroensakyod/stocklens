@@ -220,3 +220,61 @@ export async function analyzePolitical(text: string): Promise<{
   const jevText = `🧠 Jev: รุนแรง ${imp !== null ? imp.toFixed(0) + "/3" : "-"} · ${dir === "bullish" ? "🟢 หนุนหุ้น" : dir === "bearish" ? "🔴 กดหุ้น" : "⚪ สมดุล"}${fed && fed !== "neutral" ? ` · Fed: ${fed === "hawkish" ? "⚖️ ถือนาน" : "🕊️ ลดได้"}` : ""}`;
   return { impact: imp, direction: dir, fed, sectors, stocks: tickers.map(t => ({ t, price: quotes[t]?.price ?? null, chgPct: quotes[t]?.changePct ?? null })), atlasCards: atlasCards.slice(0, 3), jevText };
 }
+
+
+// ---------- Trump Pulse: โพสต์/แถลงการณ์ล่าสุด (mainstream + non-mainstream) ----------
+export interface TrumpPulseItem {
+  title: string; source: string; time: number;
+  direction: string | null; impact: number | null;
+  stocks: { t: string; chgPct: number | null }[];
+}
+
+export async function getTrumpPulse(): Promise<TrumpPulseItem[]> {
+  return cached("trump:pulse", 15 * 60_000, async () => {
+    // queries หลากหลาย: จับทั้งโพสต์ Truth Social/X + แถลงการณ์ + นโยบาย
+    const [social, policy, econ] = await Promise.all([
+      fetchRSS("Trump Truth Social post statement", "en", 5),
+      fetchRSS("Trump executive order tariff policy", "en", 5),
+      fetchRSS("Trump says economy market Fed", "en", 5),
+    ]);
+    const raw = [...social, ...policy, ...econ]
+      .filter((x, i, arr) => arr.findIndex(y => y.title.slice(0, 40) === x.title.slice(0, 40)) === i)
+      .sort((a, b) => b.time - a.time)
+      .slice(0, 6);
+
+    if (!raw.length) return [];
+
+    // Jev วิเคราะห์ 4 ข่าวแรก
+    const out: TrumpPulseItem[] = [];
+    for (let i = 0; i < raw.length; i++) {
+      const n = raw[i];
+      const a = i < 4 ? await jevAsk(
+        `Trump news: "${n.title.slice(0, 120)}" (source: ${n.source})`,
+        {
+          direction: { type: "choice", instructions: "Direction for stocks?", criteria: { bullish: "หนุน", bearish: "กด", neutral: "สมดุล" } },
+          impact: { type: "score", instructions: "Market impact (0-3)?", criteria: ["เบา", "มีนัย", "สำคัญ", "Game changer"] },
+        }
+      ).catch(() => null) : null;
+
+      const sectors = matchSectors(n.title);
+      const tickers = sectors.flatMap(s => SECTOR_STOCKS[s]?.tickers ?? []).slice(0, 3);
+      out.push({
+        title: n.title, source: n.source, time: n.time,
+        direction: (a?.direction as { choice?: string })?.choice ?? null,
+        impact: (a?.impact as { score?: number })?.score ?? null,
+        stocks: tickers.map(t => ({ t, chgPct: null })), // เติมราคาใน batch ด้านล่าง
+      });
+    }
+
+    // ราคาหุ้น batch เดียว
+    const allT = [...new Set(out.flatMap(x => x.stocks.map(s => s.t)))].slice(0, 15);
+    if (allT.length) {
+      const quotes = await getQuotes(allT).catch(() => ({} as Record<string, { changePct: number }>));
+      for (const item of out) {
+        for (const s of item.stocks) s.chgPct = quotes[s.t]?.changePct ?? null;
+      }
+    }
+
+    return out;
+  }) as Promise<TrumpPulseItem[]>;
+}

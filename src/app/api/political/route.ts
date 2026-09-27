@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getPoliticalFeed, analyzePolitical } from "@/lib/political";
+import { getPoliticalFeed, analyzePolitical, getTrumpPulse } from "@/lib/political";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 // GET /api/political — feed ข่าวการเมืองที่กระทบตลาด
 export async function GET(req: NextRequest) {
+  const mode = req.nextUrl.searchParams.get("mode");
+  if (mode === "trump") {
+    const items = await getTrumpPulse();
+    return NextResponse.json({ items });
+  }
   const refresh = req.nextUrl.searchParams.get("refresh") === "1";
   const data = await getPoliticalFeed(refresh);
   if (!data) return NextResponse.json({ error: "ดึงข่าวไม่สำเร็จ" }, { status: 502 });

@@ -1,5 +1,6 @@
 "use client";
 
+import TrumpPulse from "@/components/TrumpPulse";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import NewsSplit from "@/components/NewsSplit";
@@ -152,7 +153,10 @@ export default function HomePage() {
         </section>
 
         <div className="space-y-6">
-          {/* ปฏิทิน */}
+      
+      {/* 🇺🇸 Trump Pulse — โพสต์/แถลงการณ์ล่าสุด + ผลกระทบหุ้น */}
+      <TrumpPulse />
+    {/* ปฏิทิน */}
           <section>
             <h2 className="text-sm font-bold text-zinc-400 mb-3">🗓️ ปฏิทินเหตุการณ์สำคัญ</h2>
             <div className="card divide-y divide-base-700/60">
