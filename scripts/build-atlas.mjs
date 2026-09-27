@@ -6,6 +6,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 const DIR = "scripts/atlas-src";
 const nodes = [
   ...JSON.parse(readFileSync(`${DIR}/nodes-part0.json`, "utf8")),
+  ...JSON.parse(readFileSync(`${DIR}/nodes-rothschild.json`, "utf8")),
   ...JSON.parse(readFileSync(`${DIR}/nodes-part1.json`, "utf8")),
   ...JSON.parse(readFileSync(`${DIR}/nodes-part2.json`, "utf8")),
   ...JSON.parse(readFileSync(`${DIR}/nodes-part3.json`, "utf8")),
@@ -76,7 +77,8 @@ const OVERRIDE = {
   paxbrit: [1900, 1560], industrial: [1720, 1400], rothschild: [2100, 1500],
   meiji: [2190, 1330], germanyunify: [2390, 1610],
   opium: [2070, 660], uscivilwar: [2260, 460],
-  napoleon: [1900, 600],
+  napoleon: [1900, 600], waterloo1815: [2130, 820],
+  goldfix1919: [2960, 330],
   mingsilver: [1120, 1330],
   // หลัง 1900
   depression: [3070, 660],
