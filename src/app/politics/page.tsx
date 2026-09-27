@@ -3,26 +3,26 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-// 🇺🇸 Political Pulse — ติดตามข่าวการเมืองที่กระทบตลาด (Trump/Fed/จีน/สงคราม/ไทย)
-// + วิเคราะห์รายชิ้นด้วย Jev → หุ้นที่กระทบ + การ์ด Atlas ที่เกี่ยว
+// 🇺🇸 Political Pulse — ข่าวการเมืองที่กระทบตลาด: auto-fetch + Jev + ผลกระทบหุ้นรายตัว
 
+interface StockHit { t: string; price: number | null; chgPct: number | null; why: string }
 interface Item {
-  title: string; source: string; time: number; link?: string;
-  impact: number | null; direction: string | null; sectors: string[]; atlasLink: string | null; jevNote: string | null;
+  title: string; source: string; time: number; link?: string; topic: string;
+  direction: string | null; impact: number | null; fedImplication: string | null;
+  stocks: StockHit[]; atlasCard: string | null;
 }
-interface Feed { items: Item[]; asOf: string; topics: { id: string; label: string; emoji: string; query: string }[] }
+interface Feed {
+  items: Item[]; asOf: string;
+  overall: { impact: number | null; direction: string | null; topRisk: string | null } | null;
+}
 interface Analysis {
-  impact: number | null; direction: string | null; sectors: string[]; stocks: string[];
+  impact: number | null; direction: string | null; fed: string | null;
+  sectors: string[]; stocks: { t: string; price: number | null; chgPct: number | null }[];
   atlasCards: string[]; jevText: string; error?: string;
 }
 
-const SECTOR_LABEL: Record<string, string> = {
-  ev_auto: "🚗 Auto/EV", oil_energy: "🛢️ น้ำมัน/พลังงาน", tech_ai: "💻 Tech/AI",
-  banking: "🏦 ธนาคาร", defense: "🛡️ กลาโหม", bonds_rates: "🏛️ พันธบัตร/ดอกเบี้ย",
-  gold_metals: "🥇 ทอง/โลหะ", thailand: "🇹🇭 ไทย", crypto: "🪙 Crypto", asia: "🌏 เอเชีย",
-};
-
-const fmtTime = (t: number) => { const h = Math.floor((Date.now() - t) / 3600e3); return h < 1 ? "เมื่อสักครู่" : h < 24 ? `${h} ชม.ก่อน` : `${Math.floor(h / 24)} วันก่อน`; };
+const fmtTime = (t: number) => { const h = Math.floor((Date.now() - t) / 3600e3); return h < 1 ? "เมื่อสักครู่" : h < 24 ? `${h} ชม.` : `${Math.floor(h / 24)} วัน`; };
+const DIR_ICON = (d: string | null) => d === "bullish" ? "🟢" : d === "bearish" ? "🔴" : "⚪";
 
 export default function PoliticsPage() {
   const [feed, setFeed] = useState<Feed | null>(null);
@@ -30,32 +30,64 @@ export default function PoliticsPage() {
   const [q, setQ] = useState("");
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    fetch("/api/political").then(r => r.json()).then(j => { if (j.error) setErr(j.error); else setFeed(j); }).catch(() => setErr("โหลดไม่สำเร็จ"));
-  }, []);
+  const load = async (refresh = false) => {
+    if (refresh) setRefreshing(true);
+    try {
+      const res = await fetch(`/api/political${refresh ? "?refresh=1" : ""}`);
+      const j = await res.json();
+      if (j.error) setErr(j.error); else { setFeed(j); setErr(""); }
+    } catch { setErr("โหลดไม่สำเร็จ"); }
+    setRefreshing(false);
+  };
+
+  useEffect(() => { load(); }, []);
 
   const analyze = async () => {
     if (q.trim().length < 10) return;
     setLoading(true); setAnalysis(null);
-    try { const res = await fetch("/api/political", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text: q }) }); setAnalysis(await res.json()); } catch {}
+    try {
+      const res = await fetch("/api/political", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text: q }) });
+      setAnalysis(await res.json());
+    } catch {}
     setLoading(false);
   };
 
   return (
     <div className="space-y-5">
-      <div>
-        <h1 className="text-2xl font-bold text-zinc-50">🇺🇸 Political Pulse — ข่าวการเมืองที่กระทบพอร์ตคุณ</h1>
-        <p className="text-sm text-zinc-400 mt-1">
-          Trump · Fed · จีน · สงคราม · การเมืองไทย — ข่าวการเมืองที่ตลาดต้องขยับ พร้อม Jev วิเคราะห์ว่า<b className="text-zinc-200">หุ้นกลุ่มไหนโดน</b> และโยงไปการ์ดประวัติศาสตร์ Atlas
-        </p>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-zinc-50">🇺🇸 Political Pulse — ข่าวการเมือง × ผลกระทบหุ้น</h1>
+          <p className="text-sm text-zinc-400 mt-1">
+            ข่าว Trump · Fed · จีน · สงคราม · การเมืองไทย — อัปเดตอัตโนมัติทุก 20 นาที พร้อม Jev วิเคราะห์ทิศทาง + <b className="text-zinc-200">ราคาหุ้นที่โดนกระทบแบบเรียลไทม์</b>
+          </p>
+        </div>
+        <button className="btn-ghost !py-1.5 !px-3 !text-xs shrink-0" onClick={() => load(true)} disabled={refreshing}>
+          {refreshing ? "⟳ กำลังรีเฟรช…" : "⟳ รีเฟรช"}
+        </button>
       </div>
 
-      {/* วิเคราะห์ข่าวรายชิ้น */}
+      {/* สรุปภาพรวม */}
+      {feed?.overall && (
+        <div className={`card p-4 border ${feed.overall.direction === "bullish" ? "border-up/30 bg-up/5" : feed.overall.direction === "bearish" ? "border-down/30 bg-down/5" : "border-base-700"}`}>
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+            <span className="text-sm font-bold text-zinc-100">
+              ภาพรวม: {DIR_ICON(feed.overall.direction)} {feed.overall.direction === "bullish" ? "หนุนหุ้น" : feed.overall.direction === "bearish" ? "กดหุ้น" : "สมดุล"}
+              {feed.overall.impact !== null && <span className="text-zinc-500 ml-2 num">รุนแรง {feed.overall.impact.toFixed(0)}/3</span>}
+            </span>
+            {feed.overall.topRisk && <span className="chip bg-amber-500/10 text-amber-400 border border-amber-500/25 !text-[11px]">⚠️ ความเสี่ยงหลัก: {feed.overall.topRisk === "inflation" ? "เงินเฟ้อ/ดอกเบี้ย" : feed.overall.topRisk === "war" ? "สงคราม" : feed.overall.topRisk === "policy" ? "นโยบาย" : feed.overall.topRisk === "china" ? "จีน/การค้า" : "การเมือง"}</span>}
+            <span className="text-[10px] text-zinc-600 ml-auto">อัปเดต {new Date(feed.asOf).toLocaleTimeString("th-TH")}</span>
+          </div>
+        </div>
+      )}
+
+      {/* วิเคราะห์รายชิ้น */}
       <div className="card p-4">
+        <h2 className="text-sm font-bold text-zinc-100 mb-2">🔍 วิเคราะห์ข่าว/เหตุการณ์เอง</h2>
         <div className="flex gap-2">
-          <input className="input flex-1" placeholder="วางข่าว/เหตุการณ์การเมืองที่อยากรู้ผลกระทบ เช่น Trump ยกเลิกกฎ EV..." value={q} onChange={e => setQ(e.target.value)} onKeyDown={e => e.key === "Enter" && analyze()} />
-          <button className="btn-primary shrink-0" onClick={analyze} disabled={loading || q.trim().length < 10}>{loading ? "🧠 วิเคราะห์…" : "ตรวจผลกระทบ"}</button>
+          <input className="input flex-1" placeholder="วางข่าวที่อยากรู้ผลกระทบ เช่น Trump ยกเลิกกฎ EV / Fed ขึ้นดอกเบี้ย / จีนบุกไต้หวัน..." value={q} onChange={e => setQ(e.target.value)} onKeyDown={e => e.key === "Enter" && analyze()} />
+          <button className="btn-primary shrink-0" onClick={analyze} disabled={loading || q.trim().length < 10}>{loading ? "🧠…" : "ตรวจ"}</button>
         </div>
         {analysis && "error" in analysis && <div className="mt-3 text-sm text-down">{analysis.error}</div>}
         {analysis && !("error" in analysis) && (
@@ -65,19 +97,20 @@ export default function PoliticsPage() {
             </div>
             {analysis.stocks.length > 0 && (
               <div>
-                <div className="text-xs font-bold text-zinc-300 mb-2">📈 หุ้นที่กระทบโดยตรง</div>
-                <div className="flex flex-wrap gap-1.5">
-                  {analysis.stocks.map(s => <Link key={s} href={`/stock/${encodeURIComponent(s)}`} className="chip bg-accent/15 text-accent-soft border border-accent/30 !text-[11px]">{s}</Link>)}
+                <div className="text-xs font-bold text-zinc-300 mb-2">📈 หุ้นที่กระทบ (ราคาปัจจุบัน)</div>
+                <div className="flex flex-wrap gap-2">
+                  {analysis.stocks.map(s => (
+                    <Link key={s.t} href={`/stock/${encodeURIComponent(s.t)}`} className="flex items-center gap-2 bg-base-850 border border-base-700 rounded-lg px-3 py-1.5 hover:border-accent/50">
+                      <span className="text-sm font-bold text-zinc-100">{s.t}</span>
+                      {s.price !== null && <span className="text-xs num text-zinc-300">{s.price >= 1000 ? s.price.toFixed(0) : s.price.toFixed(2)}</span>}
+                      {s.chgPct !== null && <span className={`text-xs num ${s.chgPct >= 0 ? "text-up" : "text-down"}`}>{s.chgPct >= 0 ? "+" : ""}{s.chgPct.toFixed(1)}%</span>}
+                    </Link>
+                  ))}
                 </div>
               </div>
             )}
             {analysis.atlasCards.length > 0 && (
-              <div>
-                <div className="text-xs font-bold text-zinc-300 mb-2">🕵️ บริบทจาก Atlas</div>
-                <div className="flex gap-1.5">
-                  {analysis.atlasCards.map(c => <Link key={c} href={`/atlas?card=${c}`} className="chip bg-purple-500/15 text-purple-300 border border-purple-500/30 !text-[10px]">ดูการ์ด →</Link>)}
-                </div>
-              </div>
+              <Link href="/atlas" className="inline-flex gap-1.5 items-center text-xs text-purple-300 hover:underline">🕵️ บริบทใน Atlas ({analysis.atlasCards.length} การ์ด) →</Link>
             )}
           </div>
         )}
@@ -85,41 +118,46 @@ export default function PoliticsPage() {
 
       {/* Feed */}
       {err && <div className="card p-6 text-sm text-down">{err}</div>}
-      {!feed && !err && <div className="card p-6 text-sm text-zinc-500">กำลังดึงข่าวการเมืองล่าสุด…</div>}
-      {feed && (
-        <div className="card overflow-hidden">
-          <div className="px-4 pt-3 pb-1 flex items-center justify-between">
-            <h2 className="text-sm font-bold text-zinc-100">📰 ข่าวการเมืองล่าสุด ({feed.items.length} ข่าว)</h2>
-            <span className="text-[10px] text-zinc-600">{new Date(feed.asOf).toLocaleString("th-TH")}</span>
-          </div>
-          <div className="divide-y divide-base-800">
-            {feed.items.map((n, i) => (
-              <div key={i} className="px-4 py-2.5 hover:bg-base-850 flex items-start gap-3">
-                <span className={`text-sm mt-0.5 ${n.direction === "bullish" ? "text-up" : n.direction === "bearish" ? "text-down" : "text-zinc-500"}`}>
-                  {n.direction === "bullish" ? "🟢" : n.direction === "bearish" ? "🔴" : "⚪"}
-                </span>
+      {!feed && !err && <div className="card p-6 text-sm text-zinc-500">กำลังดึงข่าว…</div>}
+      {feed && feed.items.length === 0 && <div className="card p-6 text-sm text-zinc-500">ไม่มีข่าวตอนนี้ — กด ⟳ รีเฟรช</div>}
+
+      {feed && feed.items.length > 0 && (
+        <div className="space-y-2">
+          {feed.items.map((n, i) => (
+            <div key={i} className={`card p-4 ${n.impact !== null && n.impact >= 2 ? "border-l-4 " + (n.direction === "bearish" ? "border-l-down" : n.direction === "bullish" ? "border-l-up" : "border-l-amber-500") : ""}`}>
+              <div className="flex items-start gap-3">
+                <span className="text-lg shrink-0">{n.topic}</span>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-zinc-200 leading-snug">{n.title}</p>
-                  <div className="flex flex-wrap items-center gap-1.5 mt-1">
-                    <span className="text-[10px] text-zinc-600">{n.source} · {fmtTime(n.time)}</span>
-                    {n.sectors.slice(0, 2).map(s => <span key={s} className="chip bg-base-800 text-zinc-400 border border-base-700 !text-[9px]">{SECTOR_LABEL[s] ?? s}</span>)}
-                    {n.atlasLink && <span className="chip bg-purple-500/10 text-purple-300 border border-purple-500/25 !text-[9px]">Atlas</span>}
+                  <div className="flex items-start gap-2 flex-wrap">
+                    <span className="text-lg shrink-0">{DIR_ICON(n.direction)}</span>
+                    <p className="text-sm text-zinc-100 leading-snug flex-1">{n.title}</p>
+                    {n.impact !== null && <span className={`chip !text-[10px] border shrink-0 ${n.impact >= 2 ? "bg-amber-500/10 text-amber-400 border-amber-500/25" : "bg-base-800 text-zinc-500 border-base-700"}`} title="ความรุนแรงจาก Jev">รุนแรง {n.impact.toFixed(0)}/3</span>}
+                    {n.fedImplication && n.fedImplication !== "neutral" && <span className="chip !text-[9px] bg-blue-500/10 text-blue-400 border border-blue-500/25 shrink-0">{n.fedImplication === "hawkish" ? "Fed ⚖️" : "Fed 🕊️"}</span>}
                   </div>
+                  <div className="text-[10px] text-zinc-600 mt-1">{n.source} · {fmtTime(n.time)}</div>
+
+                  {/* หุ้นที่กระทบ + ราคา */}
+                  {n.stocks.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mt-2">
+                      {n.stocks.map(s => (
+                        <Link key={s.t} href={`/stock/${encodeURIComponent(s.t)}`} className="flex items-center gap-1.5 bg-base-850 border border-base-700 rounded-md px-2 py-0.5 hover:border-accent/40 text-[11px]">
+                          <span className="font-semibold text-zinc-200">{s.t}</span>
+                          {s.price !== null && <span className="text-zinc-400 num">{s.price >= 1000 ? s.price.toFixed(0) : s.price.toFixed(2)}</span>}
+                          {s.chgPct !== null && <span className={`num ${s.chgPct >= 0 ? "text-up" : "text-down"}`}>{s.chgPct >= 0 ? "+" : ""}{s.chgPct.toFixed(1)}%</span>}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+
+                  {n.atlasCard && (
+                    <Link href={`/atlas?card=${n.atlasCard}`} className="inline-flex mt-1.5 text-[10px] text-purple-300 hover:underline">🕵️ บริบท: {n.atlasCard} →</Link>
+                  )}
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
       )}
-
-      {/* เชื่อมต่อ */}
-      <div className="card p-4 text-xs text-zinc-400 flex flex-wrap items-center gap-x-4 gap-y-2">
-        <span className="text-zinc-300 font-bold">เชื่อมต่อต่อ:</span>
-        <Link href="/radar" className="link">🌐 Radar 25 ธีม</Link>
-        <Link href="/web" className="link">🕸️ แผนผังข่าววันนี้</Link>
-        <Link href="/atlas" className="link">🕵️ Atlas 570 ปี</Link>
-        <Link href="/supernova" className="link">🛰️ Supernova มหภาค</Link>
-      </div>
     </div>
   );
 }

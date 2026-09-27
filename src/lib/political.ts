@@ -1,7 +1,5 @@
-// ===== Political Pulse — ติดตามข่าวการเมือง (Trump/การเมืองไทย/ภูมิรัฐศาสตร์) ที่กระทบตลาด =====
-// ดึงข่าวจริง (Google News) → Jev วิเคราะห์ impact/direction/sectors → เชื่อม Atlas + impact-map
-import { getNews } from "./yahoo";
-import { cached } from "./yahoo";
+// ===== Political Pulse — ข่าวการเมืองที่กระทบตลาด: auto-fetch + Jev + ผลกระทบหุ้นรายตัว =====
+import { cached, getQuotes } from "./yahoo";
 import { jevAsk } from "./typesafe";
 
 export interface PoliticalItem {
@@ -9,176 +7,216 @@ export interface PoliticalItem {
   source: string;
   time: number;
   link?: string;
-  // Jev analysis
-  impact: number | null; // 0-2
-  direction: "bullish" | "bearish" | "neutral" | null;
-  sectors: string[]; // กลุ่มที่กระทบ
-  atlasLink: string | null; // การ์ด Atlas ที่เกี่ยว
-  jevNote: string | null; // คำอธิบายสั้นจาก Jev
+  topic: string;
+  // Jev รายชิ้น
+  direction: string | null; // bullish / bearish / neutral
+  impact: number | null; // 0-3
+  fedImplication: string | null; // hawkish / dovish / neutral
+  // หุ้นที่กระทบ
+  stocks: { t: string; price: number | null; chgPct: number | null; why: string }[];
+  atlasCard: string | null;
 }
 
 export interface PoliticalFeed {
   items: PoliticalItem[];
   asOf: string;
-  topics: { id: string; label: string; emoji: string; query: string }[];
+  overall: { impact: number | null; direction: string | null; topRisk: string | null } | null;
 }
 
-const TOPICS = [
-  { id: "trump", label: "Trump/US Policy", emoji: "🇺🇸", query: "Trump policy economy tariffs" },
-  { id: "fed", label: "Fed/Interest Rates", emoji: "🏦", query: "Federal Reserve interest rate inflation" },
-  { id: "china", label: "China Trade/Taiwan", emoji: "🐉", query: "China trade war Taiwan chips" },
-  { id: "war", label: "Wars/Geopolitics", emoji: "⚔️", query: "war Ukraine Middle East oil impact" },
-  { id: "thaipol", label: "การเมืองไทย", emoji: "🇹🇭", query: "การเมืองไทย เศรษฐกิจ งบประมาณ" },
-  { id: "crypto", label: "Crypto Regulation", emoji: "🪙", query: "crypto Bitcoin regulation ETF" },
-];
-
-const SECTOR_MAP: Record<string, string[]> = {
-  ev_auto: ["TSLA", "F", "GM", "STLA", "RIVN", "LCID", "NVM.BK"],
-  oil_energy: ["XOM", "CVX", "COP", "OXY", "XLE", "PTT.BK", "PTTEP.BK", "TOP.BK"],
-  tech_ai: ["NVDA", "MSFT", "GOOGL", "META", "AAPL", "AVGO", "TSM", "SMH", "DELTA.BK"],
-  banking: ["JPM", "BAC", "GS", "KBANK.BK", "BBL.BK", "SCB.BK"],
-  defense: ["LMT", "RTX", "NOC", "GD", "ITA"],
-  bonds_rates: ["TLT", "^TNX", "AGG"],
-  gold_metals: ["GC=F", "NEM", "GOLD", "GLD"],
-  thailand: ["^SET.BK", "AOT.BK", "KBANK.BK", "CPN.BK", "ADVANC.BK"],
-  crypto: ["BTC-USD", "ETH-USD", "COIN"],
-  asia: ["^N225", "^HSI", "000001.SS", "^SET.BK"],
-};
-
-const ATLAS_LINK: Record<string, string> = {
-  trump: "trump2",
-  tariffs: "trump2",
-  trade: "china",
-  fed: "fiatqe",
-  "interest rate": "fiatqe",
-  inflation: "inflation2022",
-  china: "china",
-  taiwan: "taiwan",
-  war: "ukraine",
-  ukraine: "ukraine",
-  "middle east": "mideast",
-  oil: "oil73",
-  gold: "goldrush22",
-  ev: "ai4ir",
-  ai: "ai4ir",
-  crypto: "covid",
-  bond: "debtclock",
-  debt: "debtclock",
-  dollar: "dedollar",
-  thailand: "thai",
-};
-
-function findAtlasLinks(text: string): string[] {
-  const lower = text.toLowerCase();
-  const links: string[] = [];
-  for (const [key, id] of Object.entries(ATLAS_LINK)) {
-    if (lower.includes(key) && !links.includes(id)) links.push(id);
-  }
-  return links.slice(0, 3);
+// ---------- RSS fetch ตรง (ไม่ผ่าน getNews — ทำงานแน่นอนกว่า) ----------
+async function fetchRSS(query: string, lang: string, max: number): Promise<{ title: string; source: string; link: string; time: number }[]> {
+  try {
+    const locale = lang === "th" ? "hl=th&gl=TH&ceid=TH:th" : "hl=en-US&gl=US&ceid=US:en";
+    const res = await fetch(`https://news.google.com/rss/search?q=${encodeURIComponent(query)}&${locale}`, {
+      headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" },
+      signal: AbortSignal.timeout(12_000),
+    });
+    if (!res.ok) return [];
+    const xml = await res.text();
+    const items = xml.match(/<item>([\s\S]*?)<\/item>/g) ?? [];
+    return items.slice(0, max).map(item => {
+      const title = (item.match(/<title>(.*?)<\/title>/)?.[1] ?? "").replace(/&#39;/g, "'").replace(/&amp;/g, "&").replace(/&quot;/g, '"');
+      const source = item.match(/<source[^>]*>(.*?)<\/source>/)?.[1] ?? "";
+      const link = item.match(/<link>(.*?)<\/link>/)?.[1] ?? "";
+      const pubDate = item.match(/<pubDate>(.*?)<\/pubDate>/)?.[1] ?? "";
+      const time = pubDate ? new Date(pubDate).getTime() : Date.now();
+      return { title, source, link, time };
+    }).filter(x => x.title.length > 10);
+  } catch { return []; }
 }
 
-function findSectors(text: string): string[] {
-  const lower = text.toLowerCase();
+// ---------- Sector → Stocks mapping ----------
+const SECTOR_STOCKS: Record<string, { label: string; tickers: string[] }> = {
+  ev_auto: { label: "🚗 Auto/EV", tickers: ["TSLA", "F", "GM", "RIVN"] },
+  oil_energy: { label: "🛢️ น้ำมัน/พลังงาน", tickers: ["XOM", "CVX", "XLE", "CL=F"] },
+  tech_ai: { label: "💻 Tech/AI", tickers: ["NVDA", "MSFT", "GOOGL", "SMH"] },
+  banking: { label: "🏦 ธนาคาร", tickers: ["JPM", "BAC", "GS"] },
+  defense: { label: "🛡️ กลาโหม", tickers: ["LMT", "RTX", "ITA"] },
+  bonds: { label: "🏛️ พันธบัตร/ดอกเบี้ย", tickers: ["TLT", "^TNX"] },
+  gold: { label: "🥇 ทอง", tickers: ["GC=F", "NEM", "GLD"] },
+  thailand: { label: "🇹🇭 ไทย", tickers: ["^SET.BK", "AOT.BK", "KBANK.BK"] },
+  crypto: { label: "🪙 Crypto", tickers: ["BTC-USD", "COIN"] },
+  asia: { label: "🌏 เอเชีย", tickers: ["^N225", "^HSI"] },
+};
+
+const SECTOR_KEYS: Record<string, string> = {
+  ev: "ev_auto", electric: "ev_auto", auto: "ev_auto", car: "ev_auto", tesla: "ev_auto", vehicle: "ev_auto",
+  oil: "oil_energy", crude: "oil_energy", energy: "oil_energy", gas: "oil_energy", petrol: "oil_energy", opec: "oil_energy",
+  chip: "tech_ai", semiconductor: "tech_ai", ai: "tech_ai", tech: "tech_ai", nvidia: "tech_ai", software: "tech_ai",
+  bank: "banking", financial: "banking", fed: "banking", rate: "banking", yield: "banking",
+  defense: "defense", military: "defense", weapon: "defense", war: "defense", nato: "defense",
+  bond: "bonds", treasury: "bonds", debt: "bonds", inflation: "bonds", cpi: "bonds",
+  gold: "gold", precious: "gold", commodity: "gold", metal: "gold",
+  thailand: "thailand", thai: "thailand", ไทย: "thailand", set: "thailand", baht: "thailand",
+  crypto: "crypto", bitcoin: "crypto", btc: "crypto", ethereum: "crypto",
+  china: "asia", japan: "asia", asia: "asia", taiwan: "asia", korea: "asia",
+};
+
+const ATLAS_MAP: Record<string, string> = {
+  trump: "trump2", tariff: "trump2", trade: "china", china: "china", taiwan: "taiwan",
+  fed: "fiatqe", inflation: "inflation2022", war: "ukraine", ukraine: "ukraine",
+  "middle east": "mideast", oil: "oil73", gold: "goldrush22", ai: "ai4ir",
+  crypto: "covid", debt: "debtclock", dollar: "dedollar", thailand: "thai",
+};
+
+function matchSectors(text: string): string[] {
+  const lower = " " + text.toLowerCase() + " ";
   const hits: string[] = [];
-  if (/ev|electric vehicle|auto|car|ford|gm|tesla/.test(lower)) hits.push("ev_auto");
-  if (/oil|crude|energy|gas|petrol|refin/.test(lower)) hits.push("oil_energy");
-  if (/tech|ai|chip|semiconductor|nvidia|software/.test(lower)) hits.push("tech_ai");
-  if (/bank|financial|lending|mortgage/.test(lower)) hits.push("banking");
-  if (/defense|military|weapon|war|nato/.test(lower)) hits.push("defense");
-  if (/bond|yield|treasury|interest rate|fed/.test(lower)) hits.push("bonds_rates");
-  if (/gold|precious|metal|commodity/.test(lower)) hits.push("gold_metals");
-  if (/thai|thailand|บาท|set|ภาษาไทย/.test(lower)) hits.push("thailand");
-  if (/crypto|bitcoin|btc|ethereum/.test(lower)) hits.push("crypto");
-  if (/asia|china|japan|korea|asean/.test(lower)) hits.push("asia");
-  return hits.length ? hits : ["bonds_rates"];
+  for (const [key, sector] of Object.entries(SECTOR_KEYS)) {
+    if (lower.includes(key) && !hits.includes(sector)) hits.push(sector);
+  }
+  return hits.length ? hits.slice(0, 3) : ["bonds"];
 }
 
-/** ดึงข่าวการเมือง + วิเคราะห์ด้วย Jev — cache 30 นาที */
-export async function getPoliticalFeed(): Promise<PoliticalFeed | null> {
-  return cached("political:feed", 30 * 60_000, async () => {
-    // ดึงข่าวจาก 2 topics หลัก (Trump + Geopolitics) รวม ~16 ข่าว
-    const [trumpNews, geoNews] = await Promise.all([
-      getNews("Trump economy policy tariff market", 10).catch(() => []),
-      getNews("geopolitics war oil gold market impact", 8).catch(() => []),
+function matchAtlas(text: string): string | null {
+  const lower = text.toLowerCase();
+  for (const [key, id] of Object.entries(ATLAS_MAP)) {
+    if (lower.includes(key)) return id;
+  }
+  return null;
+}
+
+// ---------- Main: feed + Jev รายชิ้น + ราคาหุ้น ----------
+export async function getPoliticalFeed(refresh = false): Promise<PoliticalFeed | null> {
+  if (refresh) {
+    // ข้าม cache — ยิงตรง (ใช้ครั้งเดียว)
+  }
+  return cached("political:v2", refresh ? 1 : 20 * 60_000, async () => {
+    // 1) Fetch RSS — หลาย query เพื่อกระจายความเสี่ยง
+    const [enTrump, enGeo, thNews] = await Promise.all([
+      fetchRSS("Trump tariff policy economy stock market", "en", 8),
+      fetchRSS("geopolitics war oil gold market impact", "en", 6),
+      fetchRSS("การเมืองไทย เศรษฐกิจ หุ้น", "th", 4),
     ]);
-
     const raw = [
-      ...trumpNews.map((n: { title: string; publisher?: string; link?: string; time?: number }) => ({ title: n.title, source: n.publisher ?? "", link: n.link, time: n.time ?? Date.now(), topic: "trump" })),
-      ...geoNews.map((n: { title: string; publisher?: string; link?: string; time?: number }) => ({ title: n.title, source: n.publisher ?? "", link: n.link, time: n.time ?? Date.now(), topic: "war" })),
-    ].slice(0, 14);
+      ...enTrump.map(n => ({ ...n, topic: "🇺🇸" })),
+      ...enGeo.map(n => ({ ...n, topic: "🌍" })),
+      ...thNews.map(n => ({ ...n, topic: "🇹🇭" })),
+    ].sort((a, b) => b.time - a.time).slice(0, 12);
 
-    if (!raw.length) {
-      return { items: [], asOf: new Date().toISOString(), topics: TOPICS };
+    if (!raw.length) return { items: [], asOf: new Date().toISOString(), overall: null };
+
+    // 2) Jev วิเคราะห์รายชิ้น — top 6 ข่าวล่าสุด (ประหยัด calls)
+    const top6 = raw.slice(0, 6);
+    const analyzed: PoliticalItem[] = [];
+
+    for (const n of top6) {
+      const sectors = matchSectors(n.title);
+      const stockTickers = sectors.flatMap(s => SECTOR_STOCKS[s]?.tickers ?? []).slice(0, 4);
+      const atlas = matchAtlas(n.title);
+
+      // Jev รายชิ้น
+      const a = await jevAsk(
+        `Political/market news: "${n.title}" (source: ${n.source})`,
+        {
+          direction: { type: "choice", instructions: "Direction for stocks?", criteria: { bullish: "หนุน", bearish: "กด", neutral: "สมดุล/ไม่ชัด" } },
+          impact: { type: "score", instructions: "How market-moving? (0=เบา 3=game changer)", criteria: ["เบา", "มีนัย", "สำคัญ", "Game changer"] },
+          fed: { type: "choice", instructions: "Fed implication?", criteria: { hawkish: "ถือนาน/ขึ้นดอกเบี้ย", dovish: "ลดได้เร็วขึ้น", neutral: "ไม่กระทบ" } },
+        }
+      ).catch(() => null);
+
+      analyzed.push({
+        ...n,
+        direction: (a?.direction as { choice?: string })?.choice ?? null,
+        impact: (a?.impact as { score?: number })?.score ?? null,
+        fedImplication: (a?.fed as { choice?: string })?.choice ?? null,
+        stocks: [], // เติมราคาด้านล่าง
+        atlasCard: atlas,
+      });
     }
 
-    // Jev วิเคราะห์เป็น batch (หัวข้อข่าวรวมกัน → Jev ให้ score รวม + จับ direction/sector ด้วย local)
-    const headlines = raw.map((n, i) => `${i}: ${n.title}`).join("\n");
-    const jevRes = await jevAsk(
-      `Political news headlines (US/global) that may impact financial markets:\n${headlines}`,
-      {
-        overallImpact: { type: "score", instructions: "Overall: how market-moving are these political headlines taken together?", criteria: ["เบามาก", "มีนัยบ้าง", "สำคัญ", "สำคัญมาก"] },
-        bias: { type: "choice", instructions: "Overall bias for risk assets (stocks)?", criteria: { bullish: "หนุนหุ้น", bearish: "กดหุ้น", neutral: "สมดุล/ไม่ชัด" } },
-        topRisk: { type: "choice", instructions: "What is the single biggest risk theme from these headlines?", criteria: { inflation: "เงินเฟ้อ/ดอกเบี้ย", war: "สงคราม/ภูมิรัฐศาสตร์", policy: "นโยบาย/กฎระเบียบ", china: "จีน/การค้า", election: "การเมือง/เลือกตั้ง" } },
-      }
-    );
+    // ข่าวที่เหลือ (ไม่ยิง Jev — ประหยัด) ใส่ sector matching อย่างเดียว
+    for (const n of raw.slice(6)) {
+      analyzed.push({
+        ...n,
+        direction: null, impact: null, fedImplication: null,
+        stocks: [],
+        atlasCard: matchAtlas(n.title),
+      });
+    }
 
-    const items: PoliticalItem[] = raw.map((n, idx) => {
-      const sectors = findSectors(n.title + " " + (n.source ?? ""));
-      const atlasLinks = findAtlasLinks(n.title);
-      return {
-        title: n.title,
-        source: n.source ?? "",
-        time: n.time ?? Date.now(),
-        link: n.link,
-        impact: null, // per-item impact จาก Jev รวม ไม่ได้ยิงรายชิ้น (ประหยัด)
-        direction: null,
-        sectors,
-        atlasLink: atlasLinks[0] ?? null,
-        jevNote: null,
-      };
-    });
+    // 3) ดึงราคาหุ้นที่กระทบ (batch เดียว)
+    const allTickers = [...new Set(analyzed.flatMap(n => matchSectors(n.title).flatMap(s => SECTOR_STOCKS[s]?.tickers ?? [])))].slice(0, 20);
+    const quotes = await getQuotes(allTickers).catch(() => ({} as Record<string, { price: number; changePct: number }>));
+
+    for (const item of analyzed) {
+      const sectors = matchSectors(item.title);
+      const tickers = sectors.flatMap(s => SECTOR_STOCKS[s]?.tickers ?? []).slice(0, 4);
+      item.stocks = tickers.map(t => ({
+        t,
+        price: quotes[t]?.price ?? null,
+        chgPct: quotes[t]?.changePct ?? null,
+        why: SECTOR_STOCKS[matchSectors(item.title)[0]]?.label ?? "",
+      }));
+    }
+
+    // 4) Jev สรุปภาพรวม
+    const headlines = top6.map((n, i) => `${i + 1}. ${n.title.slice(0, 70)}`).join("\n");
+    const overallRes = await jevAsk(
+      `Political news roundup:\n${headlines}`,
+      {
+        overallImpact: { type: "score", instructions: "Overall market impact of these headlines together?", criteria: ["เบา", "มีนัย", "สำคัญ", "สำคัญมาก"] },
+        overallDir: { type: "choice", instructions: "Overall direction for stocks?", criteria: { bullish: "หนุน", bearish: "กด", neutral: "สมดุล" } },
+        topRisk: { type: "choice", instructions: "Single biggest risk theme?", criteria: { inflation: "เงินเฟ้อ/ดอกเบี้ย", war: "สงคราม", policy: "นโยบาย/กฎระเบียบ", china: "จีน/การค้า", election: "การเมือง" } },
+      }
+    ).catch(() => null);
 
     return {
-      items,
+      items: analyzed,
       asOf: new Date().toISOString(),
-      topics: TOPICS,
+      overall: {
+        impact: (overallRes?.overallImpact as { score?: number })?.score ?? null,
+        direction: (overallRes?.overallDir as { choice?: string })?.choice ?? null,
+        topRisk: (overallRes?.topRisk as { choice?: string })?.choice ?? null,
+      },
     };
   }) as Promise<PoliticalFeed | null>;
 }
 
-/** วิเคราะห์ข่าวการเมืองรายชิ้นด้วย Jev — สำหรับ "ตรวจสอบ" */
+/** วิเคราะห์ข่าวรายชิ้นด้วย Jev (สำหรับช่องพิมพ์เอง) */
 export async function analyzePolitical(text: string): Promise<{
-  impact: number | null;
-  direction: string | null;
-  sectors: string[];
-  stocks: string[];
-  atlasCards: string[];
-  jevText: string;
+  impact: number | null; direction: string | null; fed: string | null;
+  sectors: string[]; stocks: { t: string; price: number | null; chgPct: number | null }[];
+  atlasCards: string[]; jevText: string;
 } | { error: string }> {
   if (text.trim().length < 10) return { error: "ต้องใส่ข้อความอย่างน้อย 10 ตัวอักษร" };
-
   const a = await jevAsk(
-    `Political news/event that may impact markets: "${text.slice(0, 1200)}"`,
+    `Political/economic event: "${text.slice(0, 1200)}"`,
     {
-      impact: { type: "score", instructions: "How market-moving is this event for global financial markets?", criteria: ["แทบไม่กระทบ", "กระทบบางกลุ่ม", "กระทบกว้าง", "Game changer"] },
-      direction: { type: "choice", instructions: "Direction for risk assets (stocks)?", criteria: { bullish: "หนุนหุ้น", bearish: "กดหุ้น", neutral: "สมดุล/ไม่ชัด" } },
-      mainSector: { type: "choice", instructions: "Which sector is MOST directly affected?", criteria: { ev_auto: "Auto/EV", oil_energy: "Oil/Energy", tech_ai: "Tech/AI/Chips", banking: "Banking/Finance", defense: "Defense/Military", bonds_rates: "Bonds/Rates", gold_metals: "Gold/Metals", thailand: "Thai market", crypto: "Crypto", asia: "Asia markets" } },
-      fedImplication: { type: "choice", instructions: "What does this mean for Fed policy?", criteria: { hawkish: "Fed ต้องขึ้นดอกเบี้ย/ถือนานขึ้น", dovish: "Fed ลดดอกเบี้ยได้เร็วขึ้น", neutral: "ไม่กระทบนโยบาย Fed" } },
+      direction: { type: "choice", instructions: "Direction for stocks?", criteria: { bullish: "หนุน", bearish: "กด", neutral: "สมดุล" } },
+      impact: { type: "score", instructions: "How market-moving?", criteria: ["เบา", "มีนัย", "สำคัญ", "Game changer"] },
+      fed: { type: "choice", instructions: "Fed implication?", criteria: { hawkish: "ถือนาน/ขึ้น", dovish: "ลดได้เร็ว", neutral: "ไม่กระทบ" } },
     }
   );
-
-  const sectors = findSectors(text);
-  const stocks = [...new Set(sectors.flatMap(s => SECTOR_MAP[s] ?? []))].slice(0, 8);
-  const atlasCards = findAtlasLinks(text);
-
-  const impact = (a?.impact as { score?: number })?.score ?? null;
+  const sectors = matchSectors(text);
+  const tickers = sectors.flatMap(s => SECTOR_STOCKS[s]?.tickers ?? []).slice(0, 6);
+  const quotes = await getQuotes(tickers).catch(() => ({} as Record<string, { price: number; changePct: number }>));
   const dir = (a?.direction as { choice?: string })?.choice ?? null;
-  const fed = (a?.fedImplication as { choice?: string })?.choice ?? null;
-
-  const jevText = [
-    `🧠 Jev: ความรุนแรง ${impact !== null ? impact.toFixed(1) + "/3" : "-"} · ทิศทางหุ้น: ${dir === "bullish" ? "🟢 หนุน" : dir === "bearish" ? "🔴 กด" : "⚪ สมดุล"}`,
-    fed && fed !== "neutral" ? ` · Fed: ${fed === "hawkish" ? "⚖️ ถือนานขึ้น/ขึ้นดอกเบี้ย" : "🕊️ ลดได้เร็วขึ้น"}` : "",
-  ].join("");
-
-  return { impact, direction: dir, sectors, stocks, atlasCards, jevText };
+  const imp = (a?.impact as { score?: number })?.score ?? null;
+  const fed = (a?.fed as { choice?: string })?.choice ?? null;
+  const lower = text.toLowerCase();
+  const atlasCards: string[] = [];
+  for (const [k, id] of Object.entries(ATLAS_MAP)) { if (lower.includes(k) && !atlasCards.includes(id)) atlasCards.push(id); }
+  const jevText = `🧠 Jev: รุนแรง ${imp !== null ? imp.toFixed(0) + "/3" : "-"} · ${dir === "bullish" ? "🟢 หนุนหุ้น" : dir === "bearish" ? "🔴 กดหุ้น" : "⚪ สมดุล"}${fed && fed !== "neutral" ? ` · Fed: ${fed === "hawkish" ? "⚖️ ถือนาน" : "🕊️ ลดได้"}` : ""}`;
+  return { impact: imp, direction: dir, fed, sectors, stocks: tickers.map(t => ({ t, price: quotes[t]?.price ?? null, chgPct: quotes[t]?.changePct ?? null })), atlasCards: atlasCards.slice(0, 3), jevText };
 }

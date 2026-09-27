@@ -5,8 +5,9 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 // GET /api/political — feed ข่าวการเมืองที่กระทบตลาด
-export async function GET() {
-  const data = await getPoliticalFeed();
+export async function GET(req: NextRequest) {
+  const refresh = req.nextUrl.searchParams.get("refresh") === "1";
+  const data = await getPoliticalFeed(refresh);
   if (!data) return NextResponse.json({ error: "ดึงข่าวไม่สำเร็จ" }, { status: 502 });
   return NextResponse.json(data);
 }
