@@ -883,5 +883,20 @@
     "from": "inflation2022",
     "to": "ibbotson100",
     "label": "เงินเฟ้อคือคู่แข่งที่ทุกสินทรัพย์ต้องชนะ"
+  },
+  {
+    "from": "ai4ir",
+    "to": "ailadder",
+    "label": "โลกอยู่ที่ ANI — ไต่บันไดต่อ"
+  },
+  {
+    "from": "agi2030",
+    "to": "ailadder",
+    "label": "เหนือ AGI/ASI: จิตสำนึก+Singularity"
+  },
+  {
+    "from": "aibubble",
+    "to": "ailadder",
+    "label": "ฟองเกิดที่ ANI ก่อนบันไดจะสูงขึ้น"
   }
 ]
