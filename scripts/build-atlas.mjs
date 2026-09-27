@@ -84,7 +84,7 @@ const OVERRIDE = {
   mingsilver: [1120, 1330],
   // ยุค AI/หลัง 2030
   aibubble: [5700, 170], gold100k: [5900, 1230], zombieset: [5750, 1090],
-  at2030: [7250, 200], agi2030: [7540, 200], newhegemon: [7830, 200],
+  at2030: [7250, 200], agi2030: [7540, 200], newhegemon: [7830, 200], ibbotson100: [5730, 1690],
   // หลัง 1900
   depression: [3070, 660],
   bis: [3080, 1880], smoot: [3235, 1780], newdeal: [3375, 1950],

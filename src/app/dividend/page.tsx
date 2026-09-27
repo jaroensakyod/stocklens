@@ -83,6 +83,19 @@ export default function DividendPage() {
         {asOf && <p className="text-[11px] text-zinc-500 mt-2">ราคา/yield ล่าสุด {asOf} · หุ้นไทยปันผลดูที่ <Link href="/longterm" className="text-accent-soft underline">หน้าระยะยาว</Link></p>}
       </section>
 
+      {/* กฎ 97% จากสถิติ 100 ปี (CFA/Ibbotson 1926-2025) */}
+      <section className="card p-4 border-accent/25 bg-accent/5">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <h2 className="text-sm font-bold text-accent-soft">💰 ปันผลไม่ใช่โบนัส — คือ 97% ของความมั่งคั่ง</h2>
+          <span className="text-[11px] text-zinc-500">สถิติ 100 ปี (1926-2025) จาก CFA Institute · Ibbotson &quot;Exponential Wealth&quot; 2026</span>
+        </div>
+        <p className="text-xs text-zinc-400 mt-2 leading-relaxed">
+          หุ้นสหรัฐฯ ใหญ่ให้ผลตอบแทน <b className="text-zinc-200 num">10.1%/ปี</b> ตลอดศตวรรษ — แต่ถ้า<b className="text-zinc-200">ไม่นำปันผลกลับมาซื้อซ้ำ</b> เหลือเพียง <b className="text-down num">6.17%/ปี</b>:
+          ต่างกัน &quot;แค่&quot; 4 จุดต่อปี แต่ทบ 100 ปี = <b className="text-zinc-200 num">$1 → ~$16,600</b> เทียบกับ <b className="text-zinc-200 num">~$340</b> — ตัววางแผนด้านล่างจึงมีตัวเลือก
+          <b className="text-zinc-200"> &quot;ต่อยอดปันผล (DRIP)&quot; ให้เลือกเสมอ</b>
+        </p>
+      </section>
+
       {/* ตารางหุ้นจ่ายรายเดือน */}
       <section>
         <div className="flex flex-wrap items-center justify-between gap-2 mb-3">

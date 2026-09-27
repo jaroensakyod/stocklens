@@ -848,5 +848,40 @@
     "from": "china",
     "to": "newhegemon",
     "label": "จีน: ผู้ท้าชิงตัวจริง"
+  },
+  {
+    "from": "goldstd",
+    "to": "ibbotson100",
+    "label": "ข้อมูลเริ่มต้นยุคทองคำ 1926"
+  },
+  {
+    "from": "fiatqe",
+    "to": "ibbotson100",
+    "label": "Bond Mountain จบที่ยุค ZIRP"
+  },
+  {
+    "from": "debtclock",
+    "to": "ibbotson100",
+    "label": "yield เริ่มต้นต่ำ = พันธบัตรรอบใหม่ต่างเดิม"
+  },
+  {
+    "from": "japanbubble",
+    "to": "ibbotson100",
+    "label": "บทเรียนญี่ปุ่น: 100 ปีของตลาดเดียวไม่พอ"
+  },
+  {
+    "from": "china",
+    "to": "ibbotson100",
+    "label": "จีน: หุ้นไม่จำเป็นต้องตาม GDP"
+  },
+  {
+    "from": "depression",
+    "to": "ibbotson100",
+    "label": "ช่วงเจ็บ 25 ปีที่สถิติต้องรอด"
+  },
+  {
+    "from": "inflation2022",
+    "to": "ibbotson100",
+    "label": "เงินเฟ้อคือคู่แข่งที่ทุกสินทรัพย์ต้องชนะ"
   }
 ]

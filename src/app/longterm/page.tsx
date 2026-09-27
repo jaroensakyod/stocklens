@@ -90,6 +90,30 @@ export default function LongTermPage() {
             </div>
           </section>
 
+          {/* เกณฑ์เทียบ 100 ปี (CFA/Ibbotson 1926-2025) */}
+          <section className="card p-4">
+            <h2 className="text-sm font-bold text-zinc-100 mb-1">📊 เกณฑ์เทียบ 100 ปี — หุ้นที่คุณเลือกต้องเอาชนะสิ่งนี้ก่อน</h2>
+            <p className="text-[11px] text-zinc-500 mb-3">ผลตอบแทนทับต้นต่อปี 1926-2025 (สหรัฐฯ) · CFA Institute — Ibbotson &quot;Exponential Wealth&quot; 2026 · ≈ = ค่าประมาณจากชุด SBBI มาตรฐาน</p>
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead><tr className="text-[10px] text-zinc-500 uppercase border-b border-base-700">
+                  <th className="px-2 py-1.5 text-left">สินทรัพย์</th><th className="px-2 py-1.5 text-right">ต่อปี</th>
+                  <th className="px-2 py-1.5 text-right">แท้จริง (หักเงินเฟ้อ)</th><th className="px-2 py-1.5 text-right">$1 ทบ 100 ปี</th><th className="px-2 py-1.5 text-right">ผันผวน</th>
+                </tr></thead>
+                <tbody>
+                  <tr className="border-b border-base-800"><td className="px-2 py-1.5">🦅 หุ้นใหญ่สหรัฐฯ</td><td className="px-2 py-1.5 text-right num font-bold text-up">10.1%</td><td className="px-2 py-1.5 text-right num text-up">6.9%</td><td className="px-2 py-1.5 text-right num">~$16,600</td><td className="px-2 py-1.5 text-right num text-zinc-400">18.9%</td></tr>
+                  <tr className="border-b border-base-800"><td className="px-2 py-1.5">🐭 หุ้นเล็ก ≈</td><td className="px-2 py-1.5 text-right num font-bold text-up">11.9%</td><td className="px-2 py-1.5 text-right num text-up">8.6%</td><td className="px-2 py-1.5 text-right num">~$70,000</td><td className="px-2 py-1.5 text-right num text-zinc-400">~32%</td></tr>
+                  <tr className="border-b border-base-800"><td className="px-2 py-1.5">🏛️ พันธบัตรรัฐยาว</td><td className="px-2 py-1.5 text-right num text-zinc-300">4.9%</td><td className="px-2 py-1.5 text-right num text-zinc-300">1.9%</td><td className="px-2 py-1.5 text-right num">~$117</td><td className="px-2 py-1.5 text-right num text-zinc-400">กลาง</td></tr>
+                  <tr className="border-b border-base-800"><td className="px-2 py-1.5">💵 เงินสด/T-Bills</td><td className="px-2 py-1.5 text-right num text-zinc-400">3.3%</td><td className="px-2 py-1.5 text-right num text-down">0.3%</td><td className="px-2 py-1.5 text-right num">~$25</td><td className="px-2 py-1.5 text-right num text-zinc-400">ต่ำ</td></tr>
+                  <tr><td className="px-2 py-1.5">🔥 เงินเฟ้อ</td><td className="px-2 py-1.5 text-right num text-zinc-400">~3.0%</td><td className="px-2 py-1.5 text-right num text-zinc-500">—</td><td className="px-2 py-1.5 text-right num text-zinc-500">$1 เหลือกำลังซื้อ ~5¢</td><td className="px-2 py-1.5 text-right"></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p className="text-[11px] text-zinc-500 mt-2 leading-relaxed">
+              อ่านคู่กับ &quot;กฎ 97%&quot;: หุ้นใหญ่ 10.1%/ปี เหลือ 6.17% ถ้าไม่ reinvest ปันผล · พันธบัตรยาวโตแรงช่วง 1981-2021 เพราะดอกเบี้ยลง 40 ปี (Bond Mountain) — รอบหน้าต้องดู yield เริ่มต้น · ช่วงเจ็บที่ต้องรอด: 1929 (-84~89%, 25 ปีฟื้น) · ดอตคอม -49% · GFC -57%
+            </p>
+          </section>
+
           <div className="card p-4 border-amber-500/25">
             <h3 className="text-sm font-bold text-amber-400 mb-1">📌 วิธีอ่านสำหรับมือใหม่ถือยาว</h3>
             <ul className="text-xs text-zinc-400 space-y-1 list-disc ml-4 leading-relaxed">
