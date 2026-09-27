@@ -87,7 +87,7 @@ const OVERRIDE = {
   oil73: [4315, 900],
   blackmonday: [4680, 900], japanbubble: [4790, 760],
   asiancrisis: [4950, 900], dotcom: [5060, 740], gfc: [5280, 880], cantillon: [5380, 1120],
-  covid: [5570, 860], inflation2022: [5735, 860], svb: [5895, 860],
+  covid: [5470, 830], inflation2022: [5700, 940], svb: [5895, 860], gme2021: [5580, 1060],
   ukraine: [5570, 520], mideast: [5790, 520],
   m2: [5570, 1240],
   dollarweapon: [5730, 1540],

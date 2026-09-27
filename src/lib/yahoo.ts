@@ -409,6 +409,23 @@ async function yahooCrumb(): Promise<{ cookie: string; crumb: string } | null> {
   }
 }
 
+/** quoteSummary module ใดๆ (ผ่าน crumb) — ใช้ร่วมกันหลาย feature: defaultKeyStatistics / price / ฯลฯ */
+export async function getQuoteSummaryModule<T = Record<string, unknown>>(symbol: string, modules: string): Promise<T | null> {
+  const c = await yahooCrumb();
+  if (!c) return null;
+  try {
+    const res = await fetch(
+      `https://query2.finance.yahoo.com/v10/finance/quoteSummary/${encodeURIComponent(symbol)}?modules=${modules}&crumb=${encodeURIComponent(c.crumb)}`,
+      { headers: { "User-Agent": UA, cookie: c.cookie }, signal: AbortSignal.timeout(12_000) }
+    );
+    if (!res.ok) return null;
+    const j = (await res.json()) as { quoteSummary?: { result?: T[] } };
+    return j.quoteSummary?.result?.[0] ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export interface AnnualRaw {
   label: string; // FY2026
   revenue?: number;

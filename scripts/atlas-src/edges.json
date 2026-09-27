@@ -1,154 +1,777 @@
 [
-  { "from": "romedebase", "to": "hyperinflation1923", "label": "เงินเสื่อมซ้ำทุกยุค 1,700 ปี" },
-  { "from": "songpaper", "to": "nixonshock", "label": "fiat ครั้งแรก ↔ ครั้งล่าสุด" },
-  { "from": "songpaper", "to": "hyperinflation1923", "label": "พิมพ์เกิน→พัง เหมือนกันทุกยุค" },
-  { "from": "solidus", "to": "goldstd", "label": "เงินเสถียรที่สุดในประวัติศาสตร์" },
-  { "from": "solidus", "to": "dedollar", "label": "reserve เก่าเสื่อม→โลกหาใหม่" },
-  { "from": "constantinople", "to": "portugal", "label": "เส้นทางบกตาย→ยุคทะเล" },
-  { "from": "constantinople", "to": "thai", "label": "1511 โปรตุเกสถึงเอเชีย→สยามเปิดรับตะวันตก" },
-  { "from": "portugal", "to": "spain", "label": "การค้าตกทอดสู่มหาอำนาจถัดไป" },
-  { "from": "potosi", "to": "spain", "label": "เงินแท้ท่วมสเปน" },
-  { "from": "potosi", "to": "pricerevolution", "label": "เงินทะลัก→เงินเฟ้อโลกครั้งแรก" },
-  { "from": "potosi", "to": "mingsilver", "label": "จีนหมิงดูดเงินโลก" },
-  { "from": "mingsilver", "to": "china", "label": "จีนกับเงินโลก: บทเรียนซ้ำ" },
-  { "from": "spain", "to": "dutchgolden", "label": "สเปนหมดแรง ดัตช์รับช่วงทะเล" },
-  { "from": "spain", "to": "debtclock", "label": "จักรวรรดิก็ default ได้ แม้เงินท่วม" },
-  { "from": "dutchgolden", "to": "voc", "label": "ระดมทุนสมัยใหม่เกิด" },
-  { "from": "thirtyyears", "to": "dutchgolden", "label": "สงครามปลดปล่อยดัตช์" },
-  { "from": "voc", "to": "bankamsterdam", "label": "การค้าใหญ่→โครงสร้างพื้นฐานการเงิน" },
-  { "from": "bankamsterdam", "to": "tulip", "label": "สภาพคล่อง+ตลาด→ฟองแรก" },
-  { "from": "tulip", "to": "dotcom", "label": "ฟองแรก↔ฟองเทค: 400 ปีบทเรียนเดิม" },
-  { "from": "voc", "to": "globalization1", "label": "บรรษัทข้ามชาติแรก→โลกาภิวัตน์ 1.0" },
-  { "from": "dutchgolden", "to": "glorious1688", "label": "นักการเงินดัตช์ย้ายเข้าลอนดอน" },
-  { "from": "glorious1688", "to": "bankofengland", "label": "กติกาน่าเชื่อ→ยืมถูก" },
-  { "from": "bankofengland", "to": "napoleon", "label": "ยืมทำสงครามเก่งกว่าฝรั่งเศส" },
-  { "from": "mississippi", "to": "frevolution", "label": "ฝรั่งเศสไม่กล้าใช้กระดาษ 250 ปี" },
-  { "from": "sevenyears", "to": "frevolution", "label": "หนี้สงครามทับถลำ→1789" },
-  { "from": "sevenyears", "to": "paxbrit", "label": "อาณาจักรอังกฤษเกิด (แคนาดา+อินเดีย)" },
-  { "from": "sevenyears", "to": "ukus", "label": "ชัยชนะวางรากฐานที่อเมริกาจะรับช่วง" },
-  { "from": "frevolution", "to": "napoleon", "label": "ความโกลาหล→จักรพรรดิ" },
-  { "from": "napoleon", "to": "rothschild", "label": "ตลาดพันธบัตรยุคนโปเลียน" },
-  { "from": "napoleon", "to": "paxbrit", "label": "อังกฤษชนะ=คุมทะเล 99 ปี" },
-  { "from": "napoleon", "to": "goldstd", "label": "กลับสู่ทอง 1821 หลังพัก 22 ปี" },
-  { "from": "industrial", "to": "paxbrit", "label": "อุตสาหกรรม=ฐานอำนาจใหม่" },
-  { "from": "industrial", "to": "ai4ir", "label": "การปฏิวัติรอบ 1 ↔ รอบ 4" },
-  { "from": "paxbrit", "to": "globalization1", "label": "โลกาภิวัตน์ครั้งแรก" },
-  { "from": "paxbrit", "to": "goldstd", "label": "ปอนด์+ทองคือมาตรฐานโลก" },
-  { "from": "globalization1", "to": "goldstd", "label": "ทุน-ค้าเสรีบนมาตรฐานทอง" },
-  { "from": "globalization1", "to": "ww1", "label": "โลกาภิวัตน์จบในสัปดาห์เดียว 1914" },
-  { "from": "opium", "to": "china", "label": "century of humiliation→จีนวันนี้" },
-  { "from": "opium", "to": "thai", "label": "สยามเลือกเปิดจำกัดแทนปิดแบบจีน" },
-  { "from": "uscivilwar", "to": "goldstd", "label": "greenback→กลับสู่ทอง 1879" },
-  { "from": "longdepression", "to": "depression", "label": "deflation สองแบบ: โต vs วิกฤต" },
-  { "from": "longdepression", "to": "smoot", "label": "แรงกด deflation→การเมืองภาษี" },
-  { "from": "germanyunify", "to": "ww1", "label": "แข่งขันมหาอำนาจ→สงครามโลก" },
-  { "from": "meiji", "to": "ww2", "label": "มหาอำนาจเอเชีย→สงครามแปซิฟิก" },
-  { "from": "meiji", "to": "japanbubble", "label": "จากเมจิสู่ฟองและ Lost Decades" },
-  { "from": "rothschild", "to": "goldstd", "label": "ลอนดอน=เจ้าหนี้ของโลก" },
-  { "from": "rothschild", "to": "thai", "label": "ไทยยุค ร.5 กู้ผ่านลอนดอน-ปารีส" },
-  { "from": "rothschild5", "to": "rothschild", "label": "จากเครือข่าย 5 เมือง→เจ้าหนี้โลก" },
-  { "from": "rothschild5", "to": "bankofengland", "label": "คู่แข่งสำคัญของธนาคารกลางยุคนั้น" },
-  { "from": "napoleon", "to": "waterloo1815", "label": "จบสงคราม=กำเนิดตำนาน" },
-  { "from": "waterloo1815", "to": "rothschild", "label": "ชื่อเสียงก่อตัวจากสงคราม" },
-  { "from": "suez1875", "to": "ukus", "label": "1875 ซื้อสุเอซ→1956 เสียอำนาจ" },
-  { "from": "suez1875", "to": "paxbrit", "label": "จัดหาเงินซื้อหัวใจจักรวรรดิ" },
-  { "from": "goldfix1919", "to": "goldstd", "label": "ราคาทองโลกตั้งที่ห้อง NM Rothschild" },
-  { "from": "goldfix1919", "to": "goldrush22", "label": "ห้อง fix ปิด 2004 ก่อนทองระเบิด" },
-  { "from": "rothschild20", "to": "ww2", "label": "นาซียึดธนาคารเวียนนา-ปารีส" },
-  { "from": "rothschild20", "to": "depression", "label": "Creditanstalt 1931 จุดวิกฤตยุโรป" },
-  { "from": "rothschild20", "to": "greatreset", "label": "จากประวัติศาสตร์จริง→ตัวละครทฤษฎีสมคบคิด" },
-  { "from": "panic1907", "to": "fed", "label": "วิกฤต→ต้องมีธนาคารกลาง" },
-  { "from": "goldstd", "to": "ww1", "label": "สงครามหยุดระบบทอง" },
-  { "from": "ww1", "to": "ukus", "label": "อังกฤษกลายเป็นลูกหนี้อเมริกา" },
-  { "from": "ww1", "to": "versailles", "label": "จบสงครามด้วยสัญญาลงโทษ" },
-  { "from": "ww1", "to": "warbonds", "label": "การเงินสงคราม 3 ทางเลือก" },
-  { "from": "warbonds", "to": "hyperinflation1923", "label": "พิมพ์จ่ายสงคราม→เงินพุ่ง" },
-  { "from": "versailles", "to": "hyperinflation1923", "label": "ค่าปฏิกรณ์บีบให้พิมพ์" },
-  { "from": "versailles", "to": "reparations", "label": "ตั้งระบบจ่ายค่าปฏิกรณ์" },
-  { "from": "reparations", "to": "crash1929", "label": "เงินกู้อเมริกันหยุด=ระบบล่ม" },
-  { "from": "hyperinflation1923", "to": "ww2", "label": "ความแค้ง+จน→นาซีเติบโต" },
-  { "from": "bis", "to": "reparations", "label": "BIS เกิดเพื่อบริหารหนี้เยอรมัน" },
-  { "from": "goldexchange", "to": "depression", "label": "ปอนด์แพง→deflation กดอังกฤษ" },
-  { "from": "goldexchange", "to": "ukus", "label": "1931 อังกฤษทิ้งทองก่อนใคร" },
-  { "from": "crash1929", "to": "depression", "label": "ฟองแตก→deflation spiral" },
-  { "from": "depression", "to": "smoot", "label": "ตอบโต้ด้วยกำแพงภาษี" },
-  { "from": "smoot", "to": "depression", "label": "การค้าโลกหด บีบลึกขึ้น" },
-  { "from": "depression", "to": "newdeal", "label": "FDR: ยึดทอง+devalue 41%" },
-  { "from": "depression", "to": "ww2", "label": "ความสิ้นหวังเปลี่ยนการเมือง" },
-  { "from": "ww2", "to": "brettonwoods", "label": "ผู้ชนะเขียนกติกาใหม่" },
-  { "from": "ww2", "to": "goldflow", "label": "ทองไหลเข้า Fort Knox" },
-  { "from": "goldflow", "to": "brettonwoods", "label": "ทอง 2/3 โลก=ผูกดอลลาร์ได้" },
-  { "from": "brettonwoods", "to": "bwinst", "label": "IMF+World Bank เกิดพร้อมกัน" },
-  { "from": "brettonwoods", "to": "coldwar", "label": "ระบบดอลลาร์ vs โซเวียต" },
-  { "from": "coldwar", "to": "marshall", "label": "ฟื้นยุโรปกันคอมมิวนิสต์" },
-  { "from": "coldwar", "to": "vietnam", "label": "proxy war ที่แพงที่สุด" },
-  { "from": "coldwar", "to": "thai", "label": "ไทย=แนวหน้า เงินอเมริกันไหลเข้า" },
-  { "from": "vietnam", "to": "nixonshock", "label": "พิมพ์จ่ายสงคราม ทองรั่ว" },
-  { "from": "nixonshock", "to": "oil73", "label": "ดอลลาร์ลอย→เงินเฟ้อ+น้ำมันแพง" },
-  { "from": "nixonshock", "to": "petrodollar", "label": "แก้ดอลลาร์ด้วยข้อตกลงน้ำมัน" },
-  { "from": "nixonshock", "to": "wef", "label": "1971: เงินเปลี่ยน ฟอรัมเกิด" },
-  { "from": "oil73", "to": "volcker", "label": "เงินเฟ้อ 14% ต้องสังหาร" },
-  { "from": "petrodollar", "to": "petrorecycle", "label": "เงินน้ำมัน→หนี้ลาติน" },
-  { "from": "volcker", "to": "petrorecycle", "label": "ดอกเบี้ย 20% จุดระเบิดหนี้" },
-  { "from": "volcker", "to": "plaza", "label": "ดอลลาร์แข็งเกิน→ต้องกด" },
-  { "from": "plaza", "to": "japanbubble", "label": "เยนแข็ง→ดอกเบี้ย 2.5%→ฟอง" },
-  { "from": "plaza", "to": "asiancrisis", "label": "เงินถูกไหลเข้าเอเชีย" },
-  { "from": "japanbubble", "to": "asiancrisis", "label": "เงินญี่ปุ่นถูกดึงกลับ 1997-98" },
-  { "from": "asiancrisis", "to": "thai", "label": "บาทลอย 2 ก.ค. 1997" },
-  { "from": "ussr", "to": "dotcom", "label": "ชัยชนะขั้วเดียว→ความมั่นใจล้น" },
-  { "from": "ussr", "to": "china", "label": "โลกเดียว→จีนไต่เต้ามีที่" },
-  { "from": "dotcom", "to": "warterror", "label": "ฟองแตก+9/11→ดอกเบี้ย 1%" },
-  { "from": "china", "to": "gfc", "label": "ออมจีนกดดอกเบี้ย→บ้านถูก" },
-  { "from": "warterror", "to": "gfc", "label": "ดอกเบี้ย 1%→subprime" },
-  { "from": "gfc", "to": "fiatqe", "label": "ตอบด้วย QE" },
-  { "from": "fiatqe", "to": "cantillon", "label": "อธิบายผล QE: ใครใกล้เครื่องพิมพ์" },
-  { "from": "fiatqe", "to": "covid", "label": "ระบบพร้อมพิมพ์ทันที" },
-  { "from": "covid", "to": "m2", "label": "M2 +27% ในปีเดียว" },
-  { "from": "covid", "to": "greatreset", "label": "จังหวะประกาศ Reset" },
-  { "from": "m2", "to": "inflation2022", "label": "18 เดือนถัดมา CPI 9.1%" },
-  { "from": "inflation2022", "to": "svb", "label": "พันธบัตรยาวตก→ธนาคารล้ม" },
-  { "from": "inflation2022", "to": "trump2", "label": "ค่าครองชีพพลิกการเมือง" },
-  { "from": "ukraine", "to": "dollarweapon", "label": "อายัด reserve $300B" },
-  { "from": "dollarweapon", "to": "dedollar", "label": "ทุกรัฐหาทางออกจากระบบ" },
-  { "from": "ukraine", "to": "goldrush22", "label": "สงคราม→ทองคือประกัน" },
-  { "from": "dedollar", "to": "goldrush22", "label": "ธนาคารกลางซื้อทอง 1,000+ ตัน/ปี" },
-  { "from": "goldrush22", "to": "debtclock", "label": "ผู้ซื้อพันธบัตรเปลี่ยนมือ" },
-  { "from": "dedollar", "to": "brics", "label": "กลุ่มทางเลือกขยายตัว" },
-  { "from": "brics", "to": "multipolar", "label": "โลกสองแคมป์+คนกลาง" },
-  { "from": "multipolar", "to": "trump2", "label": "แรงกดดัน→สงครามภาษี" },
-  { "from": "trump2", "to": "maralago", "label": "แนวคิดแก้ระบบดอลลาร์" },
-  { "from": "debtclock", "to": "maralago", "label": "หนี้บีบให้อ่อนดอลลาร์" },
-  { "from": "debtclock", "to": "cbdc", "label": "stablecoin ดูดซับพันธบัตร" },
-  { "from": "greatreset", "to": "cbdc", "label": "โครงสร้างเงิน+ID ใหม่" },
-  { "from": "wef", "to": "greatreset", "label": "เวที Davos ผลักแนวคิด" },
-  { "from": "ai4ir", "to": "taiwan", "label": "ชิปรวมศูนย์ไต้หวัน" },
-  { "from": "china", "to": "taiwan", "label": "ความขัดแย้งหลักของศตวรรษ" },
-  { "from": "taiwan", "to": "multipolar", "label": "แบ่ง bloc เทคโนโลยี" },
-  { "from": "mideast", "to": "inflation2022", "label": "พลังงาน-อาหารแพง 2022" },
-  { "from": "petrodollar", "to": "dedollar", "label": "50 ปีต่อมาถูกทดสอบ" },
-  { "from": "greatreset", "to": "ai4ir", "label": "การปฏิวัติอุตสาหกรรม 4.0" },
-  { "from": "ukus", "to": "brettonwoods", "label": "เจ้าใหม่ออกแบบระบบ" },
-  { "from": "newdeal", "to": "brettonwoods", "label": "แม่แบบ: หนี deflation ด้วย devalue" },
-  { "from": "fed", "to": "crash1929", "label": "Fed หดเงิน+ไม่ช่วยพอ" },
-  { "from": "fed", "to": "fiatqe", "label": "ผู้เล่นหลักของทุกตลาดยุคหลัง" },
-  { "from": "goldstd", "to": "goldexchange", "label": "พยายามฟื้นระบบทอง 1925" },
-  { "from": "nixonshock", "to": "fiatqe", "label": "เงินเฟี้ยวเต็มรูปแบบ" },
-  { "from": "covid", "to": "trump2", "label": "แรงสั่นสะเทือนเศรษฐกิจ-สังคม" },
-  { "from": "smoot", "to": "trump2", "label": "กำแพงภาษีรอบใหม่ 90 ปีถัดมา" },
-  { "from": "cantillon", "to": "trump2", "label": "ความเหลื่อมล้ำ→ประชานิยม" },
-  { "from": "thai", "to": "multipolar", "label": "ไทย: ไม่เลือกข้าง ได้ประโยชน์" },
-  { "from": "coldwar", "to": "ussr", "label": "โซเวียตแพ้ที่งบดุล 1991" },
-  { "from": "marshall", "to": "coldwar", "label": "ยุโรปตะวันตก=ปราการ" },
-  { "from": "bwinst", "to": "asiancrisis", "label": "IMM 17.2 พันล้าน+เงื่อนไข" },
-  { "from": "blackmonday", "to": "fiatqe", "label": "กำเนิด 'ผู้ช่วยทุกครั้ง'" },
-  { "from": "volcker", "to": "blackmonday", "label": "ประธาน Fed ใหม่+สภาพคล่อง" },
-  { "from": "gfc", "to": "trump2", "label": "ความโกรธ 2008→การเมือง 2016+" },
-  { "from": "gfc", "to": "multipolar", "label": "ความเชื่อมั่นตะวันตกลด" },
-  { "from": "cbdc", "to": "multipolar", "label": "ระบบชำระเงินสอง bloc" },
-  { "from": "ai4ir", "to": "debtclock", "label": "AI กับหนี้: คำตอบเติบโต?" },
-  { "from": "goldrush22", "to": "maralago", "label": "ทองแข็งแรง→ต้นทุนอ่อนดอลลาร์ต่ำ" },
-  { "from": "ukraine", "to": "mideast", "label": "แนวรบเชื่อมต่อ: อิหร่าน-รัสเซีย" },
-  { "from": "mideast", "to": "dedollar", "label": "น้ำมันเริ่มชำระหลายสกุล" },
-  { "from": "taiwan", "to": "ai4ir", "label": "ทางเลือก: กระจายโรงงานชิป" },
-  { "from": "multipolar", "to": "thai", "label": "China+1: โรงงานย้ายเข้าไทย" }
+  {
+    "from": "romedebase",
+    "to": "hyperinflation1923",
+    "label": "เงินเสื่อมซ้ำทุกยุค 1,700 ปี"
+  },
+  {
+    "from": "songpaper",
+    "to": "nixonshock",
+    "label": "fiat ครั้งแรก ↔ ครั้งล่าสุด"
+  },
+  {
+    "from": "songpaper",
+    "to": "hyperinflation1923",
+    "label": "พิมพ์เกิน→พัง เหมือนกันทุกยุค"
+  },
+  {
+    "from": "solidus",
+    "to": "goldstd",
+    "label": "เงินเสถียรที่สุดในประวัติศาสตร์"
+  },
+  {
+    "from": "solidus",
+    "to": "dedollar",
+    "label": "reserve เก่าเสื่อม→โลกหาใหม่"
+  },
+  {
+    "from": "constantinople",
+    "to": "portugal",
+    "label": "เส้นทางบกตาย→ยุคทะเล"
+  },
+  {
+    "from": "constantinople",
+    "to": "thai",
+    "label": "1511 โปรตุเกสถึงเอเชีย→สยามเปิดรับตะวันตก"
+  },
+  {
+    "from": "portugal",
+    "to": "spain",
+    "label": "การค้าตกทอดสู่มหาอำนาจถัดไป"
+  },
+  {
+    "from": "potosi",
+    "to": "spain",
+    "label": "เงินแท้ท่วมสเปน"
+  },
+  {
+    "from": "potosi",
+    "to": "pricerevolution",
+    "label": "เงินทะลัก→เงินเฟ้อโลกครั้งแรก"
+  },
+  {
+    "from": "potosi",
+    "to": "mingsilver",
+    "label": "จีนหมิงดูดเงินโลก"
+  },
+  {
+    "from": "mingsilver",
+    "to": "china",
+    "label": "จีนกับเงินโลก: บทเรียนซ้ำ"
+  },
+  {
+    "from": "spain",
+    "to": "dutchgolden",
+    "label": "สเปนหมดแรง ดัตช์รับช่วงทะเล"
+  },
+  {
+    "from": "spain",
+    "to": "debtclock",
+    "label": "จักรวรรดิก็ default ได้ แม้เงินท่วม"
+  },
+  {
+    "from": "dutchgolden",
+    "to": "voc",
+    "label": "ระดมทุนสมัยใหม่เกิด"
+  },
+  {
+    "from": "thirtyyears",
+    "to": "dutchgolden",
+    "label": "สงครามปลดปล่อยดัตช์"
+  },
+  {
+    "from": "voc",
+    "to": "bankamsterdam",
+    "label": "การค้าใหญ่→โครงสร้างพื้นฐานการเงิน"
+  },
+  {
+    "from": "bankamsterdam",
+    "to": "tulip",
+    "label": "สภาพคล่อง+ตลาด→ฟองแรก"
+  },
+  {
+    "from": "tulip",
+    "to": "dotcom",
+    "label": "ฟองแรก↔ฟองเทค: 400 ปีบทเรียนเดิม"
+  },
+  {
+    "from": "voc",
+    "to": "globalization1",
+    "label": "บรรษัทข้ามชาติแรก→โลกาภิวัตน์ 1.0"
+  },
+  {
+    "from": "dutchgolden",
+    "to": "glorious1688",
+    "label": "นักการเงินดัตช์ย้ายเข้าลอนดอน"
+  },
+  {
+    "from": "glorious1688",
+    "to": "bankofengland",
+    "label": "กติกาน่าเชื่อ→ยืมถูก"
+  },
+  {
+    "from": "bankofengland",
+    "to": "napoleon",
+    "label": "ยืมทำสงครามเก่งกว่าฝรั่งเศส"
+  },
+  {
+    "from": "mississippi",
+    "to": "frevolution",
+    "label": "ฝรั่งเศสไม่กล้าใช้กระดาษ 250 ปี"
+  },
+  {
+    "from": "sevenyears",
+    "to": "frevolution",
+    "label": "หนี้สงครามทับถลำ→1789"
+  },
+  {
+    "from": "sevenyears",
+    "to": "paxbrit",
+    "label": "อาณาจักรอังกฤษเกิด (แคนาดา+อินเดีย)"
+  },
+  {
+    "from": "sevenyears",
+    "to": "ukus",
+    "label": "ชัยชนะวางรากฐานที่อเมริกาจะรับช่วง"
+  },
+  {
+    "from": "frevolution",
+    "to": "napoleon",
+    "label": "ความโกลาหล→จักรพรรดิ"
+  },
+  {
+    "from": "napoleon",
+    "to": "rothschild",
+    "label": "ตลาดพันธบัตรยุคนโปเลียน"
+  },
+  {
+    "from": "napoleon",
+    "to": "paxbrit",
+    "label": "อังกฤษชนะ=คุมทะเล 99 ปี"
+  },
+  {
+    "from": "napoleon",
+    "to": "goldstd",
+    "label": "กลับสู่ทอง 1821 หลังพัก 22 ปี"
+  },
+  {
+    "from": "industrial",
+    "to": "paxbrit",
+    "label": "อุตสาหกรรม=ฐานอำนาจใหม่"
+  },
+  {
+    "from": "industrial",
+    "to": "ai4ir",
+    "label": "การปฏิวัติรอบ 1 ↔ รอบ 4"
+  },
+  {
+    "from": "paxbrit",
+    "to": "globalization1",
+    "label": "โลกาภิวัตน์ครั้งแรก"
+  },
+  {
+    "from": "paxbrit",
+    "to": "goldstd",
+    "label": "ปอนด์+ทองคือมาตรฐานโลก"
+  },
+  {
+    "from": "globalization1",
+    "to": "goldstd",
+    "label": "ทุน-ค้าเสรีบนมาตรฐานทอง"
+  },
+  {
+    "from": "globalization1",
+    "to": "ww1",
+    "label": "โลกาภิวัตน์จบในสัปดาห์เดียว 1914"
+  },
+  {
+    "from": "opium",
+    "to": "china",
+    "label": "century of humiliation→จีนวันนี้"
+  },
+  {
+    "from": "opium",
+    "to": "thai",
+    "label": "สยามเลือกเปิดจำกัดแทนปิดแบบจีน"
+  },
+  {
+    "from": "uscivilwar",
+    "to": "goldstd",
+    "label": "greenback→กลับสู่ทอง 1879"
+  },
+  {
+    "from": "longdepression",
+    "to": "depression",
+    "label": "deflation สองแบบ: โต vs วิกฤต"
+  },
+  {
+    "from": "longdepression",
+    "to": "smoot",
+    "label": "แรงกด deflation→การเมืองภาษี"
+  },
+  {
+    "from": "germanyunify",
+    "to": "ww1",
+    "label": "แข่งขันมหาอำนาจ→สงครามโลก"
+  },
+  {
+    "from": "meiji",
+    "to": "ww2",
+    "label": "มหาอำนาจเอเชีย→สงครามแปซิฟิก"
+  },
+  {
+    "from": "meiji",
+    "to": "japanbubble",
+    "label": "จากเมจิสู่ฟองและ Lost Decades"
+  },
+  {
+    "from": "rothschild",
+    "to": "goldstd",
+    "label": "ลอนดอน=เจ้าหนี้ของโลก"
+  },
+  {
+    "from": "rothschild",
+    "to": "thai",
+    "label": "ไทยยุค ร.5 กู้ผ่านลอนดอน-ปารีส"
+  },
+  {
+    "from": "rothschild5",
+    "to": "rothschild",
+    "label": "จากเครือข่าย 5 เมือง→เจ้าหนี้โลก"
+  },
+  {
+    "from": "rothschild5",
+    "to": "bankofengland",
+    "label": "คู่แข่งสำคัญของธนาคารกลางยุคนั้น"
+  },
+  {
+    "from": "napoleon",
+    "to": "waterloo1815",
+    "label": "จบสงคราม=กำเนิดตำนาน"
+  },
+  {
+    "from": "waterloo1815",
+    "to": "rothschild",
+    "label": "ชื่อเสียงก่อตัวจากสงคราม"
+  },
+  {
+    "from": "suez1875",
+    "to": "ukus",
+    "label": "1875 ซื้อสุเอซ→1956 เสียอำนาจ"
+  },
+  {
+    "from": "suez1875",
+    "to": "paxbrit",
+    "label": "จัดหาเงินซื้อหัวใจจักรวรรดิ"
+  },
+  {
+    "from": "goldfix1919",
+    "to": "goldstd",
+    "label": "ราคาทองโลกตั้งที่ห้อง NM Rothschild"
+  },
+  {
+    "from": "goldfix1919",
+    "to": "goldrush22",
+    "label": "ห้อง fix ปิด 2004 ก่อนทองระเบิด"
+  },
+  {
+    "from": "rothschild20",
+    "to": "ww2",
+    "label": "นาซียึดธนาคารเวียนนา-ปารีส"
+  },
+  {
+    "from": "rothschild20",
+    "to": "depression",
+    "label": "Creditanstalt 1931 จุดวิกฤตยุโรป"
+  },
+  {
+    "from": "rothschild20",
+    "to": "greatreset",
+    "label": "จากประวัติศาสตร์จริง→ตัวละครทฤษฎีสมคบคิด"
+  },
+  {
+    "from": "panic1907",
+    "to": "fed",
+    "label": "วิกฤต→ต้องมีธนาคารกลาง"
+  },
+  {
+    "from": "goldstd",
+    "to": "ww1",
+    "label": "สงครามหยุดระบบทอง"
+  },
+  {
+    "from": "ww1",
+    "to": "ukus",
+    "label": "อังกฤษกลายเป็นลูกหนี้อเมริกา"
+  },
+  {
+    "from": "ww1",
+    "to": "versailles",
+    "label": "จบสงครามด้วยสัญญาลงโทษ"
+  },
+  {
+    "from": "ww1",
+    "to": "warbonds",
+    "label": "การเงินสงคราม 3 ทางเลือก"
+  },
+  {
+    "from": "warbonds",
+    "to": "hyperinflation1923",
+    "label": "พิมพ์จ่ายสงคราม→เงินพุ่ง"
+  },
+  {
+    "from": "versailles",
+    "to": "hyperinflation1923",
+    "label": "ค่าปฏิกรณ์บีบให้พิมพ์"
+  },
+  {
+    "from": "versailles",
+    "to": "reparations",
+    "label": "ตั้งระบบจ่ายค่าปฏิกรณ์"
+  },
+  {
+    "from": "reparations",
+    "to": "crash1929",
+    "label": "เงินกู้อเมริกันหยุด=ระบบล่ม"
+  },
+  {
+    "from": "hyperinflation1923",
+    "to": "ww2",
+    "label": "ความแค้ง+จน→นาซีเติบโต"
+  },
+  {
+    "from": "bis",
+    "to": "reparations",
+    "label": "BIS เกิดเพื่อบริหารหนี้เยอรมัน"
+  },
+  {
+    "from": "goldexchange",
+    "to": "depression",
+    "label": "ปอนด์แพง→deflation กดอังกฤษ"
+  },
+  {
+    "from": "goldexchange",
+    "to": "ukus",
+    "label": "1931 อังกฤษทิ้งทองก่อนใคร"
+  },
+  {
+    "from": "crash1929",
+    "to": "depression",
+    "label": "ฟองแตก→deflation spiral"
+  },
+  {
+    "from": "depression",
+    "to": "smoot",
+    "label": "ตอบโต้ด้วยกำแพงภาษี"
+  },
+  {
+    "from": "smoot",
+    "to": "depression",
+    "label": "การค้าโลกหด บีบลึกขึ้น"
+  },
+  {
+    "from": "depression",
+    "to": "newdeal",
+    "label": "FDR: ยึดทอง+devalue 41%"
+  },
+  {
+    "from": "depression",
+    "to": "ww2",
+    "label": "ความสิ้นหวังเปลี่ยนการเมือง"
+  },
+  {
+    "from": "ww2",
+    "to": "brettonwoods",
+    "label": "ผู้ชนะเขียนกติกาใหม่"
+  },
+  {
+    "from": "ww2",
+    "to": "goldflow",
+    "label": "ทองไหลเข้า Fort Knox"
+  },
+  {
+    "from": "goldflow",
+    "to": "brettonwoods",
+    "label": "ทอง 2/3 โลก=ผูกดอลลาร์ได้"
+  },
+  {
+    "from": "brettonwoods",
+    "to": "bwinst",
+    "label": "IMF+World Bank เกิดพร้อมกัน"
+  },
+  {
+    "from": "brettonwoods",
+    "to": "coldwar",
+    "label": "ระบบดอลลาร์ vs โซเวียต"
+  },
+  {
+    "from": "coldwar",
+    "to": "marshall",
+    "label": "ฟื้นยุโรปกันคอมมิวนิสต์"
+  },
+  {
+    "from": "coldwar",
+    "to": "vietnam",
+    "label": "proxy war ที่แพงที่สุด"
+  },
+  {
+    "from": "coldwar",
+    "to": "thai",
+    "label": "ไทย=แนวหน้า เงินอเมริกันไหลเข้า"
+  },
+  {
+    "from": "vietnam",
+    "to": "nixonshock",
+    "label": "พิมพ์จ่ายสงคราม ทองรั่ว"
+  },
+  {
+    "from": "nixonshock",
+    "to": "oil73",
+    "label": "ดอลลาร์ลอย→เงินเฟ้อ+น้ำมันแพง"
+  },
+  {
+    "from": "nixonshock",
+    "to": "petrodollar",
+    "label": "แก้ดอลลาร์ด้วยข้อตกลงน้ำมัน"
+  },
+  {
+    "from": "nixonshock",
+    "to": "wef",
+    "label": "1971: เงินเปลี่ยน ฟอรัมเกิด"
+  },
+  {
+    "from": "oil73",
+    "to": "volcker",
+    "label": "เงินเฟ้อ 14% ต้องสังหาร"
+  },
+  {
+    "from": "petrodollar",
+    "to": "petrorecycle",
+    "label": "เงินน้ำมัน→หนี้ลาติน"
+  },
+  {
+    "from": "volcker",
+    "to": "petrorecycle",
+    "label": "ดอกเบี้ย 20% จุดระเบิดหนี้"
+  },
+  {
+    "from": "volcker",
+    "to": "plaza",
+    "label": "ดอลลาร์แข็งเกิน→ต้องกด"
+  },
+  {
+    "from": "plaza",
+    "to": "japanbubble",
+    "label": "เยนแข็ง→ดอกเบี้ย 2.5%→ฟอง"
+  },
+  {
+    "from": "plaza",
+    "to": "asiancrisis",
+    "label": "เงินถูกไหลเข้าเอเชีย"
+  },
+  {
+    "from": "japanbubble",
+    "to": "asiancrisis",
+    "label": "เงินญี่ปุ่นถูกดึงกลับ 1997-98"
+  },
+  {
+    "from": "asiancrisis",
+    "to": "thai",
+    "label": "บาทลอย 2 ก.ค. 1997"
+  },
+  {
+    "from": "ussr",
+    "to": "dotcom",
+    "label": "ชัยชนะขั้วเดียว→ความมั่นใจล้น"
+  },
+  {
+    "from": "ussr",
+    "to": "china",
+    "label": "โลกเดียว→จีนไต่เต้ามีที่"
+  },
+  {
+    "from": "dotcom",
+    "to": "warterror",
+    "label": "ฟองแตก+9/11→ดอกเบี้ย 1%"
+  },
+  {
+    "from": "china",
+    "to": "gfc",
+    "label": "ออมจีนกดดอกเบี้ย→บ้านถูก"
+  },
+  {
+    "from": "warterror",
+    "to": "gfc",
+    "label": "ดอกเบี้ย 1%→subprime"
+  },
+  {
+    "from": "gfc",
+    "to": "fiatqe",
+    "label": "ตอบด้วย QE"
+  },
+  {
+    "from": "fiatqe",
+    "to": "cantillon",
+    "label": "อธิบายผล QE: ใครใกล้เครื่องพิมพ์"
+  },
+  {
+    "from": "fiatqe",
+    "to": "covid",
+    "label": "ระบบพร้อมพิมพ์ทันที"
+  },
+  {
+    "from": "covid",
+    "to": "m2",
+    "label": "M2 +27% ในปีเดียว"
+  },
+  {
+    "from": "covid",
+    "to": "greatreset",
+    "label": "จังหวะประกาศ Reset"
+  },
+  {
+    "from": "m2",
+    "to": "inflation2022",
+    "label": "18 เดือนถัดมา CPI 9.1%"
+  },
+  {
+    "from": "inflation2022",
+    "to": "svb",
+    "label": "พันธบัตรยาวตก→ธนาคารล้ม"
+  },
+  {
+    "from": "inflation2022",
+    "to": "trump2",
+    "label": "ค่าครองชีพพลิกการเมือง"
+  },
+  {
+    "from": "ukraine",
+    "to": "dollarweapon",
+    "label": "อายัด reserve $300B"
+  },
+  {
+    "from": "dollarweapon",
+    "to": "dedollar",
+    "label": "ทุกรัฐหาทางออกจากระบบ"
+  },
+  {
+    "from": "ukraine",
+    "to": "goldrush22",
+    "label": "สงคราม→ทองคือประกัน"
+  },
+  {
+    "from": "dedollar",
+    "to": "goldrush22",
+    "label": "ธนาคารกลางซื้อทอง 1,000+ ตัน/ปี"
+  },
+  {
+    "from": "goldrush22",
+    "to": "debtclock",
+    "label": "ผู้ซื้อพันธบัตรเปลี่ยนมือ"
+  },
+  {
+    "from": "dedollar",
+    "to": "brics",
+    "label": "กลุ่มทางเลือกขยายตัว"
+  },
+  {
+    "from": "brics",
+    "to": "multipolar",
+    "label": "โลกสองแคมป์+คนกลาง"
+  },
+  {
+    "from": "multipolar",
+    "to": "trump2",
+    "label": "แรงกดดัน→สงครามภาษี"
+  },
+  {
+    "from": "trump2",
+    "to": "maralago",
+    "label": "แนวคิดแก้ระบบดอลลาร์"
+  },
+  {
+    "from": "debtclock",
+    "to": "maralago",
+    "label": "หนี้บีบให้อ่อนดอลลาร์"
+  },
+  {
+    "from": "debtclock",
+    "to": "cbdc",
+    "label": "stablecoin ดูดซับพันธบัตร"
+  },
+  {
+    "from": "greatreset",
+    "to": "cbdc",
+    "label": "โครงสร้างเงิน+ID ใหม่"
+  },
+  {
+    "from": "wef",
+    "to": "greatreset",
+    "label": "เวที Davos ผลักแนวคิด"
+  },
+  {
+    "from": "ai4ir",
+    "to": "taiwan",
+    "label": "ชิปรวมศูนย์ไต้หวัน"
+  },
+  {
+    "from": "china",
+    "to": "taiwan",
+    "label": "ความขัดแย้งหลักของศตวรรษ"
+  },
+  {
+    "from": "taiwan",
+    "to": "multipolar",
+    "label": "แบ่ง bloc เทคโนโลยี"
+  },
+  {
+    "from": "mideast",
+    "to": "inflation2022",
+    "label": "พลังงาน-อาหารแพง 2022"
+  },
+  {
+    "from": "petrodollar",
+    "to": "dedollar",
+    "label": "50 ปีต่อมาถูกทดสอบ"
+  },
+  {
+    "from": "greatreset",
+    "to": "ai4ir",
+    "label": "การปฏิวัติอุตสาหกรรม 4.0"
+  },
+  {
+    "from": "ukus",
+    "to": "brettonwoods",
+    "label": "เจ้าใหม่ออกแบบระบบ"
+  },
+  {
+    "from": "newdeal",
+    "to": "brettonwoods",
+    "label": "แม่แบบ: หนี deflation ด้วย devalue"
+  },
+  {
+    "from": "fed",
+    "to": "crash1929",
+    "label": "Fed หดเงิน+ไม่ช่วยพอ"
+  },
+  {
+    "from": "fed",
+    "to": "fiatqe",
+    "label": "ผู้เล่นหลักของทุกตลาดยุคหลัง"
+  },
+  {
+    "from": "goldstd",
+    "to": "goldexchange",
+    "label": "พยายามฟื้นระบบทอง 1925"
+  },
+  {
+    "from": "nixonshock",
+    "to": "fiatqe",
+    "label": "เงินเฟี้ยวเต็มรูปแบบ"
+  },
+  {
+    "from": "covid",
+    "to": "trump2",
+    "label": "แรงสั่นสะเทือนเศรษฐกิจ-สังคม"
+  },
+  {
+    "from": "smoot",
+    "to": "trump2",
+    "label": "กำแพงภาษีรอบใหม่ 90 ปีถัดมา"
+  },
+  {
+    "from": "cantillon",
+    "to": "trump2",
+    "label": "ความเหลื่อมล้ำ→ประชานิยม"
+  },
+  {
+    "from": "thai",
+    "to": "multipolar",
+    "label": "ไทย: ไม่เลือกข้าง ได้ประโยชน์"
+  },
+  {
+    "from": "coldwar",
+    "to": "ussr",
+    "label": "โซเวียตแพ้ที่งบดุล 1991"
+  },
+  {
+    "from": "marshall",
+    "to": "coldwar",
+    "label": "ยุโรปตะวันตก=ปราการ"
+  },
+  {
+    "from": "bwinst",
+    "to": "asiancrisis",
+    "label": "IMM 17.2 พันล้าน+เงื่อนไข"
+  },
+  {
+    "from": "blackmonday",
+    "to": "fiatqe",
+    "label": "กำเนิด 'ผู้ช่วยทุกครั้ง'"
+  },
+  {
+    "from": "volcker",
+    "to": "blackmonday",
+    "label": "ประธาน Fed ใหม่+สภาพคล่อง"
+  },
+  {
+    "from": "gfc",
+    "to": "trump2",
+    "label": "ความโกรธ 2008→การเมือง 2016+"
+  },
+  {
+    "from": "gfc",
+    "to": "multipolar",
+    "label": "ความเชื่อมั่นตะวันตกลด"
+  },
+  {
+    "from": "cbdc",
+    "to": "multipolar",
+    "label": "ระบบชำระเงินสอง bloc"
+  },
+  {
+    "from": "ai4ir",
+    "to": "debtclock",
+    "label": "AI กับหนี้: คำตอบเติบโต?"
+  },
+  {
+    "from": "goldrush22",
+    "to": "maralago",
+    "label": "ทองแข็งแรง→ต้นทุนอ่อนดอลลาร์ต่ำ"
+  },
+  {
+    "from": "ukraine",
+    "to": "mideast",
+    "label": "แนวรบเชื่อมต่อ: อิหร่าน-รัสเซีย"
+  },
+  {
+    "from": "mideast",
+    "to": "dedollar",
+    "label": "น้ำมันเริ่มชำระหลายสกุล"
+  },
+  {
+    "from": "taiwan",
+    "to": "ai4ir",
+    "label": "ทางเลือก: กระจายโรงงานชิป"
+  },
+  {
+    "from": "multipolar",
+    "to": "thai",
+    "label": "China+1: โรงงานย้ายเข้าไทย"
+  },
+  {
+    "from": "gme2021",
+    "to": "cantillon",
+    "label": "เงินเฟ้อสินทรัพย์→คนธรรมดามีอำนาจตลาด"
+  },
+  {
+    "from": "m2",
+    "to": "gme2021",
+    "label": "เงินกระตุ้นไหลเข้าโบรกเกอร์ฟรี"
+  },
+  {
+    "from": "dotcom",
+    "to": "gme2021",
+    "label": "หมีอ่านพื้นฐานถูก แต่ผิด positioning"
+  }
 ]

@@ -18,6 +18,7 @@ const GROUPS: MenuGroup[] = [
     items: [
       { href: "/screener", label: "📡 Radars Builder", desc: "สร้างเรดาร์คัดกรองหุ้นตามเงื่อนไขของคุณ — 30 ตลาด, บันทึก/แชร์ได้" },
       { href: "/surge", label: "🚀 หุ้นซิ่งวันนี้", desc: "สแกนหุ้นขยับแรงพร้อมสัญญาณ (ทะลุสูงสุด/วอลุ่มพุ่ง) หลายตลาด" },
+      { href: "/squeeze", label: "🔥 Squeeze Radar", desc: "ตรวจ oversell ของกองทุนแบบคนตรวจเจอ GME — short interest เทียบ float ทั้งตลาดสหรัฐฯ" },
       { href: "/dr", label: "🪙 DR ไทย", desc: "หุ้นต้นทางของ DR ยอดนิยม + วิเคราะห์ภาษาไทยเต็มรูปแบบ" },
       { href: "/compare", label: "⚖️ เทียบหุ้น", desc: "เทียบสถิติ 2-4 ตัวแบบคลิกเดียว — factors/งบ/สัญญาณ" },
     ],
