@@ -10,11 +10,14 @@ import LockGate from "@/components/LockGate";
 interface Signal { id: string; emoji: string; name: string; clips: number; desc: string; rule: string; watch: string[]; up: string[]; down: string[]; status?: string; currentValue?: string }
 interface Prediction { date: string; text: string; status: string; result?: string; note?: string }
 interface Framework { howHeReadsHistory: string[]; howHeSeesFuture: string[] }
-interface Data { signals: Signal[]; predictions: Prediction[]; framework: Framework; supernova?: { rows: { id: string; label: string; price: number | null; chg5d: number | null }[]; insider?: { netBuyers: number; n: number } }; jiangSignals?: Signal[]; jiangPredictions?: Prediction[]; compareView?: { agree: { topic: string; thaweesakh: string; jiang: string }[]; differ: { topic: string; thaweesakh: string; jiang: string }[] } }
+interface Data { signals: Signal[]; predictions: Prediction[]; framework: Framework; supernova?: { rows: { id: string; label: string; price: number | null; chg5d: number | null }[]; insider?: { netBuyers: number; n: number } }; jiangSignals?: Signal[]; jiangPredictions?: Prediction[]; compareView?: { agree: { topic: string; thaweesakh: string; jiang: string }[]; differ: { topic: string; thaweesakh: string; jiang: string }[] }; jevMining?: { ranAt: string; calls: number; summary: { chunks: number; hotChunks: number; predictionsFound: number; causalChunks: number; byAsset: Record<string, number> }; predictions: { clip: string; quote: string; assets: string | null; timeframe: string | null; predScore: number }[]; causalQuotes: { clip: string; quote: string }[] } }
 interface AnalyzeResult { signals: Signal[]; chains: { name: string; stocks: string[] }[]; note: string }
 
 const STATUS_ICON: Record<string, string> = { green: "🟢", yellow: "🟡", red: "🔴" };
 const PRED_ICON: Record<string, string> = { verified: "✅", pending: "⏳", active: "🔥", standing: "📌" };
+
+const ASSET_TH: Record<string, string> = { gold: "🥇 ทองคำ", oil: "🛢️ น้ำมัน/พลังงาน", thb: "🇹🇭 เงินบาท", set: "📊 SET", bonds: "🏛️ พันธบัตร/ดอกเบี้ย", land: "🌱 ที่ดิน", usd: "💵 ดอลลาร์", defense: "🛡️ กลาโหม" };
+const TF_TH: Record<string, string> = { days: "ระยะสั้น (วัน-สัปดาห์)", months: "ไตรมาส-ไม่กี่เดือน", year: "ภายในปีเดียว", years: "หลายปี-2030+" };
 
 export default function ProlensPage() {
   const can = useCan();
@@ -202,6 +205,35 @@ export default function ProlensPage() {
           <LockGate need="starter" title="🔓 เปิด Event Analyzer" desc="พิมพ์เหตุการณ์ แล้วระบบวิเคราะห์ผ่าน 14 หลักการของ T" />
         )}
       </div>
+
+      {/* 5.5 🧠 Jev ขุดเพิ่มจาก 27 คลิป */}
+      {data.jevMining && (
+        <div className="card p-5">
+          <h2 className="text-sm font-bold text-zinc-100 mb-1">🧠 Jev ขุดเพิ่มจากคลัง 27 คลิป ({data.jevMining.calls} chunks ตรวจ)</h2>
+          <p className="text-[11px] text-zinc-500 mb-3">
+            รอบแรก (ตอน Jev พัง 402) regex ได้ 21 พยากรณ์ — รอบนี้ Jev จริง ได้ <b className="text-accent-soft">{data.jevMining.summary.predictionsFound}</b> พยากรณ์ +{" "}
+            <b className="text-accent-soft">{data.jevMining.summary.causalChunks}</b> ประโยค causal จาก {data.jevMining.summary.chunks} chunks ({data.jevMining.summary.hotChunks} chunks มีของ) · แสดง 12 อันดับคะแนนสูงสุด
+          </p>
+          <div className="flex flex-wrap gap-1.5 mb-3">
+            {Object.entries(data.jevMining.summary.byAsset).filter(([k]) => k !== "none").sort((a, b) => b[1] - a[1]).map(([k, v]) => (
+              <span key={k} className="chip bg-base-800 text-zinc-300 border border-base-700 !text-[10px]">{ASSET_TH[k] ?? k} <b className="num">{v}</b></span>
+            ))}
+          </div>
+          <div className="space-y-2">
+            {data.jevMining.predictions.slice(0, 12).map((p, i) => (
+              <div key={i} className="bg-base-850 rounded-lg px-3 py-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="chip bg-accent/15 text-accent-soft border border-accent/30 !text-[10px] num">#{i + 1} · Jev {p.predScore.toFixed(1)}</span>
+                  {p.assets && p.assets !== "none" && <span className="chip bg-base-800 text-zinc-400 border border-base-700 !text-[10px]">{ASSET_TH[p.assets] ?? p.assets}</span>}
+                  {p.timeframe && p.timeframe !== "none" && <span className="chip bg-base-800 text-zinc-500 border border-base-700 !text-[10px]">{TF_TH[p.timeframe] ?? p.timeframe}</span>}
+                  <span className="text-[10px] text-zinc-600">{p.clip}</span>
+                </div>
+                <p className="text-[12px] text-zinc-300 mt-1 leading-relaxed">“{p.quote}”</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* 6. Dual Lens: T vs J */}
       {data.jiangSignals && data.jiangSignals.length > 0 && (
