@@ -16,6 +16,7 @@ export interface XrayResult {
   dividend: { estAnnualThb: number; yieldPct: number } | null;
   feeDragPct: number;
   weakPoints: string[];
+  highDebt: { sym: string; de: number }[]; // หุ้นหนี้สูง — ความเสี่ยงช่วงดอกเบี้ยขาขึ้น
 }
 
 const PERIODS: { label: string; days: number }[] = [
@@ -177,11 +178,14 @@ export async function runXray(holdings: XrayHolding[]): Promise<XrayResult | nul
 
   // ---- factor เฉลี่ยถ่วงน้ำหนัก (ตัวอย่าง 8 ตัวแรกพอ ประหยัด) ----
   let factorsAvg: XrayResult["factorsAvg"] = null;
+  let highDebt: { sym: string; de: number }[] = [];
   {
     const picks = values.slice(0, 8);
     const anas = await Promise.all(picks.map((v) => buildAnalysis(v.sym).catch(() => null)));
     const acc = { valuation: 0, growth: 0, profitability: 0, momentum: 0, health: 0, overall: 0 };
     let n = 0;
+    const de = picks.map((v, i) => ({ sym: v.sym, de: anas[i]?.financials?.debtToEquity })).filter((d) => typeof d.de === "number" && (d.de as number) > 120);
+    highDebt = de as { sym: string; de: number }[];
     for (let i = 0; i < picks.length; i++) {
       const f = anas[i]?.factors;
       if (f) {
@@ -233,6 +237,7 @@ export async function runXray(holdings: XrayHolding[]): Promise<XrayResult | nul
   if (hhi > 0.25) weakPoints.push(`พอร์ตเข้มข้น (HHI ${hhi.toFixed(2)}) — กระจายน้อยกว่า 4 ตัวหลัก`);
   if (sectors[0] && sectors[0].pct >= 50) weakPoints.push(`${sectors[0].pct}% ของพอร์ตอยู่หมวด ${sectors[0].name} — พึ่งอุตสาหกรรมเดียวสูง`);
   if (mdd !== null && mdd >= 30) weakPoints.push(`เคยตกหนักสุด ${mdd.toFixed(0)}% ใน 1 ปี — ทนแรงกดดันได้แค่ไหน?`);
+  if (highDebt.length) weakPoints.push(`หุ้นหนี้สูงในพอร์ตช่วงดอกเบี้ยขาขึ้น: ${highDebt.map((h) => `${h.sym} (หนี้/ทุน ${Math.round(h.de)}%)`).join(" · ")} — ต้นทุนการเงินโดนกดเมื่อดอกเบี้ยสูงขึ้น`);
   if (dividend === null) weakPoints.push("พอร์ตยังไม่มีกระแสเงินสดจากปันผล");
 
   return {
@@ -246,6 +251,7 @@ export async function runXray(holdings: XrayHolding[]): Promise<XrayResult | nul
     dividend,
     feeDragPct,
     weakPoints,
+    highDebt,
   };
 }
 

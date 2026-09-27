@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
   const rows: {
     ticker: string; qty: number; avgCost: number; core: boolean;
     price: number; value: number; currency: string; pl: number; plPct: number;
-    sector?: string; industry?: string;
+    sector?: string; industry?: string; debtToEquity?: number;
     factors?: { valuation: number; growth: number; profitability: number; momentum: number; health: number; overall: number };
     signal?: string;
     signalLabel?: string;
@@ -81,6 +81,7 @@ export async function POST(req: NextRequest) {
         pl: (a.quote.price - h.avgCost) * h.qty, // P/L คิดในสกุลของหุ้นนั้น (ใช้เฉพาะ plPct ต่อ)
         plPct: h.avgCost > 0 ? ((a.quote.price - h.avgCost) / h.avgCost) * 100 : 0,
         sector: sec?.sector || a.profile?.sector, industry: sec?.industry || a.profile?.industry,
+        debtToEquity: a.financials?.debtToEquity,
         factors: a.factors ? { valuation: a.factors.valuation, growth: a.factors.growth, profitability: a.factors.profitability, momentum: a.factors.momentum, health: a.factors.health, overall: a.factors.overall } : undefined,
         signal: a.technicals?.signal,
         signalLabel: a.technicals?.signal === "bullish" ? "เอียงบวก" : a.technicals?.signal === "bearish" ? "เอียงลบ" : "กลาง",
@@ -139,7 +140,13 @@ Sector ใหญ่สุด: ${topSector[0]} (${topSectorPct.toFixed(1)}%) ${to
 สัญญาณเทคนิค: บวก ${bullishCount} · กลาง ${rows.length - bullishCount - bearishCount} · ลบ ${bearishCount}
 ธีม Radar ร้อนสุด: ${radarTop.map((t) => `${t.emoji}${t.name}(${t.heat})`).join(", ")}`;
 
-  const packet = `[ข้อมูลจริงของพอร์ต]\n${metricsText}\n\nตำแหน่ง:\n${holdingsText}`;
+  // ⚠️ หุ้นหนี้สูงช่วงดอกเบี้ยขาขึ้น (แนวคิด "ลดหนี้ให้เร็ว" — ต้นทุนการเงินโดนกดเมื่อดอกเบี้ยสูงขึ้น)
+  const highDebt = rows.filter((r) => r.debtToEquity !== undefined && r.debtToEquity > 120);
+  const debtText = highDebt.length
+    ? `\nหุ้นหนี้สูง (หนี้/ทุน >120%): ${highDebt.map((r) => `${r.ticker} (${Math.round(r.debtToEquity as number)}%)`).join(" · ")} — พิจารณาความเสี่ยงต้นทุนการเงินหากดอกเบี้ยขาขึ้น`
+    : "";
+
+  const packet = `[ข้อมูลจริงของพอร์ต]\n${metricsText}${debtText}\n\nตำแหน่ง:\n${holdingsText}`;
 
   // ===== 4) โหมด demo (ไม่มี AI key) — วิเคราะห์เชิงกฎ =====
   const demoAdvice: { action: string; title: string; detail: string; tone: "warn" | "info" | "good" }[] = [];

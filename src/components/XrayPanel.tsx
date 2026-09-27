@@ -14,6 +14,7 @@ interface Xray {
   dividend: { estAnnualThb: number; yieldPct: number } | null;
   feeDragPct: number;
   weakPoints: string[];
+  highDebt?: { sym: string; de: number }[];
 }
 interface Holding { ticker: string; qty: number; avgCost?: number; core?: boolean }
 
@@ -203,6 +204,13 @@ export default function XrayPanel({ holdings }: { holdings: Holding[] }) {
       {data.weakPoints.length > 0 && (
         <div className="card p-5 border border-down/30">
           <h3 className="text-sm font-bold text-zinc-100 mb-2">🔎 จุดที่ควรปรับ</h3>
+          {data.highDebt && data.highDebt.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mb-2">
+              {data.highDebt.map((h) => (
+                <span key={h.sym} className="chip num bg-down/10 text-down border border-down/30 text-[11px]">{h.sym} หนี้/ทุน {Math.round(h.de)}%</span>
+              ))}
+            </div>
+          )}
           <ul className="space-y-1.5">
             {data.weakPoints.map((w) => (
               <li key={w} className="text-xs text-zinc-300 flex gap-2"><span className="text-down">⚠️</span>{w}</li>
