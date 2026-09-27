@@ -32,6 +32,7 @@ const GROUPS: MenuGroup[] = [
       { href: "/radar", label: "🌐 Radar เหตุการณ์", desc: "25 ธีมข่าวโลก (สงคราม/ดอกเบี้ย/AI...) → ห่วงโซ่หุ้นที่ได้-เสียประโยชน์" },
       { href: "/supernova", label: "🛰️ มหภาค (Supernova)", desc: "ยีลด์ US10Y · VIX · ทอง · น้ำมัน · insider — รวมเป็นสัญญาณเดียว" },
       { href: "/atlas", label: "🕵️ Atlas ประวัติศาสตร์โลก 570 ปี", desc: "กระดานพยาน: โปรตุเกส→ดัตช์→อังกฤษ→อเมริกา→? สงคราม การไหลของเงิน Great Reset — คลิกอ่านได้ทุกการ์ด" },
+      { href: "/politics", label: "🇺🇸 Political Pulse", desc: "ติดตามข่าว Trump/Fed/จีน/สงคราม/การเมืองไทย ที่กระทบตลาด — Jev วิเคราะห์หุ้นที่โดน + โยง Atlas" },
       { href: "/aiopp", label: "🪜 โอกาสบันได AI", desc: "หุ้นจริงรายขั้น ANI→AGI→ASI + กลุ่มบริษัทก่อนเข้าตลาด (OpenAI/Anthropic/Figure...) พร้อมดีล-มูลค่าล่าสุด" },
       { href: "/score", label: "🏆 อันดับ Score", desc: "คะแนน StockLens รวม 6 เสา — อันดับสูงสุด/ต่ำสุดของวัน" },
     ],
