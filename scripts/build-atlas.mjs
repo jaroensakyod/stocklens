@@ -7,6 +7,7 @@ const DIR = "scripts/atlas-src";
 const nodes = [
   ...JSON.parse(readFileSync(`${DIR}/nodes-part0.json`, "utf8")),
   ...JSON.parse(readFileSync(`${DIR}/nodes-rothschild.json`, "utf8")),
+  ...JSON.parse(readFileSync(`${DIR}/nodes-future.json`, "utf8")),
   ...JSON.parse(readFileSync(`${DIR}/nodes-part1.json`, "utf8")),
   ...JSON.parse(readFileSync(`${DIR}/nodes-part2.json`, "utf8")),
   ...JSON.parse(readFileSync(`${DIR}/nodes-part3.json`, "utf8")),
@@ -28,9 +29,10 @@ const eraIds = new Set(eras.map((e) => e.id));
 for (const n of nodes) if (!eraIds.has(n.era)) throw new Error(`node ${n.id} era ไม่มีจริง: ${n.era}`);
 
 // ---------- ตำแหน่ง ----------
-const BOARD_W = 7100, BOARD_H = 2150, CARD_W = 190, CARD_H = 140;
+const BOARD_W = 8400, BOARD_H = 2150, CARD_W = 190, CARD_H = 140;
 const ANCIENT_X = 140, ANCIENT_W = 500; // กระเป๋าโบราณ (ไม่ตามสเกลเวลา)
-const ZONE_X = 6000; // โซน Great Reset ขวาสุด
+const ZONE_X = 6000; // โซน Great Reset
+const ZONE2_X = 7150; // โซน 🔮 ยุคหลัง 2030 (ม่วง) ขวาสุด
 
 // สเกลเวลา 1450→2026: ช่วงก่อน 1900 กระจายตามความหนาแน่นเหตุการณ์, ช่วงหลัง 1900 ยัดแน่นตามเดิม (+2,340)
 const ANCHORS = [
@@ -44,7 +46,7 @@ const ANCHORS = [
   [1945, 3710], [1948, 3780], [1957, 3960], [1965, 4100], [1971, 4260], [1973, 4340],
   [1974, 4380], [1979, 4480], [1985, 4620], [1987, 4692], [1990, 4740], [1991, 4780],
   [1997, 4920], [2000, 5020], [2001, 5060], [2008, 5240], [2010, 5420], [2013, 5420],
-  [2020, 5640], [2022, 5710], [2023, 5790], [2024, 5860], [2026, 5900],
+  [2020, 5640], [2022, 5710], [2023, 5790], [2024, 5860], [2026, 5900], [2030, 7200], [2035, 7480], [2045, 8080],
 ];
 function yearX(year) {
   if (year <= ANCHORS[0][0]) return ANCHORS[0][1];
@@ -80,6 +82,9 @@ const OVERRIDE = {
   napoleon: [1900, 600], waterloo1815: [2130, 820],
   goldfix1919: [2960, 330],
   mingsilver: [1120, 1330],
+  // ยุค AI/หลัง 2030
+  aibubble: [5700, 170], gold100k: [5900, 1230], zombieset: [5750, 1090],
+  at2030: [7250, 200], agi2030: [7540, 200], newhegemon: [7830, 200],
   // หลัง 1900
   depression: [3070, 660],
   bis: [3080, 1880], smoot: [3235, 1780], newdeal: [3375, 1950],
@@ -117,7 +122,7 @@ for (let i = 0; i < placed.length; i++)
 if (warns.length) console.log("⚠️ ทับกัน:\n" + warns.join("\n"));
 
 const out = {
-  meta: { boardW: BOARD_W, boardH: BOARD_H, cardW: CARD_W, cardH: CARD_H, zoneX: ZONE_X, ancientX: ANCIENT_X, ancientW: ANCIENT_W, builtAt: new Date().toISOString() },
+  meta: { boardW: BOARD_W, boardH: BOARD_H, cardW: CARD_W, cardH: CARD_H, zoneX: ZONE_X, zone2X: ZONE2_X, ancientX: ANCIENT_X, ancientW: ANCIENT_W, builtAt: new Date().toISOString() },
   eras: eras.map((e) => ({ ...e, x: e.id === "ancient" ? ANCIENT_X : Math.round(yearX(e.from)) })),
   nodes: placed,
   edges: rawEdges,

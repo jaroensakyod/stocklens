@@ -15,7 +15,7 @@ interface AtlasNode {
 }
 interface AtlasEdge { from: string; to: string; label: string }
 interface AtlasEra { id: string; from: number; to: number | string; name: string; desc: string; x: number }
-interface Atlas { meta: { boardW: number; boardH: number; cardW: number; cardH: number; zoneX: number; ancientX: number; ancientW: number }; eras: AtlasEra[]; nodes: AtlasNode[]; edges: AtlasEdge[] }
+interface Atlas { meta: { boardW: number; boardH: number; cardW: number; cardH: number; zoneX: number; zone2X: number; ancientX: number; ancientW: number }; eras: AtlasEra[]; nodes: AtlasNode[]; edges: AtlasEdge[] }
 const ATLAS = atlasData as unknown as Atlas;
 
 // แถบการส่งไม้ต่อมหาอำนาจ (x ตามพิกัดกระดาน — คลิกเพื่อเลื่อนไปยุคนั้น)
@@ -24,7 +24,8 @@ const HEGEMONS: { label: string; x: number; to: number; color: string; note: str
   { label: "🇳🇱 ดัตช์", x: 1180, to: 1520, color: "#fb923c", note: "ศูนย์กลางการเงินโลกคนแรก (VOC+Bank of Amsterdam)" },
   { label: "🇬🇧 อังกฤษ", x: 1520, to: 2760, color: "#a855f7", note: "Pax Britannica: ปอนด์+ทอง+กองเรือ 200 ปี" },
   { label: "🇺🇸 อเมริกา", x: 2760, to: 5710, color: "#3b82f6", note: "Bretton Woods→เปโตรดอลลาร์→QE: ดอลลาร์ 100 ปี" },
-  { label: "🌐 หลายขั้ว ?", x: 5710, to: 7100, color: "#22c55e", note: "ทดสอบครั้งใหญ่ที่สุดของระบบดอลลาร์" },
+  { label: "🌐 หลายขั้ว", x: 5710, to: 7150, color: "#22c55e", note: "ทดสอบครั้งใหญ่ที่สุดของระบบดอลลาร์ (2022-2030)" },
+  { label: "🔮 AI ยุคใหม่ ?", x: 7150, to: 8400, color: "#a855f7", note: "หลัง Reset ~2030: AGI/ควอนตัม/มหาอำนาจใหม่ (มุมมอง AT)" },
 ];
 
 const TYPES: Record<string, { label: string; color: string; emoji: string }> = {
@@ -197,8 +198,15 @@ export default function AtlasPage() {
                   </div>
                 </div>
 
+                {/* โซน 🔮 ยุคหลัง 2030 (ขวาสุด) */}
+                <div className="absolute top-0 bottom-0" style={{ left: ATLAS.meta.zone2X, right: 0, background: "linear-gradient(90deg, rgba(168,85,247,.06), rgba(168,85,247,.14))", borderLeft: "2px dashed rgba(168,85,247,.4)" }}>
+                  <div className="absolute top-3 left-1/2 -translate-x-1/2 whitespace-nowrap text-[13px] font-bold tracking-wide text-purple-200/60" style={{ textShadow: "0 1px 2px #000" }}>
+                    🔮 ยุคหลัง 2030 · AI/AGI (มุมมอง AT)
+                  </div>
+                </div>
+
                 {/* โซน Reset ขวาสุด */}
-                <div className="absolute top-0 bottom-0" style={{ left: ATLAS.meta.zoneX, right: 0, background: "linear-gradient(90deg, rgba(34,197,94,.05), rgba(34,197,94,.12))", borderLeft: "2px dashed rgba(34,197,94,.35)" }}>
+                <div className="absolute top-0 bottom-0" style={{ left: ATLAS.meta.zoneX, width: ATLAS.meta.zone2X - ATLAS.meta.zoneX, background: "linear-gradient(90deg, rgba(34,197,94,.05), rgba(34,197,94,.12))", borderLeft: "2px dashed rgba(34,197,94,.35)" }}>
                   <div className="absolute top-3 left-1/2 -translate-x-1/2 whitespace-nowrap text-[13px] font-bold tracking-widest text-green-300/60" style={{ textShadow: "0 1px 2px #000" }}>
                     🧭 THE GREAT RESET & โลกหลายขั้ว
                   </div>

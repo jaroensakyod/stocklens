@@ -773,5 +773,80 @@
     "from": "dotcom",
     "to": "gme2021",
     "label": "หมีอ่านพื้นฐานถูก แต่ผิด positioning"
+  },
+  {
+    "from": "ai4ir",
+    "to": "aibubble",
+    "label": "คลื่น AI → ความเสี่ยงฟอง"
+  },
+  {
+    "from": "dotcom",
+    "to": "aibubble",
+    "label": "แบบแผนฟองเทครอบก่อนหน้า"
+  },
+  {
+    "from": "japanbubble",
+    "to": "aibubble",
+    "label": "ฟอง+หนี้ = เจ็บนานกว่าที่คิด"
+  },
+  {
+    "from": "aibubble",
+    "to": "agi2030",
+    "label": "หลังฟองแตก เทคโนโลยียังเดินต่อ"
+  },
+  {
+    "from": "greatreset",
+    "to": "at2030",
+    "label": "Reset จบราว 2030 → ยุคใหม่ (กรอบ AT)"
+  },
+  {
+    "from": "ukraine",
+    "to": "at2030",
+    "label": "สงครามใหญ่กินเวลาถึง ~2030"
+  },
+  {
+    "from": "debtclock",
+    "to": "gold100k",
+    "label": "พันธบัตรเสื่อม → ทองแพง"
+  },
+  {
+    "from": "goldrush22",
+    "to": "gold100k",
+    "label": "Gold 3.0 → สถานการณ์ 100,000 บาท"
+  },
+  {
+    "from": "debtclock",
+    "to": "zombieset",
+    "label": "ดอกเบี้ยขาขึ้น→คัดกรองบริษัทอ่อน"
+  },
+  {
+    "from": "aibubble",
+    "to": "zombieset",
+    "label": "ฟองแตก+วิกฤต = SET แยกแยะหนัก"
+  },
+  {
+    "from": "ai4ir",
+    "to": "agi2030",
+    "label": "AI → AGI/ควอนตัม/Smart City"
+  },
+  {
+    "from": "cbdc",
+    "to": "agi2030",
+    "label": "เทคโนคราซี: เงิน+AI คุมระบบ"
+  },
+  {
+    "from": "multipolar",
+    "to": "newhegemon",
+    "label": "โลกหลายขั้ว → ผู้นำรอบใหม่หลัง 2030"
+  },
+  {
+    "from": "at2030",
+    "to": "newhegemon",
+    "label": "AT: ตะวันออกขึ้นใน 7-10 ปีจากนี้"
+  },
+  {
+    "from": "china",
+    "to": "newhegemon",
+    "label": "จีน: ผู้ท้าชิงตัวจริง"
   }
 ]
