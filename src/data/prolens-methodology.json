@@ -1,6 +1,6 @@
 {
   "_note": "กรอบวิเคราะห์ T — สกัดจาก 27 คลิป YouTube (1,019,059 ตัวอักษร) + SYSTEM ARCHITECTURE 8 เล่ม + Rothschild",
-  "_updatedAt": "2026-09-27T11:45:40.241Z",
+  "_updatedAt": "2026-09-27T12:16:37.695Z",
   "signals": [
     {
       "id": "ww3",
@@ -2175,5 +2175,327 @@
       },
       "note": "Jev full suite: 380 chunks × 4 คำถาม (conviction/เฟส/คำแนะนำ/หุ้น actionable) + วิเคราะห์ข้ามคลิป — รวม Jev ทั้งสิ้น ~860 calls สำหรับคลังนี้"
     }
+  },
+  "jevMiningJiang": {
+    "ranAt": "2026-09-27T12:16:20.045Z",
+    "chunks": 1495,
+    "summary": {
+      "totalQuotes": 1034,
+      "predChunks": 6,
+      "assetsCount": {
+        "china": 89,
+        "tech": 38,
+        "supplychain": 9,
+        "bonds": 5,
+        "us": 129,
+        "energy": 21,
+        "gold": 3,
+        "taiwan": 3
+      },
+      "directionCount": {
+        "bear": 467,
+        "bull": 231,
+        "conditional": 94
+      },
+      "timeframeCount": {
+        "months": 26,
+        "years": 232,
+        "year": 15,
+        "days": 12
+      },
+      "convictionAvg": 1.52
+    },
+    "worldview": {
+      "dominant": "usDecline",
+      "evidence": 1.86,
+      "investable": "cashWait"
+    },
+    "highConviction": [
+      {
+        "asset": "us",
+        "direction": "bear",
+        "clipCount": 13,
+        "quoteCount": 194,
+        "avgConviction": 2.76,
+        "sample": [
+          "um have healthcare and uh just getting by will be enough. So one thing that I don&#39;t think Canadians really appreciate is uh the idea of ",
+          "Canadians really appreciate is uh the idea of scarcity. Um, and there are a lot of immigrants coming into this country and they&#39;re tough"
+        ]
+      },
+      {
+        "asset": "tech",
+        "direction": "bear",
+        "clipCount": 9,
+        "quoteCount": 56,
+        "avgConviction": 2.72,
+        "sample": [
+          "the reason why is it&#39;s would be too embarrassing for China to admit that Huawei was lying to everyone all along. Okay. Uh but as as you ",
+          "China to admit that Huawei was lying to everyone all along. Okay. Uh but as as you can see uh because because of this topic because of of th"
+        ]
+      },
+      {
+        "asset": "china",
+        "direction": "bear",
+        "clipCount": 7,
+        "quoteCount": 92,
+        "avgConviction": 2.75,
+        "sample": [
+          "not happened yet. And this is very strange because usually you know when you are u a Chinese president you come to China and you come to Uni",
+          "are by offering a major gift and the only thing that you know presidency has offered so far is like two pandas right uh that&#39;s kind of s"
+        ]
+      },
+      {
+        "asset": "us",
+        "direction": "conditional",
+        "clipCount": 5,
+        "quoteCount": 20,
+        "avgConviction": 2.63,
+        "sample": [
+          "elite who are like we&#39;re back we&#39;re actually better off being with the Americans. Okay. So, you think that what&#39;s happening is a",
+          "So, you think that what&#39;s happening is a trade war between Canada and the United States, between Mark Carney and Donald Trump. No. Okay."
+        ]
+      },
+      {
+        "asset": "energy",
+        "direction": "bear",
+        "clipCount": 5,
+        "quoteCount": 22,
+        "avgConviction": 2.78,
+        "sample": [
+          "daughter be in a place that&#39;s safeish, as safe as safe gets. I think you should move to Japan. I I and I I&#39;ll tell you why. Okay, Ja",
+          "why. Okay, Japan has a huge problem. It&#39;s an aging crisis. So, a lot of their population is elderly and like if you know I&#39;m not sur"
+        ]
+      },
+      {
+        "asset": "bonds",
+        "direction": "bear",
+        "clipCount": 3,
+        "quoteCount": 16,
+        "avgConviction": 2.78,
+        "sample": [
+          "so why does China have so much US debt it&#39;s because of the trade imbalance where Chinese makes make a lot of goods and then um sell it t",
+          "because of the trade imbalance where Chinese makes make a lot of goods and then um sell it to United States and China doesn&#39;t really buy"
+        ]
+      }
+    ],
+    "predictions": [
+      {
+        "quote": "of offshore financial center and there&#39;s a lot of money that&#39;s trying to leave China and come into Canada. Okay, that&#39;s point one. Point two and this and this actually more important is um China is about to go to war with Japan and this will",
+        "clip": "hcuT_mpeTxo",
+        "assets": "china",
+        "direction": "bear",
+        "timeframe": "days",
+        "conviction": 2.8,
+        "predScore": 2.6
+      },
+      {
+        "quote": "to leave China and come into Canada. Okay, that&#39;s point one. Point two and this and this actually more important is um China is about to go to war with Japan and this will change everything. Okay, because what Jamaican can do is build an alliance to embargo China which will force China to retreat to basically repatriate a lot of capital",
+        "clip": "hcuT_mpeTxo",
+        "assets": "china",
+        "direction": "bear",
+        "timeframe": "days",
+        "conviction": 2.8,
+        "predScore": 2.6
+      },
+      {
+        "quote": "Japan and this will change everything. Okay, because what Jamaican can do is build an alliance to embargo China which will force China to retreat to basically repatriate a lot of capital and a lot of resources from overseas. So on September 15th um you know 10 days from now what&#39;s going to happen is China will restrict or close its border",
+        "clip": "hcuT_mpeTxo",
+        "assets": "china",
+        "direction": "bear",
+        "timeframe": "days",
+        "conviction": 2.8,
+        "predScore": 2.6
+      },
+      {
+        "quote": "repatriate a lot of capital and a lot of resources from overseas. So on September 15th um you know 10 days from now what&#39;s going to happen is China will restrict or close its border basically. Okay. So China would basically turtle out. So a lot of actions you&#39;re seeing from China of of an outward expansion it will not be",
+        "clip": "hcuT_mpeTxo",
+        "assets": "china",
+        "direction": "bear",
+        "timeframe": "days",
+        "conviction": 2.8,
+        "predScore": 2.6
+      },
+      {
+        "quote": "have also said that that Iran and the US will likely sign an MOU agreement in mid-August and also the fact of the matter is that China has cut down all imports in a sense absorbing most of the oil shocks that would have caused a financial crisis. And in part of your argument on AI I I think and they wouldn&#39;t really need to engineer a",
+        "clip": "Z1G6WI1Q0M8",
+        "assets": "china",
+        "direction": "conditional",
+        "timeframe": "months",
+        "conviction": 0.05,
+        "predScore": 2.37
+      },
+      {
+        "quote": "imports in a sense absorbing most of the oil shocks that would have caused a financial crisis. And in part of your argument on AI I I think and they wouldn&#39;t really need to engineer a financial collapse as in recent news has has basically offered stakes to the US government, stakes in the company first um to the US government. So actually",
+        "clip": "Z1G6WI1Q0M8",
+        "assets": "china",
+        "direction": "conditional",
+        "timeframe": "months",
+        "conviction": 0.05,
+        "predScore": 2.37
+      },
+      {
+        "quote": "collapse as in recent news has has basically offered stakes to the US government, stakes in the company first um to the US government. So actually nationalization is happening at a scale where where they wouldn&#39;t actually need to engineer a financial collapse. And when the next Trump-Xi meeting in 24th September, you have also said",
+        "clip": "Z1G6WI1Q0M8",
+        "assets": "china",
+        "direction": "conditional",
+        "timeframe": "months",
+        "conviction": 0.05,
+        "predScore": 2.37
+      },
+      {
+        "quote": "is happening at a scale where where they wouldn&#39;t actually need to engineer a financial collapse. And when the next Trump-Xi meeting in 24th September, you have also said that that China will be giving US $1 trillion for for investment as well as trusting Iran to to have a deal with the US and also that there will be more more good",
+        "clip": "Z1G6WI1Q0M8",
+        "assets": "china",
+        "direction": "conditional",
+        "timeframe": "months",
+        "conviction": 0.05,
+        "predScore": 2.37
+      },
+      {
+        "quote": "is Morocco will lay will lay claim on the Strait of Gibraltar because they have the most uh legitimate claim to that area, but it&#39;s American military that will be responsible for controlling the Strait of Gibraltar, okay? So, basically this is a",
+        "clip": "Z1G6WI1Q0M8",
+        "assets": "us",
+        "direction": "bear",
+        "timeframe": "years",
+        "conviction": 2.26,
+        "predScore": 2.16
+      },
+      {
+        "quote": "have the most uh legitimate claim to that area, but it&#39;s American military that will be responsible for controlling the Strait of Gibraltar, okay? So, basically this is a silent takeover of the Moroccan military by the American Um and uh now Morocco will just be become a proxy of the empire. If our analysis is correct, then another",
+        "clip": "Z1G6WI1Q0M8",
+        "assets": "us",
+        "direction": "bear",
+        "timeframe": "years",
+        "conviction": 2.26,
+        "predScore": 2.16
+      },
+      {
+        "quote": "by the American Um and uh now Morocco will just be become a proxy of the empire. If our analysis is correct, then another There&#39;s two There&#39;s There should be other two other major flash points, all both of which are major maritime choke points, okay? Obviously, the most major maritime choke point is Strait Strait of okay? And again, April",
+        "clip": "Z1G6WI1Q0M8",
+        "assets": "us",
+        "direction": "bear",
+        "timeframe": "years",
+        "conviction": 2.26,
+        "predScore": 2.16
+      },
+      {
+        "quote": "flash points, all both of which are major maritime choke points, okay? Obviously, the most major maritime choke point is Strait Strait of okay? And again, April 13th, 2026, and the United States sign an um okay? And what will What can is that this alliance is going to expand over time. What&#39;s really interesting is and the signing of this",
+        "clip": "Z1G6WI1Q0M8",
+        "assets": "us",
+        "direction": "bear",
+        "timeframe": "years",
+        "conviction": 2.26,
+        "predScore": 2.16
+      },
+      {
+        "quote": "And I&#39;m going to I I&#39;m sorry. Yes. Okay. I am not manipulating the future. I&#39;m just foretelling the future. Okay. So, I think Trump gets his third term and I will explain why he&#39;ll get his third term and what",
+        "clip": "5gyyAzfmWk4",
+        "assets": "us",
+        "direction": "bear",
+        "timeframe": "years",
+        "conviction": 2.94,
+        "predScore": 2.12
+      },
+      {
+        "quote": "am not manipulating the future. I&#39;m just foretelling the future. Okay. So, I think Trump gets his third term and I will explain why he&#39;ll get his third term and what it means for the uh United States. Okay? That&#39;s my first prediction. second and then uh midterm I think what&#39;s going to happen is a civil war uh which will lead to",
+        "clip": "5gyyAzfmWk4",
+        "assets": "us",
+        "direction": "bear",
+        "timeframe": "years",
+        "conviction": 2.94,
+        "predScore": 2.12
+      },
+      {
+        "quote": "term and what it means for the uh United States. Okay? That&#39;s my first prediction. second and then uh midterm I think what&#39;s going to happen is a civil war uh which will lead to the balconization of the United States and in the long term what I think is going to happen okay and we&#39;re talking like maybe 20 years from now uh the United",
+        "clip": "5gyyAzfmWk4",
+        "assets": "us",
+        "direction": "bear",
+        "timeframe": "years",
+        "conviction": 2.94,
+        "predScore": 2.12
+      },
+      {
+        "quote": "uh which will lead to the balconization of the United States and in the long term what I think is going to happen okay and we&#39;re talking like maybe 20 years from now uh the United States will become a Christian AI theocracy okay so Christian plus AI and uh why I&#39;m doing in Austin is I think that Austin will be the new center of gravity",
+        "clip": "5gyyAzfmWk4",
+        "assets": "us",
+        "direction": "bear",
+        "timeframe": "years",
+        "conviction": 2.94,
+        "predScore": 2.12
+      },
+      {
+        "quote": "they tend to be very As well as complacent and unequal. Okay? You can tell because of the birth rate, right? Where in North Korea, the fertility rate is still 1.81. It&#39;s not but look at South Korea, 0.81. Okay? So, in 50 years&#39; time, South Korea lose 80% of its people. North Korea will",
+        "clip": "x83HcLWvHI8",
+        "assets": "energy",
+        "direction": "bear",
+        "timeframe": "years",
+        "conviction": 2.64,
+        "predScore": 2.09
+      },
+      {
+        "quote": "Where in North Korea, the fertility rate is still 1.81. It&#39;s not but look at South Korea, 0.81. Okay? So, in 50 years&#39; time, South Korea lose 80% of its people. North Korea will also lose people, but just if there&#39;s no war, if we just keep on going, eventually South Korea will go to zero, and North Korea will still be around,",
+        "clip": "x83HcLWvHI8",
+        "assets": "energy",
+        "direction": "bear",
+        "timeframe": "years",
+        "conviction": 2.64,
+        "predScore": 2.09
+      },
+      {
+        "quote": "eventually South Korea will go to zero, and North Korea will still be around, okay? But the other difference is that when you&#39;re poor, you&#39;re not afraid to die, You have nothing to lose. Whereas, if you&#39;re rich, well, you&#39;re you want to live, okay? So, all North Korea has to do is basically &quot;You know what? We have",
+        "clip": "x83HcLWvHI8",
+        "assets": "energy",
+        "direction": "bear",
+        "timeframe": "years",
+        "conviction": 2.64,
+        "predScore": 2.09
+      },
+      {
+        "quote": "okay? You can see how close Seoul is to the border. So, all North Korea has to do is tell the Koreans, &quot;You either pay us a lot of money or we&#39;ll go attack you.&quot; Right? It&#39;s that simple. And the And the South Koreans will be like, &quot;We&#39;ll give you money. Just please don&#39;t attack us.&quot; And what what this is",
+        "clip": "x83HcLWvHI8",
+        "assets": "energy",
+        "direction": "bear",
+        "timeframe": "years",
+        "conviction": 2.64,
+        "predScore": 2.09
+      },
+      {
+        "quote": "just create so much insurgencies that it&#39;s not really worth the cost. So you&#39;re absolutely right in that most analysts, most um um deep state actors would be like, &quot;Let&#39;s not do this.&quot; Okay. The",
+        "clip": "5gyyAzfmWk4",
+        "assets": "us",
+        "direction": "bear",
+        "timeframe": "years",
+        "conviction": 2.81,
+        "predScore": 2.06
+      },
+      {
+        "quote": "worth the cost. So you&#39;re absolutely right in that most analysts, most um um deep state actors would be like, &quot;Let&#39;s not do this.&quot; Okay. The problem is that the people around Trump stand to benefit a great deal from from this. So yeah, okay. the copper bagers going to Venezuela and they create create an issue and it&#39;s a",
+        "clip": "5gyyAzfmWk4",
+        "assets": "us",
+        "direction": "bear",
+        "timeframe": "years",
+        "conviction": 2.81,
+        "predScore": 2.06
+      },
+      {
+        "quote": "benefit a great deal from from this. So yeah, okay. the copper bagers going to Venezuela and they create create an issue and it&#39;s a complete dumpster fire that the United States has to deal with for the next hundred years. They don&#39;t care because like they can take the money and it&#39;s run off to Dubai or Hong Kong or Singapore. Okay,",
+        "clip": "5gyyAzfmWk4",
+        "assets": "us",
+        "direction": "bear",
+        "timeframe": "years",
+        "conviction": 2.81,
+        "predScore": 2.06
+      },
+      {
+        "quote": "the United States has to deal with for the next hundred years. They don&#39;t care because like they can take the money and it&#39;s run off to Dubai or Hong Kong or Singapore. Okay, try your capital guys. Okay, that&#39;s how things work. You use the nation state. You you are parasite on the nation state. All the costs are shorted by the nation",
+        "clip": "5gyyAzfmWk4",
+        "assets": "us",
+        "direction": "bear",
+        "timeframe": "years",
+        "conviction": 2.81,
+        "predScore": 2.06
+      }
+    ],
+    "note": "ขุดด้วย Jev จาก 30 คลิป 1,495 chunks (4.1M chars) — ทุกคลิปผ่าน Jev 5 คำถาม (พยากรณ์/สินทรัพย์/ทิศทาง/conviction/timeframe) + สังเคราะห์ worldview"
   }
 }
