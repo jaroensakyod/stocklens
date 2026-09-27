@@ -15,8 +15,17 @@ interface AtlasNode {
 }
 interface AtlasEdge { from: string; to: string; label: string }
 interface AtlasEra { id: string; from: number; to: number | string; name: string; desc: string; x: number }
-interface Atlas { meta: { boardW: number; boardH: number; cardW: number; cardH: number; zoneX: number }; eras: AtlasEra[]; nodes: AtlasNode[]; edges: AtlasEdge[] }
+interface Atlas { meta: { boardW: number; boardH: number; cardW: number; cardH: number; zoneX: number; ancientX: number; ancientW: number }; eras: AtlasEra[]; nodes: AtlasNode[]; edges: AtlasEdge[] }
 const ATLAS = atlasData as unknown as Atlas;
+
+// แถบการส่งไม้ต่อมหาอำนาจ (x ตามพิกัดกระดาน — คลิกเพื่อเลื่อนไปยุคนั้น)
+const HEGEMONS: { label: string; x: number; to: number; color: string; note: string }[] = [
+  { label: "🇵🇹 โปรตุเกส", x: 700, to: 1180, color: "#f59e0b", note: "โปรตุเกสเปิดเส้นทางทะเล → สเปนคุมเงิน Potosí (จักรวรรดิไอบีเรีย)" },
+  { label: "🇳🇱 ดัตช์", x: 1180, to: 1520, color: "#fb923c", note: "ศูนย์กลางการเงินโลกคนแรก (VOC+Bank of Amsterdam)" },
+  { label: "🇬🇧 อังกฤษ", x: 1520, to: 2760, color: "#a855f7", note: "Pax Britannica: ปอนด์+ทอง+กองเรือ 200 ปี" },
+  { label: "🇺🇸 อเมริกา", x: 2760, to: 5710, color: "#3b82f6", note: "Bretton Woods→เปโตรดอลลาร์→QE: ดอลลาร์ 100 ปี" },
+  { label: "🌐 หลายขั้ว ?", x: 5710, to: 7100, color: "#22c55e", note: "ทดสอบครั้งใหญ่ที่สุดของระบบดอลลาร์" },
+];
 
 const TYPES: Record<string, { label: string; color: string; emoji: string }> = {
   system: { label: "ระบบเงินตรา", color: "#eab308", emoji: "⚖️" },
@@ -72,14 +81,25 @@ export default function AtlasPage() {
     setSelected(id);
   };
 
+  // เลื่อนกระดานไปยังพิกัด x (ใช้กับ chip ยุค + แถบมหาอำนาจ)
+  const jumpToX = (x: number) => {
+    const el = boardRef.current;
+    if (!el) return;
+    el.scrollTo({ left: Math.max(0, (x - 100) * zoom), behavior: "smooth" });
+  };
+  const jumpToEra = (id: string) => {
+    const e = ATLAS.eras.find((x) => x.id === id);
+    if (e) jumpToX(e.x);
+  };
+
   return (
     <div className="space-y-4">
       {/* หัวหน้า */}
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-50">🕵️ Atlas — ห้องพยานหลักฐาน 100 ปี</h1>
+          <h1 className="text-2xl font-bold text-zinc-50">🕵️ Atlas — ห้องพยานหลักฐานโลก 1450-2026</h1>
           <p className="text-sm text-zinc-400 mt-1">
-            สงครามโลก · การเปลี่ยนอำนาจ · การไหลของเงิน · ระบบเงินตรา · The Great Reset — {ATLAS.nodes.length} การ์ด เชื่อมด้วยเชือกแดง {ATLAS.edges.length} เส้น คลิกการ์ดเพื่ออ่านเต็ม
+            การส่งไม้ต่อมหาอำนาจ 570 ปี: โปรตุเกส→สเปน→ดัตช์→อังกฤษ→อเมริกา→? · สงครามโลก · การไหลของเงิน · ระบบเงินตรา · The Great Reset — {ATLAS.nodes.length} การ์ด เชื่อมเชือกแดง {ATLAS.edges.length} เส้น คลิกอ่านได้ทุกใบ
           </p>
         </div>
         <div className="flex items-center gap-1.5">
@@ -102,9 +122,9 @@ export default function AtlasPage() {
           )}
         </div>
         <div className="flex flex-wrap gap-1.5">
-          <button className={`chip border !text-[11px] ${!era ? "bg-accent/20 text-accent-soft border-accent/40" : "bg-base-800 text-zinc-400 border-base-700"}`} onClick={() => setEra(null)}>ทุกยุค</button>
+          <button className={`chip border !text-[11px] ${!era ? "bg-accent/20 text-accent-soft border-accent/40" : "bg-base-800 text-zinc-400 border-base-700"}`} onClick={() => { setEra(null); if (view === "board") jumpToX(0); }}>ทุกยุค</button>
           {ATLAS.eras.map((e) => (
-            <button key={e.id} title={e.name} className={`chip border !text-[11px] num ${era === e.id ? "bg-accent/20 text-accent-soft border-accent/40" : "bg-base-800 text-zinc-400 border-base-700 hover:border-base-500"}`} onClick={() => setEra(era === e.id ? null : e.id)}>
+            <button key={e.id} title={e.name} className={`chip border !text-[11px] num ${era === e.id ? "bg-accent/20 text-accent-soft border-accent/40" : "bg-base-800 text-zinc-400 border-base-700 hover:border-base-500"}`} onClick={() => { setEra(era === e.id ? null : e.id); if (view === "board") jumpToEra(e.id); }}>
               {e.from}–{e.to}
             </button>
           ))}
@@ -125,6 +145,23 @@ export default function AtlasPage() {
       {/* ===== กระดานคอร์ก ===== */}
       {view === "board" && (
         <div className="card overflow-hidden">
+          {/* แถบการส่งไม้ต่อมหาอำนาจ — สัดส่วนตามพิกัดจริงของกระดาน คลิกเพื่อกระโดดไปยุค */}
+          <div className="px-3 pt-3 pb-2">
+            <div className="text-[11px] text-zinc-500 mb-1.5">👑 การส่งไม้ต่อมหาอำนาจ-การเงินของโลก (คลิกเพื่อเลื่อนกระดานไปยุคนั้น)</div>
+            <div className="flex gap-0.5">
+              {HEGEMONS.map((h) => (
+                <button
+                  key={h.label}
+                  title={h.note}
+                  className="group relative h-7 rounded-md overflow-hidden text-[10px] font-bold text-black/80 hover:brightness-110 transition-[filter]"
+                  style={{ width: `${((h.to - h.x) / ATLAS.meta.boardW) * 100}%`, flex: "0 0 auto", backgroundColor: h.color + "cc" }}
+                  onClick={() => jumpToX(h.x)}
+                >
+                  <span className="absolute inset-0 flex items-center justify-center truncate px-1 group-hover:whitespace-normal">{h.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
           <div
             ref={boardRef}
             className="overflow-auto cursor-grab active:cursor-grabbing"
@@ -153,6 +190,13 @@ export default function AtlasPage() {
                 {/* พื้นไม้คอร์ก */}
                 <div className="absolute inset-0" style={{ backgroundColor: "#33281e", backgroundImage: "radial-gradient(ellipse 900px 500px at 15% 20%, rgba(120,90,55,.28), transparent), radial-gradient(ellipse 1100px 600px at 70% 75%, rgba(90,65,40,.35), transparent), radial-gradient(rgba(160,120,75,.10) 1.2px, transparent 1.4px), radial-gradient(rgba(20,12,6,.25) 1.6px, transparent 1.8px)", backgroundSize: "auto, auto, 26px 26px, 38px 38px" }} />
 
+                {/* กระเป๋าโบราณศาสตร์เงิน (ซ้ายสุด ไม่ตามสเกลเวลา) */}
+                <div className="absolute top-0 bottom-0" style={{ left: ATLAS.meta.ancientX, width: ATLAS.meta.ancientW, background: "linear-gradient(90deg, rgba(234,179,8,.10), rgba(234,179,8,.04))", borderRight: "2px dashed rgba(234,179,8,.4)" }}>
+                  <div className="absolute top-3 left-1/2 -translate-x-1/2 whitespace-nowrap text-[13px] font-bold tracking-wide text-amber-200/60" style={{ textShadow: "0 1px 2px #000" }}>
+                    🏛️ โบราณศาสตร์เงิน
+                  </div>
+                </div>
+
                 {/* โซน Reset ขวาสุด */}
                 <div className="absolute top-0 bottom-0" style={{ left: ATLAS.meta.zoneX, right: 0, background: "linear-gradient(90deg, rgba(34,197,94,.05), rgba(34,197,94,.12))", borderLeft: "2px dashed rgba(34,197,94,.35)" }}>
                   <div className="absolute top-3 left-1/2 -translate-x-1/2 whitespace-nowrap text-[13px] font-bold tracking-widest text-green-300/60" style={{ textShadow: "0 1px 2px #000" }}>
@@ -164,14 +208,16 @@ export default function AtlasPage() {
                 {ATLAS.eras.slice(1).map((e, i) => {
                   const nextX = i + 2 < ATLAS.eras.length ? ATLAS.eras[i + 2].x : ATLAS.meta.zoneX;
                   const maxW = Math.max(60, nextX - e.x - 18);
+                  const full = `${e.from} · ${e.name}`;
+                  const label = maxW < 46 + e.name.length * 7.5 ? String(e.from) : full;
                   return (
                     <div key={e.id} className="absolute top-0 bottom-0" style={{ left: e.x - 14, borderLeft: "1px dashed rgba(245,235,214,.18)" }}>
                       <div
                         className="absolute top-1.5 left-1 whitespace-nowrap overflow-hidden text-ellipsis text-[11px] font-semibold text-amber-100/70 px-1.5 py-0.5 rounded"
                         style={{ maxWidth: maxW, background: "rgba(24,16,9,.72)", textShadow: "0 1px 2px #000" }}
-                        title={`${e.from}–${e.to} ${e.name}`}
+                        title={full}
                       >
-                        {e.from} · {e.name}
+                        {label}
                       </div>
                     </div>
                   );
@@ -191,7 +237,7 @@ export default function AtlasPage() {
                     const d = `M ${x1} ${y1} Q ${(x1 + x2) / 2} ${(y1 + y2) / 2 + sag} ${x2} ${y2}`;
                     return (
                       <g key={i}>
-                        <path d={d} fill="none" stroke={hot ? "#f87171" : "#a8341f"} strokeWidth={hot ? 3.4 : 2.1} opacity={dim ? 0.05 : hot ? 0.95 : 0.42} />
+                        <path d={d} fill="none" stroke={hot ? "#f87171" : "#a8341f"} strokeWidth={hot ? 3.4 : 2.1} opacity={dim ? 0.05 : hot ? 0.95 : 0.5} />
                         {hot && !dim && (
                           <text x={(x1 + x2) / 2} y={(y1 + y2) / 2 + sag + 4} textAnchor="middle" fontSize="13" fill="#fecaca" style={{ paintOrder: "stroke", stroke: "#1c130c", strokeWidth: 3 }}>
                             {e.label}
@@ -246,9 +292,9 @@ export default function AtlasPage() {
             </div>
           </div>
           <div className="px-3 py-2 border-t border-base-700/60 text-[11px] text-zinc-500 flex flex-wrap gap-x-4 gap-y-1">
-            <span>🖱️ ลากเพื่อเลื่อนกระดาน · คลิกการ์ดเพื่ออ่าน</span>
+            <span>🖱️ ลากเพื่อเลื่อน · คลิกการ์ดเพื่ออ่าน · กระเป๋าซ้ายสุด=โบราณศาสตร์เงิน (ไม่ตามสเกลเวลา)</span>
             <span>เส้นสีแดง = ความเชื่อมโยงเหตุ-ผล (ชี้การ์ดเพื่อเห็นป้ายกำกับ)</span>
-            <span>เรียงซ้าย→ขวา ตามเวลา · แถบบน=ระบบเงิน กลาง=สงคราม/วิกฤต ล่าง=อำนาจ/สถาบัน</span>
+            <span>ซ้าย→ขวา = ค.ศ. 1450→2026 · แถบบน=ระบบเงิน กลาง=สงคราม/วิกฤต ล่าง=อำนาจ/สถาบัน · ขวาสุด=Reset</span>
           </div>
         </div>
       )}
