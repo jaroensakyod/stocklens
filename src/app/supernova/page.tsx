@@ -26,7 +26,7 @@ export default function SupernovaPage() {
 
   const fmt = (r: Row) => {
     if (r.price === null) return "—";
-    if (r.id === "us10y" || r.id === "us02y") return r.price.toFixed(2) + "%";
+    if (r.id === "us10y" || r.id === "us30y" || r.id === "us02y") return r.price.toFixed(2) + "%";
     return r.price.toLocaleString(undefined, { maximumFractionDigits: r.price > 1000 ? 0 : 2 });
   };
 

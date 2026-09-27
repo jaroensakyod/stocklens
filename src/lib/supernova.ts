@@ -21,7 +21,8 @@ export interface SupernovaResult {
 }
 
 const WATCH: Record<string, string> = {
-  us10y: "^TNX", // ผลตอบแทนพันธบัตร 10 ปี (×10)
+  us10y: "^TNX", // ผลตอบแทนพันธบัตร 10 ปี
+  us30y: "^TYX", // ผลตอบแทนพันธบัตร 30 ปี (เกจวัดสงครามหลักของสายมหภาค)
   us02y: "^IRX", // ดอกเบี้ยระยะสั้น (proxy)
   vix: "^VIX",
   dxy: "DX-Y.NYB",
@@ -46,7 +47,7 @@ export async function getSupernova(): Promise<Omit<SupernovaResult, "insider">> 
       if (first && isFinite(last.close)) chg5d = (last.close / first.close - 1) * 100;
     }
     const labels: Record<string, string> = {
-      us10y: "พันธบัตร US 10 ปี", us02y: "ดอกเบี้ยระยะสั้น US", vix: "VIX (ความกลัว)", dxy: "ดัชนีดอลลาร์",
+      us10y: "พันธบัตร US 10 ปี", us30y: "พันธบัตร US 30 ปี ⭐", us02y: "ดอกเบี้ยระยะสั้น US", vix: "VIX (ความกลัว)", dxy: "ดัชนีดอลลาร์",
       gold: "ทองคำ", oil: "น้ำมัน Brent", set: "ดัชนี SET",
     };
     return {
