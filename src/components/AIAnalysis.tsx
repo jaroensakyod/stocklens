@@ -45,7 +45,9 @@ export default function AIAnalysis({ ticker }: { ticker: string }) {
   const [mode, setMode] = useState<"idle" | "loading" | "streaming" | "done" | "error">("idle");
   const [aiMode, setAiMode] = useState("");
   const [persona, setPersona] = useState("");
+  const [jev, setJev] = useState<{ verdictTh: string | null; verdictCls: string; blindSpotTh: string | null; stance: number | null } | null>(null);
   const boxRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef("");
 
   const run = async (p: string = persona) => {
     setPersona(p);
@@ -61,10 +63,14 @@ export default function AIAnalysis({ ticker }: { ticker: string }) {
       for (;;) {
         const { done, value } = await reader.read();
         if (done) break;
-        setText((t) => t + dec.decode(value, { stream: true }));
+        setText((t) => { textRef.current = t + dec.decode(value, { stream: true }); return textRef.current; });
         boxRef.current?.scrollTo({ top: boxRef.current.scrollHeight });
       }
       setMode("done");
+      // 🧠 Jev มุมมองที่สอง (fire-and-forget)
+      setJev(null);
+      fetch("/api/ai/jev-check", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ticker, text: textRef.current }) })
+        .then(r => r.json()).then(j => { if (j && j.text) setJev(j); }).catch(() => {});
     } catch {
       setMode("error");
     }
@@ -107,6 +113,14 @@ export default function AIAnalysis({ ticker }: { ticker: string }) {
             </p>
           )}
           <div ref={boxRef} className="ai-md max-h-[560px] overflow-y-auto text-sm text-zinc-300" dangerouslySetInnerHTML={{ __html: mdToHtml(text) }} />
+          {mode === "done" && !jev && <p className="text-[11px] text-zinc-600 mt-2">🧠 Jev กำลังตรวจบทวิเคราะห์เป็นมุมมองที่สอง…</p>}
+          {jev && (
+            <div className="mt-3 rounded-xl bg-base-900 border border-base-700 px-3 py-2.5">
+              <div className="text-xs font-bold text-zinc-200">🧠 มุมมองที่สองจาก Jev</div>
+              <p className={"text-[12px] mt-1 font-semibold " + jev.verdictCls}>{jev.verdictTh}</p>
+              {jev.blindSpotTh && <p className="text-[11px] text-zinc-500 mt-0.5">จุดที่ควรเช็กเพิ่ม: {jev.blindSpotTh}{jev.stance !== null ? " · โทนบทวิเคราะห์ " + (jev.stance >= 3.5 ? "เอียงบวก" : jev.stance <= 1.5 ? "เอียงลบ" : "ค่อนข้างกลาง") + " (" + jev.stance.toFixed(1) + "/4)" : ""}</p>}
+            </div>
+          )}
         </>
       )}
       {mode === "idle" && (

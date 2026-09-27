@@ -49,6 +49,9 @@ export default function AtlasPage() {
   const [types, setTypes] = useState<string[]>([]);
   const [q, setQ] = useState("");
   const [zoom, setZoom] = useState(0.75);
+  const [askQ, setAskQ] = useState("");
+  const [askRes, setAskRes] = useState<{ cards: { id: string; title: string; emoji: string; date: string; summary: string; prob: number }[]; relevance?: number | null; note?: string } | null>(null);
+  const [asking, setAsking] = useState(false);
   const boardRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<{ x: number; y: number; sl: number; st: number; moved: boolean } | null>(null);
 
@@ -88,6 +91,13 @@ export default function AtlasPage() {
     if (!el) return;
     el.scrollTo({ left: Math.max(0, (x - 100) * zoom), behavior: "smooth" });
   };
+  const askAtlas = async () => {
+    if (askQ.trim().length < 3) return;
+    setAsking(true); setAskRes(null);
+    try { const res = await fetch("/api/atlas/ask", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ q: askQ }) }); setAskRes(await res.json()); } catch {}
+    setAsking(false);
+  };
+
   const jumpToEra = (id: string) => {
     const e = ATLAS.eras.find((x) => x.id === id);
     if (e) jumpToX(e.x);
@@ -113,6 +123,29 @@ export default function AtlasPage() {
       <div className="card p-3 space-y-2.5">
         <div className="flex flex-wrap items-center gap-2">
           <input className="input flex-1 min-w-48 !py-1.5" placeholder="ค้นหาในการ์ด เช่น ทองคำ, Nixon, บาท, devalue..." value={q} onChange={(e) => setQ(e.target.value)} />
+          {/* ถามกระดาน — Jev ชี้การ์ดที่เกี่ยว */}
+          <div className="flex gap-2">
+            <input className="input flex-1 min-w-48 !py-1.5" placeholder="💬 ถามกระดาน เช่น: อิหร่านปิดช่องแคบฮอร์มุซ จะกระทบอะไร / ทำไมทอง decouple / ใครอยู่หลัง Fed" value={askQ} onChange={(e) => setAskQ(e.target.value)} onKeyDown={(e) => e.key === "Enter" && askAtlas()} />
+            <button className="btn-ghost shrink-0 !py-1.5 !px-3 !text-xs" onClick={askAtlas} disabled={asking || askQ.trim().length < 3}>{asking ? "🧠 กำลังคิด…" : "ถาม Jev"}</button>
+          </div>
+          {askRes && (
+            <div className="bg-base-900 border border-accent/25 rounded-xl p-3">
+              {askRes.note && <p className="text-[11px] text-zinc-500 mb-2">{askRes.note}</p>}
+              {askRes.relevance !== null && askRes.relevance !== undefined && <p className="text-[10px] text-zinc-600 mb-2">ความเกี่ยวข้องของกระดานต่อคำถามนี้: <b className="num">{askRes.relevance.toFixed(1)}/3</b></p>}
+              <div className="grid md:grid-cols-3 gap-2">
+                {(askRes.cards ?? []).map((c, i) => (
+                  <button key={c.id} className="text-left bg-base-850 hover:bg-base-800 border border-base-700 rounded-lg px-3 py-2" onClick={() => setSelected(c.id)}>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="chip bg-accent/15 text-accent-soft border border-accent/30 !text-[9px] num">#{i + 1} · {(c.prob * 100).toFixed(0)}%</span>
+                      <span className="text-[10px] text-zinc-500 num">{c.date}</span>
+                    </div>
+                    <div className="text-[12px] font-bold text-zinc-100 mt-1 leading-snug">{c.emoji} {c.title}</div>
+                    <p className="text-[10px] text-zinc-500 mt-1 leading-snug line-clamp-3">{c.summary}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
           {view === "board" && (
             <div className="flex items-center gap-1">
               <button className="btn-ghost !px-2.5 !py-1.5 !text-xs" onClick={() => setZoom((z) => Math.max(0.4, +(z - 0.15).toFixed(2)))}>−</button>

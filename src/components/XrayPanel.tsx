@@ -26,6 +26,7 @@ export default function XrayPanel({ holdings }: { holdings: Holding[] }) {
   const [data, setData] = useState<Xray | null>(null);
   const [state, setState] = useState<"idle" | "loading" | "ok" | "err">("idle");
   const [errMsg, setErrMsg] = useState("");
+  const [jevPosture, setJevPosture] = useState<{ verdictTh: string | null; blindSpotTh: string | null } | null>(null);
 
   const run = async () => {
     if (!holdings.length) {
@@ -41,6 +42,10 @@ export default function XrayPanel({ holdings }: { holdings: Holding[] }) {
         body: JSON.stringify({ holdings }),
       });
       const j = await res.json();
+      // 🧠 Jev ประเมิน posture พอร์ตจากผล X-ray (fire-and-forget)
+      const summary = JSON.stringify({ holdings: j.holdings?.slice(0, 12), risk: j.risk, concentration: j.concentration, warnings: j.warnings, factors: j.factors }).slice(0, 2000);
+      fetch("/api/ai/jev-check", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ticker: "PORTFOLIO X-RAY", text: summary }) })
+        .then(r => r.json()).then(jj => { if (jj && jj.verdictTh) setJevPosture({ verdictTh: jj.verdictTh, blindSpotTh: jj.blindSpotTh }); }).catch(() => {});
       if (!res.ok) throw new Error(j.error || "ผิดพลาด");
       setData(j);
       setState("ok");
@@ -221,6 +226,14 @@ export default function XrayPanel({ holdings }: { holdings: Holding[] }) {
       )}
 
       <button className="btn-secondary text-xs" onClick={run}>↻ รันใหม่จากพอร์ตปัจจุบัน</button>
+
+      {jevPosture && (
+        <div className="mt-4 rounded-xl bg-base-900 border border-base-700 px-3 py-2.5">
+          <div className="text-xs font-bold text-zinc-200">🧠 Jev ประเมินพอร์ตนี้</div>
+          <p className="text-[12px] mt-1 font-semibold text-zinc-200">{jevPosture.verdictTh}</p>
+          {jevPosture.blindSpotTh && <p className="text-[11px] text-zinc-500 mt-0.5">จุดบอดที่ควรเช็กเพิ่ม: {jevPosture.blindSpotTh}</p>}
+        </div>
+      )}
     </div>
   );
 }
