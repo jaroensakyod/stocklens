@@ -41,7 +41,7 @@ export default function WebPage() {
     <div className="space-y-5">
       <div>
         <h1 className="text-2xl font-bold text-zinc-50">🕸️ News Web — แผนผังข่าวเชื่อมโยง</h1>
-        <p className="text-sm text-zinc-400 mt-1">ข่าวนี้ → เกิดอะไรต่อ → กระทบหุ้นไหน — เห็นเป็นภาพเดียว พร้อมแชท AI ตอบตามมุมมอง AT + PJ</p>
+        <p className="text-sm text-zinc-400 mt-1">ข่าวนี้ → เกิดอะไรต่อ → กระทบหุ้นไหน — เห็นเป็นภาพเดียว พร้อมแชท AI ตอบตามมุมมอง T + J</p>
       </div>
 
       {/* 1. SVG Graph */}
@@ -110,7 +110,7 @@ export default function WebPage() {
       {/* 3. Dual-Lens AI Chat */}
       <div className="card p-5">
         <h2 className="text-sm font-bold text-zinc-100 mb-1">🤖 AI แชท — ถามอะไรก็ได้เกี่ยวกับเหตุการณ์/ข่าว</h2>
-        <p className="text-[10px] text-zinc-600 mb-3">ระบบจะตอบผ่านมุมมองของ AT + PJ พร้อม Jev ให้คะแนน + โยงหุ้นที่กระทบ</p>
+        <p className="text-[10px] text-zinc-600 mb-3">ระบบจะตอบผ่านมุมมองของ T + J พร้อม Jev ให้คะแนน + โยงหุ้นที่กระทบ</p>
         <div className="flex gap-2 mb-4">
           <input className="input flex-1" placeholder="เช่น: อิหร่านปิดช่องแคบฮอร์มุซ / ทรัมป์ลดดอกเบี้ย / จีนบุกไต้หวัน / ทองทะลุ 5,000" value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === "Enter" && analyze()} />
           <button className="btn-primary shrink-0" onClick={analyze} disabled={loading || input.trim().length < 5}>{loading ? "กำลังวิเคราะห์…" : "ถาม"}</button>
@@ -129,9 +129,9 @@ export default function WebPage() {
               </div>
             )}
 
-            {/* ทวีสุข Lens */}
+            {/* T Lens */}
             <div className="bg-base-850 rounded-lg p-4 border-l-4 border-accent">
-              <div className="text-xs font-bold text-accent-soft mb-1">🔬 มุมมอง AT</div>
+              <div className="text-xs font-bold text-accent-soft mb-1">🔬 มุมมอง T</div>
               <div className="text-sm font-bold text-zinc-100">{analysis.thaweesakh.signal}</div>
               <p className="text-xs text-zinc-400 mt-1.5 leading-relaxed">{analysis.thaweesakh.view}</p>
               {analysis.thaweesakh.assets.length > 0 && (
@@ -142,9 +142,9 @@ export default function WebPage() {
               )}
             </div>
 
-            {/* Jiang Lens */}
+            {/* J Lens */}
             <div className="bg-base-850 rounded-lg p-4 border-l-4 border-blue-500">
-              <div className="text-xs font-bold text-blue-400 mb-1">🧠 มุมมอง PJ</div>
+              <div className="text-xs font-bold text-blue-400 mb-1">🧠 มุมมอง J</div>
               <div className="text-sm font-bold text-zinc-100">{analysis.jiang.signal}</div>
               <p className="text-xs text-zinc-400 mt-1.5 leading-relaxed">{analysis.jiang.view}</p>
               {analysis.jiang.assets.length > 0 && (

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useCan } from "@/lib/authContext";
 import LockGate from "@/components/LockGate";
 
-// 🔬 ProLens — วิเคราะห์ความเชื่อมโยงโลก ตามกรอบ AT
+// 🔬 ProLens — วิเคราะห์ความเชื่อมโยงโลก ตามกรอบ T
 // ข้อมูลจาก transcript 27 คลิป (1 ล้านตัวอักษร) + SYSTEM ARCHITECTURE 8 เล่ม
 interface Signal { id: string; emoji: string; name: string; clips: number; desc: string; rule: string; watch: string[]; up: string[]; down: string[]; status?: string; currentValue?: string }
 interface Prediction { date: string; text: string; status: string; result?: string; note?: string }
@@ -48,7 +48,7 @@ export default function ProlensPage() {
       <div>
         <h1 className="text-2xl font-bold text-zinc-50">🔬 ProLens — วิเคราะห์ความเชื่อมโยงโลก</h1>
         <p className="text-sm text-zinc-400 mt-1 leading-relaxed">
-          ตามกรอบวิเคราะห์ของ <b className="text-zinc-200">AT</b> — สกัดจาก transcript 27 คลิป YouTube (1 ล้านตัวอักษร) + หนังสือ SYSTEM ARCHITECTURE 8 เล่ม + The House of Rothschild
+          ตามกรอบวิเคราะห์ของ <b className="text-zinc-200">T</b> — สกัดจาก transcript 27 คลิป YouTube (1 ล้านตัวอักษร) + หนังสือ SYSTEM ARCHITECTURE 8 เล่ม + The House of Rothschild
         </p>
       </div>
 
@@ -199,20 +199,20 @@ export default function ProlensPage() {
             )}
           </>
         ) : (
-          <LockGate need="starter" title="🔓 เปิด Event Analyzer" desc="พิมพ์เหตุการณ์ แล้วระบบวิเคราะห์ผ่าน 14 หลักการของ AT" />
+          <LockGate need="starter" title="🔓 เปิด Event Analyzer" desc="พิมพ์เหตุการณ์ แล้วระบบวิเคราะห์ผ่าน 14 หลักการของ T" />
         )}
       </div>
 
-      {/* 6. Dual Lens: ทวีสุข vs Jiang */}
+      {/* 6. Dual Lens: T vs J */}
       {data.jiangSignals && data.jiangSignals.length > 0 && (
         <div className="card p-5">
-          <h2 className="text-sm font-bold text-zinc-100 mb-1">🧠 Dual Lens — ทวีสุข × PJ</h2>
+          <h2 className="text-sm font-bold text-zinc-100 mb-1">🧠 Dual Lens — T × J</h2>
           <p className="text-[10px] text-zinc-600 mb-4">
             เทียบกรอบคิดของ 2 นักวิเคราะห์ที่ทำนายแม่นที่สุดในโลกปัจจุบัน — จุดที่เห็นตรงกัน = สัญญาณแรง (High Conviction)
           </p>
 
-          {/* Jiang's Signals */}
-          <h3 className="text-xs font-bold text-zinc-300 mb-2">📜 PJ (Predictive History) — 16 หลักการ</h3>
+          {/* J's Signals */}
+          <h3 className="text-xs font-bold text-zinc-300 mb-2">📜 J (Predictive History) — 16 หลักการ</h3>
           <p className="text-[10px] text-zinc-600 mb-3">Game Theory + Psychohistory + 2,000 ปีของจักรวรรดิ · 4.1 ล้านตัวอักษรจาก 16 คลิป</p>
           {can.starter ? (
             <div className="space-y-2 mb-6">
@@ -238,14 +238,14 @@ export default function ProlensPage() {
               <div className="space-y-2 opacity-40 blur-[3px] select-none mb-4" aria-hidden>
                 {data.jiangSignals.slice(0, 4).map(s => <div key={s.id} className="bg-base-850 rounded-lg p-3 text-sm">{s.emoji} {s.name}</div>)}
               </div>
-              <div className="mb-6"><LockGate need="starter" title="🔓 ดู 16 หลักการของ Jiang" /></div>
+              <div className="mb-6"><LockGate need="starter" title="🔓 ดู 16 หลักการของ J" /></div>
             </>
           )}
 
-          {/* Jiang's Predictions */}
+          {/* J's Predictions */}
           {data.jiangPredictions && can.starter && (
             <>
-              <h3 className="text-xs font-bold text-zinc-300 mb-2">📅 พยากรณ์ของ Jiang</h3>
+              <h3 className="text-xs font-bold text-zinc-300 mb-2">📅 พยากรณ์ของ J</h3>
               <div className="space-y-2 mb-6">
                 {data.jiangPredictions.map((p, i) => (
                   <div key={i} className="bg-base-850 rounded-lg p-3 flex items-start gap-3">
@@ -272,8 +272,8 @@ export default function ProlensPage() {
                   <div key={i} className="bg-up/5 border border-up/20 rounded-lg p-3">
                     <div className="text-sm font-bold text-zinc-100">{a.topic}</div>
                     <div className="grid md:grid-cols-2 gap-2 mt-2">
-                      <div className="text-[11px] text-zinc-400"><span className="text-accent-soft font-semibold">ทวีสุข:</span> {a.thaweesakh}</div>
-                      <div className="text-[11px] text-zinc-400"><span className="text-accent-soft font-semibold">Jiang:</span> {a.jiang}</div>
+                      <div className="text-[11px] text-zinc-400"><span className="text-accent-soft font-semibold">T:</span> {a.thaweesakh}</div>
+                      <div className="text-[11px] text-zinc-400"><span className="text-accent-soft font-semibold">J:</span> {a.jiang}</div>
                     </div>
                   </div>
                 ))}
@@ -286,8 +286,8 @@ export default function ProlensPage() {
                   <div key={i} className="bg-yellow-500/5 border border-yellow-500/20 rounded-lg p-3">
                     <div className="text-sm font-bold text-zinc-100">{d.topic}</div>
                     <div className="grid md:grid-cols-2 gap-2 mt-2">
-                      <div className="text-[11px] text-zinc-400"><span className="text-accent-soft font-semibold">ทวีสุข:</span> {d.thaweesakh}</div>
-                      <div className="text-[11px] text-zinc-400"><span className="text-accent-soft font-semibold">Jiang:</span> {d.jiang}</div>
+                      <div className="text-[11px] text-zinc-400"><span className="text-accent-soft font-semibold">T:</span> {d.thaweesakh}</div>
+                      <div className="text-[11px] text-zinc-400"><span className="text-accent-soft font-semibold">J:</span> {d.jiang}</div>
                     </div>
                   </div>
                 ))}

@@ -1,5 +1,5 @@
 // ===== News Web — แผนผังข่าวเชื่อมโยงแบบหนัง + Dual-Lens AI แชท =====
-// สองส่วน: (1) SVG node graph แสดง "ข่าวนี้ → เกิดนี้ → กระทบนี้" (2) แชทที่ตอบตามมุมมอง AT + Prof.Jiang
+// สองส่วน: (1) SVG node graph แสดง "ข่าวนี้ → เกิดนี้ → กระทบนี้" (2) แชทที่ตอบตามมุมมอง T + Prof.J
 import { computeThemeHeat, IMPACT_NODES } from "./radar";
 import { jevAsk, scoreNews } from "./typesafe";
 import { getNews } from "./yahoo";
@@ -78,11 +78,11 @@ export async function analyzeDualLens(text: string): Promise<DualLensAnalysis> {
   // Jev ให้คะแนนข่าว
   const jevScore = await scoreNews(text).catch(() => null);
 
-  // จับหลักการ ทวีสุข
+  // จับหลักการ T
   const tSignals = (methodology.signals as { id: string; name: string; desc: string; rule: string; up: string[]; watch: string[] }[]);
   const tMatched = matchSignals(text, tSignals);
 
-  // จับหลักการ Jiang
+  // จับหลักการ J
   const jSignals = ((methodology as Record<string, unknown>).jiangSignals as { id: string; name: string; desc: string; rule: string; up: string[] }[]) ?? [];
   const jMatched = matchSignals(text, jSignals);
 

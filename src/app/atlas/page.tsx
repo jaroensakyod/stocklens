@@ -25,7 +25,7 @@ const HEGEMONS: { label: string; x: number; to: number; color: string; note: str
   { label: "🇬🇧 อังกฤษ", x: 1520, to: 2760, color: "#a855f7", note: "Pax Britannica: ปอนด์+ทอง+กองเรือ 200 ปี" },
   { label: "🇺🇸 อเมริกา", x: 2760, to: 5710, color: "#3b82f6", note: "Bretton Woods→เปโตรดอลลาร์→QE: ดอลลาร์ 100 ปี" },
   { label: "🌐 หลายขั้ว", x: 5710, to: 7150, color: "#22c55e", note: "ทดสอบครั้งใหญ่ที่สุดของระบบดอลลาร์ (2022-2030)" },
-  { label: "🔮 AI ยุคใหม่ ?", x: 7150, to: 8400, color: "#a855f7", note: "หลัง Reset ~2030: AGI/ควอนตัม/มหาอำนาจใหม่ (มุมมอง AT)" },
+  { label: "🔮 AI ยุคใหม่ ?", x: 7150, to: 8400, color: "#a855f7", note: "หลัง Reset ~2030: AGI/ควอนตัม/มหาอำนาจใหม่ (มุมมอง T)" },
 ];
 
 const TYPES: Record<string, { label: string; color: string; emoji: string }> = {
@@ -201,7 +201,7 @@ export default function AtlasPage() {
                 {/* โซน 🔮 ยุคหลัง 2030 (ขวาสุด) */}
                 <div className="absolute top-0 bottom-0" style={{ left: ATLAS.meta.zone2X, right: 0, background: "linear-gradient(90deg, rgba(168,85,247,.06), rgba(168,85,247,.14))", borderLeft: "2px dashed rgba(168,85,247,.4)" }}>
                   <div className="absolute top-3 left-1/2 -translate-x-1/2 whitespace-nowrap text-[13px] font-bold tracking-wide text-purple-200/60" style={{ textShadow: "0 1px 2px #000" }}>
-                    🔮 ยุคหลัง 2030 · AI/AGI (มุมมอง AT)
+                    🔮 ยุคหลัง 2030 · AI/AGI (มุมมอง T)
                   </div>
                 </div>
 
@@ -362,7 +362,7 @@ export default function AtlasPage() {
       <div className="card p-4 text-xs text-zinc-400 flex flex-wrap items-center gap-x-5 gap-y-2">
         <span className="text-zinc-300 font-bold">เชื่อมต่อต่อ:</span>
         <Link href="/radar" className="link">🌐 Radar เหตุการณ์วันนี้</Link>
-        <Link href="/prolens" className="link">🔬 ProLens (AT×PJ)</Link>
+        <Link href="/prolens" className="link">🔬 ProLens (T×J)</Link>
         <Link href="/web" className="link">🕸️ แผนผังข่าว</Link>
         <Link href="/stock/GC%3DF" className="link">🥇 ทองคำวันนี้</Link>
         <span className="text-zinc-600 ml-auto">อัปเดตความรู้: แก้ที่ scripts/atlas-src → node scripts/build-atlas.mjs</span>

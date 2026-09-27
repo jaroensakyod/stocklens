@@ -797,7 +797,7 @@
   {
     "from": "greatreset",
     "to": "at2030",
-    "label": "Reset จบราว 2030 → ยุคใหม่ (กรอบ AT)"
+    "label": "Reset จบราว 2030 → ยุคใหม่ (กรอบ T)"
   },
   {
     "from": "ukraine",
@@ -842,7 +842,7 @@
   {
     "from": "at2030",
     "to": "newhegemon",
-    "label": "AT: ตะวันออกขึ้นใน 7-10 ปีจากนี้"
+    "label": "T: ตะวันออกขึ้นใน 7-10 ปีจากนี้"
   },
   {
     "from": "china",

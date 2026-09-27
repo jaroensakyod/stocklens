@@ -288,7 +288,7 @@ function DailyOps({ members, code }: { members: MemberRow[]; code: string }) {
   );
 }
 
-// สร้าง Geopolitical Weekly — Deep Dive มุมภูมิรัฐศาสตร์ (AT + Zeihan/Dalio/Brzezinski) พร้อม PDF
+// สร้าง Geopolitical Weekly — Deep Dive มุมภูมิรัฐศาสตร์ (T + Zeihan/Dalio/Brzezinski) พร้อม PDF
 function GeoWeekly() {
   const [ticker, setTicker] = useState("");
   const suggestions = ["TSM", "NVDA", "XOM", "NVO", "ASML", "RIO"];
