@@ -10,7 +10,7 @@ import LockGate from "@/components/LockGate";
 interface Signal { id: string; emoji: string; name: string; clips: number; desc: string; rule: string; watch: string[]; up: string[]; down: string[]; status?: string; currentValue?: string }
 interface Prediction { date: string; text: string; status: string; result?: string; note?: string }
 interface Framework { howHeReadsHistory: string[]; howHeSeesFuture: string[] }
-interface Data { signals: Signal[]; predictions: Prediction[]; framework: Framework; supernova?: { rows: { id: string; label: string; price: number | null; chg5d: number | null }[]; insider?: { netBuyers: number; n: number } } }
+interface Data { signals: Signal[]; predictions: Prediction[]; framework: Framework; supernova?: { rows: { id: string; label: string; price: number | null; chg5d: number | null }[]; insider?: { netBuyers: number; n: number } }; jiangSignals?: Signal[]; jiangPredictions?: Prediction[]; compareView?: { agree: { topic: string; thaweesakh: string; jiang: string }[]; differ: { topic: string; thaweesakh: string; jiang: string }[] } }
 interface AnalyzeResult { signals: Signal[]; chains: { name: string; stocks: string[] }[]; note: string }
 
 const STATUS_ICON: Record<string, string> = { green: "🟢", yellow: "🟡", red: "🔴" };
@@ -202,6 +202,100 @@ export default function ProlensPage() {
           <LockGate need="starter" title="🔓 เปิด Event Analyzer" desc="พิมพ์เหตุการณ์ แล้วระบบวิเคราะห์ผ่าน 14 หลักการของ อ.ทวีสุข" />
         )}
       </div>
+
+      {/* 6. Dual Lens: ทวีสุข vs Jiang */}
+      {data.jiangSignals && data.jiangSignals.length > 0 && (
+        <div className="card p-5">
+          <h2 className="text-sm font-bold text-zinc-100 mb-1">🧠 Dual Lens — ทวีสุข × Professor Jiang</h2>
+          <p className="text-[10px] text-zinc-600 mb-4">
+            เทียบกรอบคิดของ 2 นักวิเคราะห์ที่ทำนายแม่นที่สุดในโลกปัจจุบัน — จุดที่เห็นตรงกัน = สัญญาณแรง (High Conviction)
+          </p>
+
+          {/* Jiang's Signals */}
+          <h3 className="text-xs font-bold text-zinc-300 mb-2">📜 Professor Jiang (Predictive History) — 16 หลักการ</h3>
+          <p className="text-[10px] text-zinc-600 mb-3">Game Theory + Psychohistory + 2,000 ปีของจักรวรรดิ · 4.1 ล้านตัวอักษรจาก 16 คลิป</p>
+          {can.starter ? (
+            <div className="space-y-2 mb-6">
+              {data.jiangSignals.map(s => (
+                <div key={s.id} className="bg-base-850 rounded-lg p-3.5">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-base">{s.emoji}</span>
+                    <span className="text-sm font-bold text-zinc-100">{s.name}</span>
+                    <span className="chip bg-base-700 text-zinc-500 !text-[9px]">{s.clips}/16 คลิป</span>
+                  </div>
+                  <p className="text-[11px] text-zinc-400 mt-1.5">{s.desc}</p>
+                  <p className="text-[10px] text-accent-soft mt-1">📐 {s.rule}</p>
+                  {s.up.length > 0 && (
+                    <div className="flex gap-1.5 mt-2 flex-wrap">
+                      {s.up.slice(0, 4).map(u => <Link key={u} href={`/stock/${encodeURIComponent(u)}`} className="chip bg-up/10 text-up border border-up/30 !text-[9px]">▲ {u}</Link>)}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <>
+              <div className="space-y-2 opacity-40 blur-[3px] select-none mb-4" aria-hidden>
+                {data.jiangSignals.slice(0, 4).map(s => <div key={s.id} className="bg-base-850 rounded-lg p-3 text-sm">{s.emoji} {s.name}</div>)}
+              </div>
+              <div className="mb-6"><LockGate need="starter" title="🔓 ดู 16 หลักการของ Jiang" /></div>
+            </>
+          )}
+
+          {/* Jiang's Predictions */}
+          {data.jiangPredictions && can.starter && (
+            <>
+              <h3 className="text-xs font-bold text-zinc-300 mb-2">📅 พยากรณ์ของ Jiang</h3>
+              <div className="space-y-2 mb-6">
+                {data.jiangPredictions.map((p, i) => (
+                  <div key={i} className="bg-base-850 rounded-lg p-3 flex items-start gap-3">
+                    <span className="text-lg">{PRED_ICON[p.status] ?? "⏳"}</span>
+                    <div>
+                      <p className="text-sm text-zinc-200">{p.text}</p>
+                      <div className="flex gap-2 text-[10px] mt-1">
+                        <span className="text-zinc-600">{p.date}</span>
+                        {p.result && <span className={p.status === "verified" ? "text-up" : "text-zinc-500"}>{p.result}</span>}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+
+          {/* Compare: Agree */}
+          {data.compareView && (
+            <>
+              <h3 className="text-xs font-bold text-up mb-2">✅ เห็นตรงกัน (High Conviction)</h3>
+              <div className="space-y-2 mb-4">
+                {data.compareView.agree.map((a, i) => (
+                  <div key={i} className="bg-up/5 border border-up/20 rounded-lg p-3">
+                    <div className="text-sm font-bold text-zinc-100">{a.topic}</div>
+                    <div className="grid md:grid-cols-2 gap-2 mt-2">
+                      <div className="text-[11px] text-zinc-400"><span className="text-accent-soft font-semibold">ทวีสุข:</span> {a.thaweesakh}</div>
+                      <div className="text-[11px] text-zinc-400"><span className="text-accent-soft font-semibold">Jiang:</span> {a.jiang}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Compare: Differ */}
+              <h3 className="text-xs font-bold text-yellow-500 mb-2">⚡ เห็นต่างกัน (สำรวจทั้งสองมุม)</h3>
+              <div className="space-y-2">
+                {data.compareView.differ.map((d, i) => (
+                  <div key={i} className="bg-yellow-500/5 border border-yellow-500/20 rounded-lg p-3">
+                    <div className="text-sm font-bold text-zinc-100">{d.topic}</div>
+                    <div className="grid md:grid-cols-2 gap-2 mt-2">
+                      <div className="text-[11px] text-zinc-400"><span className="text-accent-soft font-semibold">ทวีสุข:</span> {d.thaweesakh}</div>
+                      <div className="text-[11px] text-zinc-400"><span className="text-accent-soft font-semibold">Jiang:</span> {d.jiang}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      )}
 
       {/* 6. หนังสือ/แหล่งอ้างอิง */}
       <div className="card p-4 text-[11px] text-zinc-500 leading-relaxed">

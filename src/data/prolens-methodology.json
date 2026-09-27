@@ -2,31 +2,322 @@
   "_note": "กรอบวิเคราะห์ อ.ทวีสุข ธรรมศักดิ์ — สกัดจาก 27 คลิป YouTube (1,019,059 ตัวอักษร) + SYSTEM ARCHITECTURE 8 เล่ม + Rothschild",
   "_updatedAt": "2026-09-28",
   "signals": [
-    { "id": "ww3", "emoji": "🔥", "name": "สงครามโลกครั้งที่ 3", "clips": 22, "desc": "เริ่มแล้วตั้งแต่โควิด — รูปแบบใหม่ ก่อรูปความขัดแย้ง", "rule": "สงคราม = กลไกล้างหนี้ (เหมือน WW1) · ฐานทัพสหรัฐฯ พัง 80%", "watch": ["ข่าวสงคราม/ขีปนาวุธ", "VIX > 25"], "up": ["น้ำมัน", "ทองคำ", "กลาโหม"], "down": ["หุ้นปันผล", "สายการบิน"] },
-    { "id": "gold", "emoji": "💎", "name": "ทองคำ = Safe Haven", "clips": 19, "desc": "Black currency — ยึดถือจนจบสงครามโลก", "rule": "เป้า $10,000/oz หรือ 100,000 บาท/สลึง", "watch": ["ราคาทอง vs เป้า", "ทอง vs DXY"], "up": ["GC=F", "GLD", "NEM"], "down": [] },
-    { "id": "inflation", "emoji": "📈", "name": "เงินเฟ้อตีกลับ 2-3 ปี", "clips": 15, "desc": "High Inflation กลับมาจากสงคราม + ดอลลาร์อ่อน", "rule": "ดอกเบี้ยตีกลับ = กระอักเลือด · ลดหนี้ให้เร็วที่สุด", "watch": ["CPI", "US10Y/30Y", "Fed rate"], "up": ["ทอง", "โภคภัณฑ์"], "down": ["พันธบัตรยาว", "หุ้นหนี้สูง"] },
-    { "id": "history", "emoji": "📜", "name": "วัฏจักร 120 ปี", "clips": 13, "desc": "โลกเปลี่ยนผ่านใหญ่ทุก ~120 ปี (1907-1945 ครั้งล่าสุด)", "rule": "3 เงื่อนไข: วิกฤตเศรษฐกิจ + disruption + การเมืองโลก", "watch": ["เทียบ 1907→1929→1945"], "up": [], "down": [] },
-    { "id": "defense", "emoji": "🎯", "name": "อุตสาหกรรมกลาโหม", "clips": 12, "desc": "ญี่ปุ่นฟื้นจักรวรรดิ + ยุโรปเพิ่มงบ", "rule": "Mitsubishi Heavy = ต้นแบบอาวุธ · รัฐธรรมนูญเปลี่ยนแล้ว", "watch": ["งบกลาโหม", "7011.T"], "up": ["LMT", "RTX", "NOC", "7011.T"], "down": [] },
-    { "id": "thai-strategic", "emoji": "🇹🇭", "name": "ไทย = จุดยุทธศาสตร์โลก", "clips": 10, "desc": "ไทย-พม่า-ลาว-เวียดนาม = จุดสำคัญสุด · อ่าวไทยมีน้ำมัน 850 แท่น", "rule": "Elite อพยพเข้าอาเซียน → ที่ดินไทยแพงเหมือนทอง", "watch": ["FDI ใหม่", "ราคาที่ดิน EEC"], "up": ["ที่ดิน", "CK.BK", "STEC.BK", "ITD.BK"], "down": [] },
-    { "id": "china", "emoji": "🇨🇳", "name": "จีน Self-Sufficient", "clips": 9, "desc": "จีนแก้ชิปได้ + ไฟฟ้า 3 เท่าสหรัฐฯ + BRICS ขยาย", "rule": "BRICS vs G7 = โลกสองขั้ว", "watch": ["BABA", "Xiaomi", "USD/CNY"], "up": ["BABA", "1810.HK", "BIDU"], "down": [] },
-    { "id": "food", "emoji": "🌾", "name": "เกษตร/อาหารหลังสงคราม", "clips": 9, "desc": "อาหารขาดแคลนหลังสงคราม", "rule": "ราคาหมู-กุ้ง-ไก่ขึ้น + ต้นทุนลด", "watch": ["CPF.BK", "TU.BK", "GFPT.BK"], "up": ["CPF.BK", "TU.BK", "GFPT.BK"], "down": [] },
-    { "id": "oil", "emoji": "🛢️", "name": "น้ำมัน = อาวุธภูมิรัฐศาสตร์", "clips": 9, "desc": "ฮอร์มุซชี้ขาด · อ่าวไทยมีน้ำมันเกรดสูง", "rule": "น้ำมัน > $100 = เร่งเงินเฟ้อ + หนุนปิโตร", "watch": ["Brent", "OPEC+", "PTTEP.BK"], "up": ["PTTEP.BK", "PTT.BK", "XOM"], "down": ["AAV.BK", "AOT.BK"] },
-    { "id": "dollar", "emoji": "💵", "name": "ดอลลาร์อ่อนโดยตั้งใจ", "clips": 8, "desc": "2 มิติ: (1) ของแพงจนคุ้มผลิตเอง (2) หนี้จริงลด", "rule": "DXY ลง = ทอง/ทางเลือกขึ้น", "watch": ["DXY", "USD/THB", "ทอง vs DXY"], "up": ["ทอง", "GC=F"], "down": ["USD long"] },
-    { "id": "debt", "emoji": "⚠️", "name": "ลดหนี้ให้เร็วที่สุด", "clips": 7, "desc": "ดอกเบี้ยตีกลับ = กระอักเลือดทันที", "rule": "หุ้น D/E > 120% เสี่ยงสุด", "watch": ["US30Y", "ดอกเบี้ยไทย"], "up": [], "down": ["หุ้น D/E > 120%"] },
-    { "id": "crypto", "emoji": "🪙", "name": "คริปโต (ยังไม่ชัด)", "clips": 7, "desc": "Quantum ทำลาย blockchain ได้ไหม?", "rule": "ถ้าทำลายได้ = จบ · ไม่ได้ = ดอลลาร์ลน crypto ขึ้น", "watch": ["BTC-USD"], "up": ["BTC-USD", "ETH-USD"], "down": [] },
-    { "id": "cre", "emoji": "🏢", "name": "US Commercial Real Estate", "clips": 6, "desc": "CRE $1.7T refinance 3%→7-8%", "rule": "CRE = ระเบิดเวลาในงบธนาคาร", "watch": ["REITs"], "up": [], "down": ["VNQ"] },
-    { "id": "disruption", "emoji": "🔄", "name": "Wind of Change", "clips": 4, "desc": "รถม้า→รถยนต์→EV + คน→AI = disruption ธุรกิจเก่า", "rule": "ธุรกิจไม่ปรับตัว = ตาย", "watch": ["EV", "AI adoption"], "up": ["TSLA", "NVDA"], "down": ["ธุรกิจเก่า"] }
+    {
+      "id": "ww3",
+      "emoji": "🔥",
+      "name": "สงครามโลกครั้งที่ 3",
+      "clips": 22,
+      "desc": "เริ่มแล้วตั้งแต่โควิด — รูปแบบใหม่ ก่อรูปความขัดแย้ง",
+      "rule": "สงคราม = กลไกล้างหนี้ (เหมือน WW1) · ฐานทัพสหรัฐฯ พัง 80%",
+      "watch": [
+        "ข่าวสงคราม/ขีปนาวุธ",
+        "VIX > 25"
+      ],
+      "up": [
+        "น้ำมัน",
+        "ทองคำ",
+        "กลาโหม"
+      ],
+      "down": [
+        "หุ้นปันผล",
+        "สายการบิน"
+      ]
+    },
+    {
+      "id": "gold",
+      "emoji": "💎",
+      "name": "ทองคำ = Safe Haven",
+      "clips": 19,
+      "desc": "Black currency — ยึดถือจนจบสงครามโลก",
+      "rule": "เป้า $10,000/oz หรือ 100,000 บาท/สลึง",
+      "watch": [
+        "ราคาทอง vs เป้า",
+        "ทอง vs DXY"
+      ],
+      "up": [
+        "GC=F",
+        "GLD",
+        "NEM"
+      ],
+      "down": []
+    },
+    {
+      "id": "inflation",
+      "emoji": "📈",
+      "name": "เงินเฟ้อตีกลับ 2-3 ปี",
+      "clips": 15,
+      "desc": "High Inflation กลับมาจากสงคราม + ดอลลาร์อ่อน",
+      "rule": "ดอกเบี้ยตีกลับ = กระอักเลือด · ลดหนี้ให้เร็วที่สุด",
+      "watch": [
+        "CPI",
+        "US10Y/30Y",
+        "Fed rate"
+      ],
+      "up": [
+        "ทอง",
+        "โภคภัณฑ์"
+      ],
+      "down": [
+        "พันธบัตรยาว",
+        "หุ้นหนี้สูง"
+      ]
+    },
+    {
+      "id": "history",
+      "emoji": "📜",
+      "name": "วัฏจักร 120 ปี",
+      "clips": 13,
+      "desc": "โลกเปลี่ยนผ่านใหญ่ทุก ~120 ปี (1907-1945 ครั้งล่าสุด)",
+      "rule": "3 เงื่อนไข: วิกฤตเศรษฐกิจ + disruption + การเมืองโลก",
+      "watch": [
+        "เทียบ 1907→1929→1945"
+      ],
+      "up": [],
+      "down": []
+    },
+    {
+      "id": "defense",
+      "emoji": "🎯",
+      "name": "อุตสาหกรรมกลาโหม",
+      "clips": 12,
+      "desc": "ญี่ปุ่นฟื้นจักรวรรดิ + ยุโรปเพิ่มงบ",
+      "rule": "Mitsubishi Heavy = ต้นแบบอาวุธ · รัฐธรรมนูญเปลี่ยนแล้ว",
+      "watch": [
+        "งบกลาโหม",
+        "7011.T"
+      ],
+      "up": [
+        "LMT",
+        "RTX",
+        "NOC",
+        "7011.T"
+      ],
+      "down": []
+    },
+    {
+      "id": "thai-strategic",
+      "emoji": "🇹🇭",
+      "name": "ไทย = จุดยุทธศาสตร์โลก",
+      "clips": 10,
+      "desc": "ไทย-พม่า-ลาว-เวียดนาม = จุดสำคัญสุด · อ่าวไทยมีน้ำมัน 850 แท่น",
+      "rule": "Elite อพยพเข้าอาเซียน → ที่ดินไทยแพงเหมือนทอง",
+      "watch": [
+        "FDI ใหม่",
+        "ราคาที่ดิน EEC"
+      ],
+      "up": [
+        "ที่ดิน",
+        "CK.BK",
+        "STEC.BK",
+        "ITD.BK"
+      ],
+      "down": []
+    },
+    {
+      "id": "china",
+      "emoji": "🇨🇳",
+      "name": "จีน Self-Sufficient",
+      "clips": 9,
+      "desc": "จีนแก้ชิปได้ + ไฟฟ้า 3 เท่าสหรัฐฯ + BRICS ขยาย",
+      "rule": "BRICS vs G7 = โลกสองขั้ว",
+      "watch": [
+        "BABA",
+        "Xiaomi",
+        "USD/CNY"
+      ],
+      "up": [
+        "BABA",
+        "1810.HK",
+        "BIDU"
+      ],
+      "down": []
+    },
+    {
+      "id": "food",
+      "emoji": "🌾",
+      "name": "เกษตร/อาหารหลังสงคราม",
+      "clips": 9,
+      "desc": "อาหารขาดแคลนหลังสงคราม",
+      "rule": "ราคาหมู-กุ้ง-ไก่ขึ้น + ต้นทุนลด",
+      "watch": [
+        "CPF.BK",
+        "TU.BK",
+        "GFPT.BK"
+      ],
+      "up": [
+        "CPF.BK",
+        "TU.BK",
+        "GFPT.BK"
+      ],
+      "down": []
+    },
+    {
+      "id": "oil",
+      "emoji": "🛢️",
+      "name": "น้ำมัน = อาวุธภูมิรัฐศาสตร์",
+      "clips": 9,
+      "desc": "ฮอร์มุซชี้ขาด · อ่าวไทยมีน้ำมันเกรดสูง",
+      "rule": "น้ำมัน > $100 = เร่งเงินเฟ้อ + หนุนปิโตร",
+      "watch": [
+        "Brent",
+        "OPEC+",
+        "PTTEP.BK"
+      ],
+      "up": [
+        "PTTEP.BK",
+        "PTT.BK",
+        "XOM"
+      ],
+      "down": [
+        "AAV.BK",
+        "AOT.BK"
+      ]
+    },
+    {
+      "id": "dollar",
+      "emoji": "💵",
+      "name": "ดอลลาร์อ่อนโดยตั้งใจ",
+      "clips": 8,
+      "desc": "2 มิติ: (1) ของแพงจนคุ้มผลิตเอง (2) หนี้จริงลด",
+      "rule": "DXY ลง = ทอง/ทางเลือกขึ้น",
+      "watch": [
+        "DXY",
+        "USD/THB",
+        "ทอง vs DXY"
+      ],
+      "up": [
+        "ทอง",
+        "GC=F"
+      ],
+      "down": [
+        "USD long"
+      ]
+    },
+    {
+      "id": "debt",
+      "emoji": "⚠️",
+      "name": "ลดหนี้ให้เร็วที่สุด",
+      "clips": 7,
+      "desc": "ดอกเบี้ยตีกลับ = กระอักเลือดทันที",
+      "rule": "หุ้น D/E > 120% เสี่ยงสุด",
+      "watch": [
+        "US30Y",
+        "ดอกเบี้ยไทย"
+      ],
+      "up": [],
+      "down": [
+        "หุ้น D/E > 120%"
+      ]
+    },
+    {
+      "id": "crypto",
+      "emoji": "🪙",
+      "name": "คริปโต (ยังไม่ชัด)",
+      "clips": 7,
+      "desc": "Quantum ทำลาย blockchain ได้ไหม?",
+      "rule": "ถ้าทำลายได้ = จบ · ไม่ได้ = ดอลลาร์ลน crypto ขึ้น",
+      "watch": [
+        "BTC-USD"
+      ],
+      "up": [
+        "BTC-USD",
+        "ETH-USD"
+      ],
+      "down": []
+    },
+    {
+      "id": "cre",
+      "emoji": "🏢",
+      "name": "US Commercial Real Estate",
+      "clips": 6,
+      "desc": "CRE $1.7T refinance 3%→7-8%",
+      "rule": "CRE = ระเบิดเวลาในงบธนาคาร",
+      "watch": [
+        "REITs"
+      ],
+      "up": [],
+      "down": [
+        "VNQ"
+      ]
+    },
+    {
+      "id": "disruption",
+      "emoji": "🔄",
+      "name": "Wind of Change",
+      "clips": 4,
+      "desc": "รถม้า→รถยนต์→EV + คน→AI = disruption ธุรกิจเก่า",
+      "rule": "ธุรกิจไม่ปรับตัว = ตาย",
+      "watch": [
+        "EV",
+        "AI adoption"
+      ],
+      "up": [
+        "TSLA",
+        "NVDA"
+      ],
+      "down": [
+        "ธุรกิจเก่า"
+      ]
+    }
   ],
   "predictions": [
-    { "date": "2026-01", "text": "ซื้อ PTTEP ที่ 112 บาท", "status": "verified", "result": "+32.6%", "note": "ปัจจุบัน 148.5 บาท", "clip": "FPYiCNtI2Qg" },
-    { "date": "2026-03", "text": "ทองจะแตะ $10,000/oz (100,000 บาท)", "status": "pending", "clip": "FPYiCNtI2Qg" },
-    { "date": "2026-03", "text": "ดอกเบี้ยจะทะลุ 7-8%", "status": "pending", "clip": "ZutLu2YK__w" },
-    { "date": "2026-03", "text": "ญี่ปุ่นรื้อฟื้นจักรวรรดิ — Mitsubishi Heavy ขยาย", "status": "active", "note": "รัฐธรรมนูญเปลี่ยนแล้ว", "clip": "OSOi1I4lHqg" },
-    { "date": "2026-03", "text": "ที่ดินไทยจะวิ่งขึ้นเหมือนทอง (ใน 3 ปี)", "status": "pending", "clip": "FPYiCNtI2Qg" },
-    { "date": "2026-03", "text": "ลดหนี้ให้เร็ว — เงินเฟ้อตีกลับ 2-3 ปี", "status": "standing", "clip": "I79eF-gW-q4" },
-    { "date": "2025-10", "text": "โลกจะวิกฤตทุกมิติจนสิ้นปี 2030", "status": "pending", "clip": "BzKSTcDJMbU" },
-    { "date": "2025-12", "text": "ปี 2570 ปีตกต่ำสุดของเศรษฐกิจไทย", "status": "pending", "clip": "hTXF9EX_Co8" },
-    { "date": "2026-02", "text": "โอกาสแบบนี้ 100 ปีมีครั้งเดียว", "status": "pending", "clip": "VtUspRRWA2Y" }
+    {
+      "date": "2026-01",
+      "text": "ซื้อ PTTEP ที่ 112 บาท",
+      "status": "verified",
+      "result": "+32.6%",
+      "note": "ปัจจุบัน 148.5 บาท",
+      "clip": "FPYiCNtI2Qg"
+    },
+    {
+      "date": "2026-03",
+      "text": "ทองจะแตะ $10,000/oz (100,000 บาท)",
+      "status": "pending",
+      "clip": "FPYiCNtI2Qg"
+    },
+    {
+      "date": "2026-03",
+      "text": "ดอกเบี้ยจะทะลุ 7-8%",
+      "status": "pending",
+      "clip": "ZutLu2YK__w"
+    },
+    {
+      "date": "2026-03",
+      "text": "ญี่ปุ่นรื้อฟื้นจักรวรรดิ — Mitsubishi Heavy ขยาย",
+      "status": "active",
+      "note": "รัฐธรรมนูญเปลี่ยนแล้ว",
+      "clip": "OSOi1I4lHqg"
+    },
+    {
+      "date": "2026-03",
+      "text": "ที่ดินไทยจะวิ่งขึ้นเหมือนทอง (ใน 3 ปี)",
+      "status": "pending",
+      "clip": "FPYiCNtI2Qg"
+    },
+    {
+      "date": "2026-03",
+      "text": "ลดหนี้ให้เร็ว — เงินเฟ้อตีกลับ 2-3 ปี",
+      "status": "standing",
+      "clip": "I79eF-gW-q4"
+    },
+    {
+      "date": "2025-10",
+      "text": "โลกจะวิกฤตทุกมิติจนสิ้นปี 2030",
+      "status": "pending",
+      "clip": "BzKSTcDJMbU"
+    },
+    {
+      "date": "2025-12",
+      "text": "ปี 2570 ปีตกต่ำสุดของเศรษฐกิจไทย",
+      "status": "pending",
+      "clip": "hTXF9EX_Co8"
+    },
+    {
+      "date": "2026-02",
+      "text": "โอกาสแบบนี้ 100 ปีมีครั้งเดียว",
+      "status": "pending",
+      "clip": "VtUspRRWA2Y"
+    }
   ],
   "framework": {
     "howHeReadsHistory": [
@@ -42,6 +333,371 @@
       "จีน: self-sufficient + BRICS = อำนาจใหม่",
       "ไทย: จุดยุทธศาสตร์ + อาหาร + ที่ดิน = ผู้รับประโยชน์",
       "ประจำ: ลดหนี้ + กอดทอง + ที่ดิน + กลาโหม/พลังงาน/เกษตร"
+    ]
+  },
+  "_note2": "เลนส์ที่ 2: Professor Jiang Xueqin (Predictive History) — สกัดจาก 16 คลิป geopolitics (4,117,647 ตัวอักษร)",
+  "jiangSignals": [
+    {
+      "id": "ai-datacenter",
+      "emoji": "🤖",
+      "name": "AI/Data Center = ศูนย์อำนาจใหม่",
+      "clips": 13,
+      "desc": "AI และ data center = โครงสร้างอำนาจใหม่ของโลก (ไม่ใช่แค่เทคโนโลยี)",
+      "rule": "ใครคุม data center = คุม information = คุมโลก",
+      "watch": [
+        "AI investment",
+        "data center deals"
+      ],
+      "up": [
+        "NVDA",
+        "MSFT",
+        "GOOGL"
+      ],
+      "down": []
+    },
+    {
+      "id": "china-brics",
+      "emoji": "🇨🇳",
+      "name": "จีน/BRICS ขึ้น สหรัฐฯ ลง",
+      "clips": 13,
+      "desc": "โลกกำลังเปลี่ยนจาก unipolar (สหรัฐฯ เดียว) เป็น multipolar (จีน+BRICS)",
+      "rule": "จีนไม่ได้มาแทนที่ แต่สร้างระบบคู่ขนาน (BRICS payment, SCO)",
+      "watch": [
+        "BRICS expansion",
+        "RMB internationalization",
+        "Xi diplomacy"
+      ],
+      "up": [
+        "BABA",
+        "1810.HK",
+        "BIDU"
+      ],
+      "down": []
+    },
+    {
+      "id": "empire-collapse",
+      "emoji": "🏛️",
+      "name": "Empire Collapse = สหรัฐฯ ล่มสลาย",
+      "clips": 12,
+      "desc": "ทุกจักรวรรดิที่โจมตีอิหร่านตายที่นั่น (Alexander, Rome, Byzantine, Ottoman, British, Soviet)",
+      "rule": "สหรัฐฯ overstretch เหมือนจักรวรรดิก่อนหน้า → ล่ม ~2026",
+      "watch": [
+        "US military spending",
+        "debt ceiling",
+        "domestic unrest"
+      ],
+      "up": [
+        "ทอง",
+        "กลาโหม",
+        "พลังงาน"
+      ],
+      "down": [
+        "USD",
+        "หุ้นสหรัฐฯ"
+      ]
+    },
+    {
+      "id": "iran-war",
+      "emoji": "⚔️",
+      "name": "สงครามอิหร่าน = Eschatological War",
+      "clips": 12,
+      "desc": "ไม่ใช่สงครามแบบเดิม — เป็นสงครามทางศาสนา/อุดมการณ์ ที่ฝ่ายใดฝ่ายหนึ่งต้องชนะขาด",
+      "rule": "สหรัฐฯ จะแพ้เพราะ attrition + geography อิหร่านเก่งกว่า",
+      "watch": [
+        "Iran retaliation",
+        "Hormuz closure",
+        "US ground invasion"
+      ],
+      "up": [
+        "น้ำมัน",
+        "ทอง",
+        "PTTEP"
+      ],
+      "down": [
+        "สายการบิน",
+        "หุ้นสหรัฐฯ"
+      ]
+    },
+    {
+      "id": "putin-russia",
+      "emoji": "🐻",
+      "name": "รัสเซีย/Putin = ผู้เล่นสำคัญ",
+      "clips": 12,
+      "desc": "Putin ไม่ใช่ศัตรู แต่เป็นผู้เล่นที่ฉลาดที่สุดในเกม — ใช้สงครามให้เป็นประโยชน์",
+      "rule": "รัสเซีย+จีน+อิหร่าน = แกน BRICS ที่สหรัฐฯ สู้ไม่ไหว",
+      "watch": [
+        "Putin-Xi meetings",
+        "Russia energy deals"
+      ],
+      "up": [
+        "น้ำมัน",
+        "ก๊าซ",
+        "อาวุธ"
+      ],
+      "down": []
+    },
+    {
+      "id": "secret-society",
+      "emoji": "👁️",
+      "name": "Elite/Deep State ควบคุม",
+      "clips": 12,
+      "desc": "กลุ่ม elite ใช้ media + information เพื่อควบคุม narrative และสงคราม",
+      "rule": "Information war = สงครามที่แท้จริง · ใครคุม narrative คุมโลก",
+      "watch": [
+        "media consolidation",
+        "censorship",
+        "narrative shifts"
+      ],
+      "up": [],
+      "down": []
+    },
+    {
+      "id": "japan-geopolitics",
+      "emoji": "🇯🇵",
+      "name": "ญี่ปุ่น = จุดชี้ขาดเอเชีย",
+      "clips": 12,
+      "desc": "ญี่ปุ่นเป็น key player ในการต่อสู้ระหว่างสหรัฐฯ vs จีน",
+      "rule": "ญี่ปุ่นต้องเลือกข้าง — ถ้าเลือกจีน = สหรัฐฯ หมดอิทธิพลในเอเชีย",
+      "watch": [
+        "Japan-China relations",
+        "Japan defense policy"
+      ],
+      "up": [
+        "7011.T"
+      ],
+      "down": []
+    },
+    {
+      "id": "information-war",
+      "emoji": "📡",
+      "name": "Information War/Media",
+      "clips": 12,
+      "desc": "สงครามจริงเกิดที่ information space ไม่ใช่สนามรบ",
+      "rule": "Control the narrative = control the outcome",
+      "watch": [
+        "social media regulation",
+        "AI-generated content"
+      ],
+      "up": [],
+      "down": []
+    },
+    {
+      "id": "us-civil-war",
+      "emoji": "🇺🇸",
+      "name": "สงครามกลางเมืองสหรัฐฯ",
+      "clips": 11,
+      "desc": "สหรัฐฯ กำลังแตกแยกภายใน (political + cultural)",
+      "rule": "Empire ล่มจากข้างในก่อน ไม่ใช่จากข้างนอก",
+      "watch": [
+        "US election",
+        "political violence",
+        "state secession"
+      ],
+      "up": [
+        "ทอง",
+        "ปืน"
+      ],
+      "down": [
+        "หุ้นสหรัฐฯ"
+      ]
+    },
+    {
+      "id": "nuclear-threat",
+      "emoji": "☢️",
+      "name": "นิวเคลียร์/ขีปนาวุธ",
+      "clips": 11,
+      "desc": "Iran มีขีปนาวุธที่แม่นยำ สหรัฐฯ ประเมินต่ำเกิน",
+      "rule": "ขีปนาวุธ Iran = game changer ที่สหรัฐฯ ไม่มีคำตอบ",
+      "watch": [
+        "missile tests",
+        "nuclear enrichment"
+      ],
+      "up": [
+        "กลาโหม",
+        "ทอง"
+      ],
+      "down": []
+    },
+    {
+      "id": "game-theory",
+      "emoji": "🎲",
+      "name": "Game Theory = วิธีวิเคราะห์",
+      "clips": 11,
+      "desc": "ใช้ game theory (prisoner dilemma, Nash equilibrium) วิเคราะห์สถานการณ์ geopolitics",
+      "rule": "ดู incentive ของทุกฝ่าย แล้วหา equilibrium — ไม่ดูแค่ฝ่ายเดียว",
+      "watch": [],
+      "up": [],
+      "down": []
+    },
+    {
+      "id": "economic-warfare",
+      "emoji": "💰",
+      "name": "Economic Warfare",
+      "clips": 9,
+      "desc": "Sanctions = อาวุธที่สหรัฐฯ ใช้ แต่ BRICS หาทางหลบ",
+      "rule": "Sanctions ทำให้ BRICS รวมตัวเร็วขึ้น ไม่ใช่ชะลอ",
+      "watch": [
+        "sanctions on Russia/Iran",
+        "BRICS payment system"
+      ],
+      "up": [
+        "ทอง",
+        "crypto"
+      ],
+      "down": [
+        "USD"
+      ]
+    },
+    {
+      "id": "psychology",
+      "emoji": "🧠",
+      "name": "จิตวิทยา/Incentives",
+      "clips": 8,
+      "desc": "ทำนายโดยดู incentive ของผู้เล่น ไม่ใช่ดูแค่ military capability",
+      "rule": "คนทำตาม incentive ของตัวเองเสมอ — ดูว่าใครได้อะไรจากอะไร",
+      "watch": [],
+      "up": [],
+      "down": []
+    },
+    {
+      "id": "historical-pattern",
+      "emoji": "📜",
+      "name": "Historical Patterns 2,000+ ปี",
+      "clips": 8,
+      "desc": "เทียบจักรวรรดิโบราณถึงปัจจุบัน — pattern เดิมซ้ำ",
+      "rule": "Empire life cycle: rise → peak → overstretch → collapse · สหรัฐฯ อยู่ที่ overstretch",
+      "watch": [
+        "US military bases worldwide",
+        "debt-to-GDP"
+      ],
+      "up": [],
+      "down": []
+    },
+    {
+      "id": "gold-jiang",
+      "emoji": "💎",
+      "name": "ทองคำ = Safe Haven",
+      "clips": 7,
+      "desc": "ทองขึ้นเมื่อความเชื่อในระบบเงินกระดาษลด",
+      "rule": "Empire ล่ม = เงินของ empire ล่ม = ทองขึ้น",
+      "watch": [
+        "ราคาทอง",
+        "central bank buying"
+      ],
+      "up": [
+        "GC=F",
+        "GLD"
+      ],
+      "down": []
+    },
+    {
+      "id": "psychohistory",
+      "emoji": "🔬",
+      "name": "Psychohistory (Asimov)",
+      "clips": 6,
+      "desc": "แรงบันดาลใจจาก Foundation ของ Asimov — ใช้คณิตศาสตร์ทำนายพฤติกรรมมนุษย์",
+      "rule": "ประวัติศาสตร์ไม่สุ่ม แต่มี pattern ที่ทำนายได้ถ้าเห็น incentive ที่ถูกต้อง",
+      "watch": [],
+      "up": [],
+      "down": []
+    }
+  ],
+  "jiangPredictions": [
+    {
+      "date": "2024-06",
+      "text": "Trump จะชนะเลือกตั้ง 2024",
+      "status": "verified",
+      "result": "✓ ชนะจริง"
+    },
+    {
+      "date": "2024-06",
+      "text": "สหรัฐฯ จะทำสงครามกับอิหร่าน",
+      "status": "verified",
+      "result": "✓ เกิดขึ้นจริง 2026"
+    },
+    {
+      "date": "2026-03",
+      "text": "สหรัฐฯ จะแพ้สงครามอิหร่าน (attrition)",
+      "status": "pending"
+    },
+    {
+      "date": "2026-03",
+      "text": "สหรัฐฯ จะล่มสลาย ~2026-2027",
+      "status": "pending"
+    },
+    {
+      "date": "2026-08",
+      "text": "Xi Visits Trump = การยอมจำนนของสหรัฐฯ",
+      "status": "pending",
+      "clip": "q7GdLK1xwAo"
+    },
+    {
+      "date": "2026-08",
+      "text": "US Ground Invasion = จุดเปลี่ยนสู่ collapse",
+      "status": "pending",
+      "clip": "A9Sr-4c-3Tg"
+    },
+    {
+      "date": "2026-09",
+      "text": "Spain blackmail = EU แตกแยก",
+      "status": "pending",
+      "clip": "Z1G6WI1Q0M8"
+    }
+  ],
+  "compareView": {
+    "agree": [
+      {
+        "topic": "สหรัฐฯ กำลังตกต่ำ",
+        "thaweesak": "วัฏจักร 120 ปี + หนี้ + CRE พัง",
+        "jiang": "Empire overstretch + Iran war = collapse"
+      },
+      {
+        "topic": "จีน/BRICS ขึ้น",
+        "thaweesak": "จีน self-sufficient + ทำลาย USD hegemony",
+        "jiang": "Multipolar world + BRICS payment system"
+      },
+      {
+        "topic": "สงครามครั้งที่ 3 เริ่มแล้ว",
+        "thaweesak": "สงคราม = กลไกล้างหนี้",
+        "jiang": "Eschatological war ที่เปลี่ยนโลกแบบถาวร"
+      },
+      {
+        "topic": "ทองคำ = safe haven",
+        "thaweesuk": "ถือจนจบสงคราม เป้า 0k",
+        "jiang": "Empire ล่ม = เงินกระดาษล่ม = ทองขึ้น"
+      },
+      {
+        "topic": "ญี่ปุ่นสำคัญ",
+        "thaweesakh": "Mitsubishi Heavy = Japan rearmament",
+        "jiang": "ญี่ปุ่น = จุดชี้ขาดเอเชีย ต้องเลือกข้าง"
+      },
+      {
+        "topic": "น้ำมัน = อาวุธ",
+        "thaweesakh": "ช่องแคบฮอร์มุซชี้ขาด + อ่าวไทย",
+        "jiang": "Iran คุม Hormuz = คุมต้นทุนโลก"
+      }
+    ],
+    "differ": [
+      {
+        "topic": "วิธีวิเคราะห์",
+        "thaweesakh": "เศรษฐกิจมหภาค + พันธบัตร + insider",
+        "jiang": "Game theory + historical analogy + psychology"
+      },
+      {
+        "topic": "AI/Data Center",
+        "thaweesakh": "AI bubble = ความเสี่ยง (OpenAI overfunded)",
+        "jiang": "AI = โครงสร้างอำนาจใหม่ (ใครคุม = คุมโลก)"
+      },
+      {
+        "topic": "ระยะเวลา",
+        "thaweesakh": "วัฏจักร 120 ปี (ค่อยๆ เปลี่ยน)",
+        "jiang": "Collapse แบบเร็ว ~2026-2027"
+      },
+      {
+        "topic": "ไทย",
+        "thaweesakh": "ไทย = จุดยุทธศาสตร์ + ที่ดินแพง",
+        "jiang": "ไม่พูดถึงไทยโดยตรง"
+      }
     ]
   }
 }
