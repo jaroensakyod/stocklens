@@ -11,7 +11,7 @@ interface Stock { t: string; n: string; why: string }
 interface Theme { name: string; why: string; stocks: Stock[] }
 interface Rung { id: string; title: string; desc: string; themes: Theme[] }
 interface Ipo { name: string; ticker: string; country: string; what: string; ipo: string; now: string; note: string }
-interface Watch { name: string; country: string; cat: string; product: string; gov: string; deals: string; valuation: string; expect: string; flag: string }
+interface Watch { name: string; country: string; cat: string; product: string; gov: string; deals: string; valuation: string; expect: string; flag: string; jev?: number }
 
 const D = data as unknown as { asOf: string; rungs: Rung[]; recentIpo: Ipo[]; watchlist: Watch[] };
 
@@ -78,6 +78,9 @@ export default function AiOppPage() {
         </div>
 
         {tab === "watch" && (
+          <p className="px-4 pt-1 pb-2 text-[11px] text-zinc-600">รายการใหม่ปี 2026 5 ราย (Cursor, Harvey, Anduril, Tenstorrent, Apptronik) คัดเลือกและจัดอันดับโดย 🧠 Jev — เกณฑ์: รายได้จริง สัญญาใหญ่ เทคโนโลยีแตกต่าง โอกาส IPO · คะแนน Jev = ความน่าจะเป็นที่ให้ต่อ &quot;ควรเพิ่มก่อน&quot;</p>
+        )}
+        {tab === "watch" && (
           <div className="p-4 grid lg:grid-cols-2 gap-3">
             {D.watchlist.map((w) => (
               <div key={w.name} className="rounded-xl border border-base-700/60 bg-base-900 p-4">
@@ -85,7 +88,8 @@ export default function AiOppPage() {
                   <span className="text-lg">{w.flag}</span>
                   <span className="text-sm font-bold text-zinc-50">{w.name}</span>
                   <span className="text-xs">{w.country}</span>
-                  <span className="chip bg-base-800 text-zinc-400 border border-base-700 !text-[10px] ml-auto shrink-0">{w.cat}</span>
+                  <span className="chip bg-base-800 text-zinc-400 border border-base-700 !text-[10px] shrink-0">{w.cat}</span>
+                  {w.jev !== undefined && <span title="คะแนนความมีค่าต่อการจับตา จัดอันดับโดย Jev (TypeSafe System One)" className="chip bg-accent/15 text-accent-soft border border-accent/30 !text-[10px] ml-auto num">🧠 Jev {(w.jev * 100).toFixed(0)}</span>}
                 </div>
                 <Field label="ผลิตภัณฑ์" v={w.product} />
                 <Field label="สัญญาภาครัฐ" v={w.gov} />
