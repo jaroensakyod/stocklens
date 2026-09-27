@@ -233,6 +233,14 @@ export default function AtlasPage() {
 
                 {/* เชือกแดง */}
                 <svg className="absolute inset-0 pointer-events-none" width={ATLAS.meta.boardW} height={ATLAS.meta.boardH}>
+                  <defs>
+                    <marker id="ah" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="4.4" markerHeight="4.4" orient="auto-start-reverse">
+                      <path d="M 0 1 L 10 5 L 0 9 z" fill="#a8341f" />
+                    </marker>
+                    <marker id="ahh" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse">
+                      <path d="M 0 1 L 10 5 L 0 9 z" fill="#f87171" />
+                    </marker>
+                  </defs>
                   {ATLAS.edges.map((e, i) => {
                     const a = byId.get(e.from), b = byId.get(e.to);
                     if (!a || !b) return null;
@@ -245,7 +253,7 @@ export default function AtlasPage() {
                     const d = `M ${x1} ${y1} Q ${(x1 + x2) / 2} ${(y1 + y2) / 2 + sag} ${x2} ${y2}`;
                     return (
                       <g key={i}>
-                        <path d={d} fill="none" stroke={hot ? "#f87171" : "#a8341f"} strokeWidth={hot ? 3.4 : 2.1} opacity={dim ? 0.05 : hot ? 0.95 : 0.5} />
+                        <path d={d} fill="none" stroke={hot ? "#f87171" : "#a8341f"} strokeWidth={hot ? 3.4 : 2.1} opacity={dim ? 0.05 : hot ? 0.95 : 0.5} markerEnd={dim ? undefined : hot ? "url(#ahh)" : "url(#ah)"} />
                         {hot && !dim && (
                           <text x={(x1 + x2) / 2} y={(y1 + y2) / 2 + sag + 4} textAnchor="middle" fontSize="13" fill="#fecaca" style={{ paintOrder: "stroke", stroke: "#1c130c", strokeWidth: 3 }}>
                             {e.label}
@@ -301,7 +309,7 @@ export default function AtlasPage() {
           </div>
           <div className="px-3 py-2 border-t border-base-700/60 text-[11px] text-zinc-500 flex flex-wrap gap-x-4 gap-y-1">
             <span>🖱️ ลากเพื่อเลื่อน · คลิกการ์ดเพื่ออ่าน · กระเป๋าซ้ายสุด=โบราณศาสตร์เงิน (ไม่ตามสเกลเวลา)</span>
-            <span>เส้นสีแดง = ความเชื่อมโยงเหตุ-ผล (ชี้การ์ดเพื่อเห็นป้ายกำกับ)</span>
+            <span>เส้นสีแดง = ความเชื่อมโยงเหตุ-ผล <b className="text-zinc-300">→ หัวลูกศรชี้ &quot;สิ่งที่ถูกกระทบ&quot;</b> (ชี้การ์ดเพื่อเห็นป้ายกำกับ)</span>
             <span>ซ้าย→ขวา = ค.ศ. 1450→2026 · แถบบน=ระบบเงิน กลาง=สงคราม/วิกฤต ล่าง=อำนาจ/สถาบัน · ขวาสุด=Reset</span>
           </div>
         </div>
