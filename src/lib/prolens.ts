@@ -1,4 +1,4 @@
-// ===== ProLens — วิเคราะห์ความเชื่อมโยงโลก ตามกรอบ อ.ทวีสุข =====
+// ===== ProLens — วิเคราะห์ความเชื่อมโยงโลก ตามกรอบ AT =====
 import { getSupernova } from "./supernova";
 import { jevAsk } from "./typesafe";
 import { IMPACT_NODES } from "./radar";
@@ -46,5 +46,5 @@ export async function analyzeEventProlens(text: string): Promise<{ signals: Prol
   const signals = (methodology.signals as ProlensSignal[]).filter(s => matchedIds.includes(s.id));
   // 2) โยงห่วงโซ่จาก impact-map
   const chains = IMPACT_NODES.filter(n => { const nm = n.name.toLowerCase(); return matchedIds.some(id => { const sig = methodology.signals.find(s => s.id === id); if (!sig) return false; return sig.up.some(a => nm.includes(a.toLowerCase().split(".")[0])) || sig.down.some(a => nm.includes(a.toLowerCase().split(".")[0])); }); }).slice(0, 5).map(n => ({ name: n.name, stocks: n.stocks.slice(0, 4).map(s => s.ticker) }));
-  return { signals, chains, note: "วิเคราะห์ตามกรอบ อ.ทวีสุข — ไม่ใช่คำแนะนำการลงทุน" };
+  return { signals, chains, note: "วิเคราะห์ตามกรอบ AT — ไม่ใช่คำแนะนำการลงทุน" };
 }

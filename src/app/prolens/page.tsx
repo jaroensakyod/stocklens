@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useCan } from "@/lib/authContext";
 import LockGate from "@/components/LockGate";
 
-// 🔬 ProLens — วิเคราะห์ความเชื่อมโยงโลก ตามกรอบ อ.ทวีสุข ธรรมศักดิ์
+// 🔬 ProLens — วิเคราะห์ความเชื่อมโยงโลก ตามกรอบ AT
 // ข้อมูลจาก transcript 27 คลิป (1 ล้านตัวอักษร) + SYSTEM ARCHITECTURE 8 เล่ม
 interface Signal { id: string; emoji: string; name: string; clips: number; desc: string; rule: string; watch: string[]; up: string[]; down: string[]; status?: string; currentValue?: string }
 interface Prediction { date: string; text: string; status: string; result?: string; note?: string }
@@ -48,7 +48,7 @@ export default function ProlensPage() {
       <div>
         <h1 className="text-2xl font-bold text-zinc-50">🔬 ProLens — วิเคราะห์ความเชื่อมโยงโลก</h1>
         <p className="text-sm text-zinc-400 mt-1 leading-relaxed">
-          ตามกรอบวิเคราะห์ของ <b className="text-zinc-200">อ.ทวีสุข ธรรมศักดิ์</b> — สกัดจาก transcript 27 คลิป YouTube (1 ล้านตัวอักษร) + หนังสือ SYSTEM ARCHITECTURE 8 เล่ม + The House of Rothschild
+          ตามกรอบวิเคราะห์ของ <b className="text-zinc-200">AT</b> — สกัดจาก transcript 27 คลิป YouTube (1 ล้านตัวอักษร) + หนังสือ SYSTEM ARCHITECTURE 8 เล่ม + The House of Rothschild
         </p>
       </div>
 
@@ -199,20 +199,20 @@ export default function ProlensPage() {
             )}
           </>
         ) : (
-          <LockGate need="starter" title="🔓 เปิด Event Analyzer" desc="พิมพ์เหตุการณ์ แล้วระบบวิเคราะห์ผ่าน 14 หลักการของ อ.ทวีสุข" />
+          <LockGate need="starter" title="🔓 เปิด Event Analyzer" desc="พิมพ์เหตุการณ์ แล้วระบบวิเคราะห์ผ่าน 14 หลักการของ AT" />
         )}
       </div>
 
       {/* 6. Dual Lens: ทวีสุข vs Jiang */}
       {data.jiangSignals && data.jiangSignals.length > 0 && (
         <div className="card p-5">
-          <h2 className="text-sm font-bold text-zinc-100 mb-1">🧠 Dual Lens — ทวีสุข × Professor Jiang</h2>
+          <h2 className="text-sm font-bold text-zinc-100 mb-1">🧠 Dual Lens — ทวีสุข × PJ</h2>
           <p className="text-[10px] text-zinc-600 mb-4">
             เทียบกรอบคิดของ 2 นักวิเคราะห์ที่ทำนายแม่นที่สุดในโลกปัจจุบัน — จุดที่เห็นตรงกัน = สัญญาณแรง (High Conviction)
           </p>
 
           {/* Jiang's Signals */}
-          <h3 className="text-xs font-bold text-zinc-300 mb-2">📜 Professor Jiang (Predictive History) — 16 หลักการ</h3>
+          <h3 className="text-xs font-bold text-zinc-300 mb-2">📜 PJ (Predictive History) — 16 หลักการ</h3>
           <p className="text-[10px] text-zinc-600 mb-3">Game Theory + Psychohistory + 2,000 ปีของจักรวรรดิ · 4.1 ล้านตัวอักษรจาก 16 คลิป</p>
           {can.starter ? (
             <div className="space-y-2 mb-6">

@@ -1,5 +1,5 @@
 // ===== News Web — แผนผังข่าวเชื่อมโยงแบบหนัง + Dual-Lens AI แชท =====
-// สองส่วน: (1) SVG node graph แสดง "ข่าวนี้ → เกิดนี้ → กระทบนี้" (2) แชทที่ตอบตามมุมมอง อ.ทวีสุข + Prof.Jiang
+// สองส่วน: (1) SVG node graph แสดง "ข่าวนี้ → เกิดนี้ → กระทบนี้" (2) แชทที่ตอบตามมุมมอง AT + Prof.Jiang
 import { computeThemeHeat, IMPACT_NODES } from "./radar";
 import { jevAsk, scoreNews } from "./typesafe";
 import { getNews } from "./yahoo";
