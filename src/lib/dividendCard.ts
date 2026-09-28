@@ -7,7 +7,7 @@ import universe from "@/data/universe.json";
 import setWatch from "@/data/set-watchlist.json";
 
 // ผู้สมัครไทย: หุ้นสภาพคล่องสูงที่จ่ายปันผลเป็นประจำ (คัดจาก set-watchlist — เครื่องยิงเองตัดที่ไม่ผ่านเกณฑ์)
-const TH_DIV_CANDIDATES = [
+export const TH_DIV_CANDIDATES = [
   "PTT.BK", "PTTEP.BK", "TOP.BK", "IRPC.BK", "BANPU.BK", "GPSC.BK", "GULF.BK", "EGCO.BK", "RATCH.BK",
   "AOT.BK", "BEM.BK", "BTS.BK", "MINT.BK", "CENTEL.BK", "CPALL.BK", "HMPRO.BK", "COM7.BK", "CPF.BK", "SAPPE.BK",
   "BDMS.BK", "BH.BK", "BBL.BK", "KBANK.BK", "SCB.BK", "KTB.BK", "TISCO.BK", "KTC.BK",

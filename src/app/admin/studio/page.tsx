@@ -8,21 +8,41 @@ import Link from "next/link";
 import PortfolioCard, { type CardCopy } from "@/components/PortfolioCard";
 import DividendStreakCard from "@/components/DividendStreakCard";
 import XdMythCard from "@/components/XdMythCard";
+import RecapCard from "@/components/RecapCard";
+import DcaCard from "@/components/DcaCard";
+import XdCalendarCard from "@/components/XdCalendarCard";
+import GuruCard from "@/components/GuruCard";
+import MacroChainCard from "@/components/MacroChainCard";
 import type { PortfolioCardData } from "@/lib/portfolioCard";
 import type { DividendStreakData, XdMythData } from "@/lib/dividendCard";
+import type { RecapData, DcaData, XdCalData, GuruCardData, MacroCardData } from "@/lib/contentCards2";
 
 interface Row {
   symbol: string;
   weight: string;
 }
 
-type CardType = "portfolio" | "streak" | "xd";
+type CardType = "portfolio" | "streak" | "xd" | "recap" | "dca" | "calendar" | "gurus" | "macro";
 
 const CARD_TYPES: { id: CardType; label: string }[] = [
-  { id: "portfolio", label: "📊 จัดพอร์ต" },
+  { id: "recap", label: "📊 สรุปตลาดวันนี้" },
+  { id: "dca", label: "⏪ ถ้าลงเมื่อวาน" },
+  { id: "calendar", label: "🗓️ ปฏิทิน XD" },
+  { id: "gurus", label: "🦈 กูรู 13F" },
+  { id: "macro", label: "😱 ห่วงโซ่มหภาค" },
+  { id: "portfolio", label: "💼 จัดพอร์ต" },
   { id: "streak", label: "💰 ปันผลต่อเนื่อง" },
   { id: "xd", label: "📅 ตำนาน XD" },
 ];
+
+const GURU_QUICK: { id: string; label: string }[] = [
+  { id: "", label: "อัตโนมัติ (ตัวแรก)" },
+  { id: "buffett", label: "🍦 Buffett" },
+  { id: "renTech", label: "🧮 Simons" },
+  { id: "bridgewater", label: "⚖️ Dalio" },
+];
+
+const MACRO_QUICK = ["น้ำมันราคาขึ้นแรง 10%", "เฟดประกาศลดดอกเบี้ย", "จีนออกมาตรการกระตุ้นเศรษฐกิจรอบใหญ่", "สงครามตะวันออกกลางบานปลาย"];
 
 const PRESETS: { id: string; label: string; oldP: Row[]; newP: Row[] }[] = [
   {
@@ -83,6 +103,19 @@ export default function StudioPage() {
   const [xdSym, setXdSym] = useState("PTT.BK");
   const [xData, setXData] = useState<XdMythData | null>(null);
 
+  // --- ชุดใหม่ 5 การ์ด ---
+  const [recapData, setRecapData] = useState<RecapData | null>(null);
+  const [dcaSym, setDcaSym] = useState("VOO");
+  const [dcaYears, setDcaYears] = useState(5);
+  const [dcaMonthly, setDcaMonthly] = useState(1000);
+  const [dcaData, setDcaData] = useState<DcaData | null>(null);
+  const [calMonths, setCalMonths] = useState(1);
+  const [calData, setCalData] = useState<XdCalData | null>(null);
+  const [guruId, setGuruId] = useState("");
+  const [guruData, setGuruData] = useState<GuruCardData | null>(null);
+  const [macroText, setMacroText] = useState(MACRO_QUICK[0]);
+  const [macroData, setMacroData] = useState<MacroCardData | null>(null);
+
   const [copy, setCopy] = useState<CardCopy>(EMPTY_COPY);
   const [jevText, setJevText] = useState<string | null>(null);
   const [busy, setBusy] = useState<"" | "compute" | "copy" | "png">("");
@@ -126,9 +159,23 @@ export default function StudioPage() {
       } else if (cardType === "streak") {
         const j = await post({ action: "compute", market, minYears, symbols: customSyms.split(/[,\s]+/).map((s) => s.trim().toUpperCase()).filter(Boolean) }, "/api/admin/dividend-card");
         setSData(j.data);
-      } else {
+      } else if (cardType === "xd") {
         const j = await post({ action: "compute", kind: "xd", symbol: xdSym }, "/api/admin/dividend-card");
         setXData(j.data);
+      } else {
+        // ชุดใหม่ 5 การ์ด
+        const payload =
+          cardType === "recap" ? { kind: "recap" } :
+          cardType === "dca" ? { kind: "dca", symbol: dcaSym, years: dcaYears, monthlyThb: dcaMonthly } :
+          cardType === "calendar" ? { kind: "calendar", monthsAhead: calMonths } :
+          cardType === "gurus" ? { kind: "gurus", guruId } :
+          { kind: "macro", text: macroText };
+        const j = await post({ action: "compute", ...payload }, "/api/admin/studio-cards");
+        if (cardType === "recap") setRecapData(j.data);
+        else if (cardType === "dca") setDcaData(j.data);
+        else if (cardType === "calendar") setCalData(j.data);
+        else if (cardType === "gurus") setGuruData(j.data);
+        else setMacroData(j.data);
       }
       setCopy(EMPTY_COPY);
       setJevText(null);
@@ -140,18 +187,33 @@ export default function StudioPage() {
   }
 
   async function aiCopy() {
-    const payload =
-      cardType === "portfolio"
+    const isNew = ["recap", "dca", "calendar", "gurus", "macro"].includes(cardType);
+    const newKind = cardType as "recap" | "dca" | "calendar" | "gurus" | "macro";
+    const newPayload =
+      cardType === "recap" ? { kind: "recap", data: recapData } :
+      cardType === "dca" ? { kind: "dca", data: dcaData } :
+      cardType === "calendar" ? { kind: "calendar", data: calData } :
+      cardType === "gurus" ? { kind: "gurus", data: guruData } :
+      { kind: "macro", data: macroData };
+    const payload = isNew
+      ? { action: "copy", ...newPayload }
+      : cardType === "portfolio"
         ? { action: "copy", data: pData }
         : cardType === "streak"
           ? { action: "copy", kind: "streak", data: sData }
           : { action: "copy", kind: "xd", data: xData };
-    const hasData = cardType === "portfolio" ? pData : cardType === "streak" ? sData : xData;
+    const hasData = isNew
+      ? !!(cardType === "recap" ? recapData : cardType === "dca" ? dcaData : cardType === "calendar" ? calData : cardType === "gurus" ? guruData : macroData)
+      : cardType === "portfolio"
+        ? pData
+        : cardType === "streak"
+          ? sData
+          : xData;
     if (!hasData) return;
     setBusy("copy");
     setErr(null);
     try {
-      const j = await post(payload, cardType === "portfolio" ? "/api/admin/portfolio-card" : "/api/admin/dividend-card");
+      const j = await post(payload, isNew ? "/api/admin/studio-cards" : cardType === "portfolio" ? "/api/admin/portfolio-card" : "/api/admin/dividend-card");
       setCopy({ ...EMPTY_COPY, ...j.copy, bullets: [...(j.copy.bullets ?? []), "", "", "", ""].slice(0, 4) });
       setJevText(j.jevText ?? null);
     } catch (e) {
@@ -234,10 +296,24 @@ export default function StudioPage() {
   }
 
   const previewScale = 0.33;
-  const hasData = cardType === "portfolio" ? pData : cardType === "streak" ? sData : xData;
+  const hasData =
+    cardType === "portfolio" ? pData :
+    cardType === "streak" ? sData :
+    cardType === "xd" ? xData :
+    cardType === "recap" ? recapData :
+    cardType === "dca" ? dcaData :
+    cardType === "calendar" ? calData :
+    cardType === "gurus" ? guruData : macroData;
 
   const computeBtnLabel =
-    cardType === "portfolio" ? "📊 คำนวณจากราคาจริง" : cardType === "streak" ? "🔍 สแกนประวัติปันผลจริง" : "📅 หางวด XD ล่าสุด";
+    cardType === "portfolio" ? "📊 คำนวณจากราคาจริง" :
+    cardType === "streak" ? "🔍 สแกนประวัติปันผลจริง" :
+    cardType === "xd" ? "📅 หางวด XD ล่าสุด" :
+    cardType === "recap" ? "📊 ดึงข้อมูลตลาดวันนี้" :
+    cardType === "dca" ? "⏪ คำนวณ DCA ย้อนหลัง" :
+    cardType === "calendar" ? "🗓️ คาดการณ์ XD เดือนหน้า" :
+    cardType === "gurus" ? "🦈 ดึงพอร์ต 13F ล่าสุด" :
+    "😱 วิเคราะห์ห่วงโซ่";
 
   return (
     <div className="max-w-6xl mx-auto space-y-4">
@@ -367,6 +443,87 @@ export default function StudioPage() {
         </div>
       )}
 
+      {cardType === "recap" && (
+        <div className="card p-3">
+          <p className="text-xs text-zinc-500 leading-relaxed">
+            ดึงข้อมูลจริงของวันนี้: ดัชนี 6 ตลาด · ทอง/น้ำมัน/BTC + USD/THB · หุ้นขึ้น-ลงแรงสุด · ข่าวเด่นพร้อมป้าย 🟢บวก/🔴ลบ โดย Jev — กดคำนวณแล้วได้การ์ดทันที (cache 10 นาที)
+          </p>
+        </div>
+      )}
+
+      {cardType === "dca" && (
+        <div className="card p-3 flex flex-wrap items-end gap-3">
+          <div>
+            <div className="text-[10px] text-zinc-500 mb-1">สินทรัพย์ (VOO / NVDA / BTC-USD / GC=F / PTT.BK)</div>
+            <input className="input !py-1 text-sm !w-40" value={dcaSym} onChange={(e) => setDcaSym(e.target.value.toUpperCase())} />
+          </div>
+          <div>
+            <div className="text-[10px] text-zinc-500 mb-1">ลงเดือนละ (บาท)</div>
+            <input className="input num !py-1 !w-28" value={dcaMonthly} inputMode="numeric" onChange={(e) => setDcaMonthly(Number(e.target.value) || 0)} />
+          </div>
+          <div>
+            <div className="text-[10px] text-zinc-500 mb-1">ระยะเวลา</div>
+            <div className="flex gap-1">
+              {[1, 3, 5, 10].map((y) => (
+                <button key={y} onClick={() => setDcaYears(y)} className={`chip num ${dcaYears === y ? "bg-accent text-zinc-950" : "bg-base-800 text-zinc-400 border border-base-700"}`}>
+                  {y} ปี
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="flex gap-1 flex-wrap">
+            {["VOO", "QQQ", "NVDA", "BTC-USD", "GC=F", "PTT.BK"].map((s) => (
+              <button key={s} onClick={() => setDcaSym(s)} className={`chip num !text-[11px] ${dcaSym === s ? "bg-accent text-zinc-950" : "bg-base-800 text-zinc-400 border border-base-700"}`}>
+                {s}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {cardType === "calendar" && (
+        <div className="card p-3 flex flex-wrap items-end gap-3">
+          <div>
+            <div className="text-[10px] text-zinc-500 mb-1">เดือนเป้าหมาย</div>
+            <div className="flex gap-1">
+              {[1, 2, 3].map((m) => (
+                <button key={m} onClick={() => setCalMonths(m)} className={`chip num ${calMonths === m ? "bg-accent text-zinc-950" : "bg-base-800 text-zinc-400 border border-base-700"}`}>
+                  {m} เดือนข้างหน้า
+                </button>
+              ))}
+            </div>
+          </div>
+          <p className="text-xs text-zinc-500 flex-1 min-w-[220px] leading-relaxed">
+            คาดการณ์วัน XD จากรอบการจ่ายจริงของปีก่อน (ไทย ~30 ตัว + อเมริกันจ่ายรายเดือน) — บนการ์ดระบุชัดว่าเป็นคาดการณ์ ต้องเช็คประกาศจริง
+          </p>
+        </div>
+      )}
+
+      {cardType === "gurus" && (
+        <div className="card p-3 flex flex-wrap items-end gap-2">
+          <div className="text-[10px] text-zinc-500 mb-1 w-full">เลือกกูรู (ข้อมูล 13F จริงจาก SEC EDGAR)</div>
+          {GURU_QUICK.map((g) => (
+            <button key={g.id || "auto"} onClick={() => setGuruId(g.id)} className={`chip !text-[11px] ${guruId === g.id ? "bg-accent text-zinc-950" : "bg-base-800 text-zinc-400 border border-base-700"}`}>
+              {g.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {cardType === "macro" && (
+        <div className="card p-3 space-y-2">
+          <div className="text-[10px] text-zinc-500">เหตุการณ์/ข่าวที่จะวิเคราะห์</div>
+          <input className="input !py-1 text-sm" value={macroText} onChange={(e) => setMacroText(e.target.value)} placeholder="เช่น น้ำมันขึ้นแรง 10% / เฟดลดดอกเบี้ย / จีนกระตุ้นเศรษฐกิจ" />
+          <div className="flex gap-1 flex-wrap">
+            {MACRO_QUICK.map((m) => (
+              <button key={m} onClick={() => setMacroText(m)} className={`chip !text-[11px] ${macroText === m ? "bg-accent text-zinc-950" : "bg-base-800 text-zinc-400 border border-base-700"}`}>
+                {m.slice(0, 24)}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       <button className="btn-primary" onClick={compute} disabled={busy !== ""}>
         {busy === "compute" ? "⏳ กำลังคำนวณ…" : computeBtnLabel}
       </button>
@@ -389,6 +546,11 @@ export default function StudioPage() {
                   {cardType === "portfolio" && pData && <PortfolioCard data={pData} copy={copy} cardRef={cardRef} />}
                   {cardType === "streak" && sData && <DividendStreakCard data={sData} copy={copy} cardRef={cardRef} />}
                   {cardType === "xd" && xData && <XdMythCard data={xData} copy={copy} cardRef={cardRef} />}
+                  {cardType === "recap" && recapData && <RecapCard data={recapData} copy={copy} cardRef={cardRef} />}
+                  {cardType === "dca" && dcaData && <DcaCard data={dcaData} copy={copy} cardRef={cardRef} />}
+                  {cardType === "calendar" && calData && <XdCalendarCard data={calData} copy={copy} cardRef={cardRef} />}
+                  {cardType === "gurus" && guruData && <GuruCard data={guruData} copy={copy} cardRef={cardRef} />}
+                  {cardType === "macro" && macroData && <MacroChainCard data={macroData} copy={copy} cardRef={cardRef} />}
                 </div>
               </div>
             </div>
