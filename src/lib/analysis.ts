@@ -44,7 +44,7 @@ export async function buildAnalysis(ticker: string): Promise<StockAnalysis & { u
     const locale = isThai ? "hl=th&gl=TH&ceid=TH:th" : "hl=en-US&gl=US&ceid=US:en";
     const suffix = isThai ? "+หุ้น" : "+stock";
     try {
-      const rssRes = await fetch(`https://news.google.com/rss/search?q=${encodeURIComponent(q2)}${suffix}&${locale}`, { headers: { "User-Agent": "Mozilla/5.0" }, signal: AbortSignal.timeout(10_000) });
+      const rssRes = await fetch(`https://news.google.com/rss/search?q=${encodeURIComponent(q2)}${suffix}+when:1m&${locale}`, { headers: { "User-Agent": "Mozilla/5.0" }, signal: AbortSignal.timeout(10_000) });
       if (rssRes.ok) {
         const xml = await rssRes.text();
         const items = (xml.match(/<item>[\s\S]*?<\/item>/g) ?? []).slice(0, 10).map(item => {

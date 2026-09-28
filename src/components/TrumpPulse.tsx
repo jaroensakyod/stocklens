@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { prettySym } from "@/lib/prettySymbol";
 
 // 🇺🇸 Trump Pulse — โพสต์/แถลงการณ์ล่าสุด + Jev วิเคราะห์ + หุ้นที่โดน (โชว์หน้าแรก)
 
@@ -17,13 +18,22 @@ const DIR = (d: string | null) => d === "bullish" ? "🟢" : d === "bearish" ? "
 export default function TrumpPulse() {
   const [items, setItems] = useState<PulseItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchedAt, setFetchedAt] = useState<number | null>(null);
+  const [now, setNow] = useState(Date.now());
 
   useEffect(() => {
-    fetch("/api/political?mode=trump")
-      .then(r => r.json())
-      .then(j => setItems(j.items ?? []))
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    const load = () =>
+      fetch("/api/political?mode=trump")
+        .then(r => r.json())
+        .then(j => {
+          if (j.items?.length) { setItems(j.items); setFetchedAt(Date.now()); }
+        })
+        .catch(() => {})
+        .finally(() => setLoading(false));
+    load();
+    const timer = setInterval(load, 10 * 60_000); // รีเฟรชเองทุก 10 นาที (server cache 10 นาที)
+    const tick = setInterval(() => setNow(Date.now()), 30_000);
+    return () => { clearInterval(timer); clearInterval(tick); };
   }, []);
 
   if (loading) return null;
@@ -51,7 +61,7 @@ export default function TrumpPulse() {
                 )}
                 {n.stocks.slice(0, 3).map(s => (
                   <Link key={s.t} href={`/stock/${encodeURIComponent(s.t)}`} className="chip bg-base-800 text-zinc-300 border border-base-700 !text-[9px] hover:border-accent/40">
-                    {s.t}
+                    {prettySym(s.t)}
                     {s.chgPct !== null && <span className={s.chgPct >= 0 ? "text-up ml-0.5" : "text-down ml-0.5"}>{s.chgPct >= 0 ? "+" : ""}{s.chgPct.toFixed(1)}%</span>}
                   </Link>
                 ))}
@@ -62,7 +72,7 @@ export default function TrumpPulse() {
       </div>
 
       <p className="text-[10px] text-zinc-600 mt-2 text-center">
-        Jev วิเคราะห์อัตโนมัติ · อัปเดตทุก 15 นาที · ทั้งสื่อหลัก (CNBC/Reuters) และสื่อเล็ก
+        Jev วิเคราะห์อัตโนมัติ · ข่าวสด ≤36 ชม. · รีเฟรชเองทุก 10 นาที{fetchedAt ? ` · อัปเดต ${Math.max(0, Math.round((now - fetchedAt) / 60000))} นาทีที่แล้ว` : ""}
       </p>
     </div>
   );

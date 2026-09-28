@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/authContext";
 import type { LatestFeed, LatestItem } from "@/lib/latestNews";
+import { prettySym } from "@/lib/prettySymbol";
 
 function timeAgo(t: number): string {
   const m = Math.max(0, Math.round((Date.now() - t) / 60000));
@@ -59,7 +60,7 @@ function StockChips({ item, highlight }: { item: LatestItem; highlight?: boolean
         const up = (s.chgPct ?? 0) >= 0;
         const inner = (
           <>
-            <span className="num font-semibold">{s.t.replace(".BK", "")}</span>
+            <span className="num font-semibold">{prettySym(s.t)}</span>
             {s.chgPct != null && (
               <span className={`num ml-1 ${up ? "text-up" : "text-down"}`}>
                 {up ? "+" : ""}

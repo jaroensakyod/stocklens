@@ -2,27 +2,29 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { prettySym } from "@/lib/prettySymbol";
 
-// 🇺🇸 Political Pulse — ข่าวการเมืองที่กระทบตลาด: auto-fetch + Jev + ผลกระทบหุ้นรายตัว
+// 🇺🇸 Political Pulse v3 — Jev จัดหัวข้อข่าว (Trump/ภาษี/เฟด/จีน/สงคราม/ไทย) + Gemini เขียนสรุปต่อหัวข้อ + หุ้นที่โดนกระทบ
 
-interface StockHit { t: string; price: number | null; chgPct: number | null; why: string }
+interface StockHit { t: string; chgPct: number | null }
 interface Item {
   title: string; source: string; time: number; link?: string; topic: string;
-  direction: string | null; impact: number | null; fedImplication: string | null;
-  stocks: StockHit[]; atlasCard: string | null;
+  direction: string | null; impact: number | null; stocks: StockHit[];
 }
+interface TopicSection { key: string; label: string; items: Item[]; summary: string | null }
 interface Feed {
-  items: Item[]; asOf: string;
+  asOf: string; topics: TopicSection[]; items: Item[]; aiSummaries: boolean;
   overall: { impact: number | null; direction: string | null; topRisk: string | null } | null;
 }
 interface Analysis {
-  impact: number | null; direction: string | null; fed: string | null;
-  sectors: string[]; stocks: { t: string; price: number | null; chgPct: number | null }[];
-  atlasCards: string[]; jevText: string; error?: string;
+  impact: number | null; direction: string | null; topic: string | null;
+  stocks: { t: string; price: number | null; chgPct: number | null }[];
+  jevText: string; error?: string;
 }
 
 const fmtTime = (t: number) => { const h = Math.floor((Date.now() - t) / 3600e3); return h < 1 ? "เมื่อสักครู่" : h < 24 ? `${h} ชม.` : `${Math.floor(h / 24)} วัน`; };
 const DIR_ICON = (d: string | null) => d === "bullish" ? "🟢" : d === "bearish" ? "🔴" : "⚪";
+const RISK_TH: Record<string, string> = { inflation: "เงินเฟ้อ/ดอกเบี้ย", war: "สงคราม", policy: "นโยบาย/กฎระเบียบ", china: "จีน/การค้า", election: "การเมือง" };
 
 export default function PoliticsPage() {
   const [feed, setFeed] = useState<Feed | null>(null);
@@ -42,7 +44,11 @@ export default function PoliticsPage() {
     setRefreshing(false);
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+    const timer = setInterval(() => load(), 10 * 60_000); // รีเฟรชเองทุก 10 นาที (server cache 20 นาที)
+    return () => clearInterval(timer);
+  }, []);
 
   const analyze = async () => {
     if (q.trim().length < 10) return;
@@ -60,7 +66,7 @@ export default function PoliticsPage() {
         <div>
           <h1 className="text-2xl font-bold text-zinc-50">🇺🇸 Political Pulse — ข่าวการเมือง × ผลกระทบหุ้น</h1>
           <p className="text-sm text-zinc-400 mt-1">
-            ข่าว Trump · Fed · จีน · สงคราม · การเมืองไทย — อัปเดตอัตโนมัติทุก 20 นาที พร้อม Jev วิเคราะห์ทิศทาง + <b className="text-zinc-200">ราคาหุ้นที่โดนกระทบแบบเรียลไทม์</b>
+            Jev คัดข่าวสด ≤3 วัน จัดเป็นหัวข้อ (Trump · ภาษี · เฟด · จีน · สงคราม · การเมืองไทย) — Gemini สรุปแต่ละหัวข้อ + <b className="text-zinc-200">ราคาหุ้นที่โดนกระทบ</b>
           </p>
         </div>
         <button className="btn-ghost !py-1.5 !px-3 !text-xs shrink-0" onClick={() => load(true)} disabled={refreshing}>
@@ -76,8 +82,8 @@ export default function PoliticsPage() {
               ภาพรวม: {DIR_ICON(feed.overall.direction)} {feed.overall.direction === "bullish" ? "หนุนหุ้น" : feed.overall.direction === "bearish" ? "กดหุ้น" : "สมดุล"}
               {feed.overall.impact !== null && <span className="text-zinc-500 ml-2 num">รุนแรง {feed.overall.impact.toFixed(0)}/3</span>}
             </span>
-            {feed.overall.topRisk && <span className="chip bg-amber-500/10 text-amber-400 border border-amber-500/25 !text-[11px]">⚠️ ความเสี่ยงหลัก: {feed.overall.topRisk === "inflation" ? "เงินเฟ้อ/ดอกเบี้ย" : feed.overall.topRisk === "war" ? "สงคราม" : feed.overall.topRisk === "policy" ? "นโยบาย" : feed.overall.topRisk === "china" ? "จีน/การค้า" : "การเมือง"}</span>}
-            <span className="text-[10px] text-zinc-600 ml-auto">อัปเดต {new Date(feed.asOf).toLocaleTimeString("th-TH")}</span>
+            {feed.overall.topRisk && <span className="chip bg-amber-500/10 text-amber-400 border border-amber-500/25 !text-[11px]">⚠️ ความเสี่ยงหลัก: {RISK_TH[feed.overall.topRisk] ?? feed.overall.topRisk}</span>}
+            <span className="text-[10px] text-zinc-600 ml-auto">อัปเดต {new Date(feed.asOf).toLocaleTimeString("th-TH")} · รีเฟรชเองทุก 10 นาที</span>
           </div>
         </div>
       )}
@@ -101,7 +107,7 @@ export default function PoliticsPage() {
                 <div className="flex flex-wrap gap-2">
                   {analysis.stocks.map(s => (
                     <Link key={s.t} href={`/stock/${encodeURIComponent(s.t)}`} className="flex items-center gap-2 bg-base-850 border border-base-700 rounded-lg px-3 py-1.5 hover:border-accent/50">
-                      <span className="text-sm font-bold text-zinc-100">{s.t}</span>
+                      <span className="text-sm font-bold text-zinc-100">{prettySym(s.t)}</span>
                       {s.price !== null && <span className="text-xs num text-zinc-300">{s.price >= 1000 ? s.price.toFixed(0) : s.price.toFixed(2)}</span>}
                       {s.chgPct !== null && <span className={`text-xs num ${s.chgPct >= 0 ? "text-up" : "text-down"}`}>{s.chgPct >= 0 ? "+" : ""}{s.chgPct.toFixed(1)}%</span>}
                     </Link>
@@ -109,52 +115,53 @@ export default function PoliticsPage() {
                 </div>
               </div>
             )}
-            {analysis.atlasCards.length > 0 && (
-              <Link href="/atlas" className="inline-flex gap-1.5 items-center text-xs text-purple-300 hover:underline">🕵️ บริบทใน Atlas ({analysis.atlasCards.length} การ์ด) →</Link>
-            )}
           </div>
         )}
       </div>
 
-      {/* Feed */}
+      {/* Feed แบ่งตามหัวข้อ */}
       {err && <div className="card p-6 text-sm text-down">{err}</div>}
-      {!feed && !err && <div className="card p-6 text-sm text-zinc-500">กำลังดึงข่าว…</div>}
+      {!feed && !err && <div className="card p-6 text-sm text-zinc-500">กำลังดึงข่าว + ให้ Jev จัดหัวข้อ… (ครั้งแรกใช้ ~20 วิ)</div>}
       {feed && feed.items.length === 0 && <div className="card p-6 text-sm text-zinc-500">ไม่มีข่าวตอนนี้ — กด ⟳ รีเฟรช</div>}
 
       {feed && feed.items.length > 0 && (
-        <div className="space-y-2">
-          {feed.items.map((n, i) => (
-            <div key={i} className={`card p-4 ${n.impact !== null && n.impact >= 2 ? "border-l-4 " + (n.direction === "bearish" ? "border-l-down" : n.direction === "bullish" ? "border-l-up" : "border-l-amber-500") : ""}`}>
-              <div className="flex items-start gap-3">
-                <span className="text-lg shrink-0">{n.topic}</span>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start gap-2 flex-wrap">
-                    <span className="text-lg shrink-0">{DIR_ICON(n.direction)}</span>
-                    <p className="text-sm text-zinc-100 leading-snug flex-1">{n.title}</p>
-                    {n.impact !== null && <span className={`chip !text-[10px] border shrink-0 ${n.impact >= 2 ? "bg-amber-500/10 text-amber-400 border-amber-500/25" : "bg-base-800 text-zinc-500 border-base-700"}`} title="ความรุนแรงจาก Jev">รุนแรง {n.impact.toFixed(0)}/3</span>}
-                    {n.fedImplication && n.fedImplication !== "neutral" && <span className="chip !text-[9px] bg-blue-500/10 text-blue-400 border border-blue-500/25 shrink-0">{n.fedImplication === "hawkish" ? "Fed ⚖️" : "Fed 🕊️"}</span>}
-                  </div>
-                  <div className="text-[10px] text-zinc-600 mt-1">{n.source} · {fmtTime(n.time)}</div>
-
-                  {/* หุ้นที่กระทบ + ราคา */}
-                  {n.stocks.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 mt-2">
-                      {n.stocks.map(s => (
-                        <Link key={s.t} href={`/stock/${encodeURIComponent(s.t)}`} className="flex items-center gap-1.5 bg-base-850 border border-base-700 rounded-md px-2 py-0.5 hover:border-accent/40 text-[11px]">
-                          <span className="font-semibold text-zinc-200">{s.t}</span>
-                          {s.price !== null && <span className="text-zinc-400 num">{s.price >= 1000 ? s.price.toFixed(0) : s.price.toFixed(2)}</span>}
-                          {s.chgPct !== null && <span className={`num ${s.chgPct >= 0 ? "text-up" : "text-down"}`}>{s.chgPct >= 0 ? "+" : ""}{s.chgPct.toFixed(1)}%</span>}
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-
-                  {n.atlasCard && (
-                    <Link href={`/atlas?card=${n.atlasCard}`} className="inline-flex mt-1.5 text-[10px] text-purple-300 hover:underline">🕵️ บริบท: {n.atlasCard} →</Link>
-                  )}
-                </div>
+        <div className="space-y-4">
+          {feed.topics.map((t) => (
+            <section key={t.key} className="card p-4">
+              <div className="flex items-center gap-2 flex-wrap mb-2">
+                <h2 className="text-sm font-bold text-zinc-100">{t.label}</h2>
+                <span className="chip bg-base-800 text-zinc-500 border border-base-700 !text-[10px] !py-0.5 num">{t.items.length} ข่าว</span>
               </div>
-            </div>
+              {t.summary && (
+                <p className="text-[13px] text-zinc-300 leading-relaxed bg-base-900 border-l-2 border-l-accent/60 rounded-lg px-3 py-2 mb-3">
+                  {t.summary} <span className="text-[9px] text-zinc-600">— สรุปโดย Gemini จากพาดหัวจริง</span>
+                </p>
+              )}
+              <div className="space-y-2">
+                {t.items.map((n, i) => (
+                  <div key={i} className={`flex items-start gap-2.5 bg-base-900 rounded-lg px-3 py-2 ${n.impact !== null && n.impact >= 2 ? (n.direction === "bearish" ? "border border-down/30" : n.direction === "bullish" ? "border border-up/30" : "border border-amber-500/30") : ""}`}>
+                    <span className="text-base shrink-0 mt-0.5">{DIR_ICON(n.direction)}</span>
+                    <div className="flex-1 min-w-0">
+                      {n.link ? (
+                        <a href={n.link} target="_blank" rel="noopener noreferrer" className="text-[13px] text-zinc-200 leading-snug hover:text-accent-soft">{n.title}</a>
+                      ) : (
+                        <p className="text-[13px] text-zinc-200 leading-snug">{n.title}</p>
+                      )}
+                      <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                        <span className="text-[10px] text-zinc-600">{n.source} · {fmtTime(n.time)}</span>
+                        {n.impact !== null && n.impact >= 2 && <span className="chip bg-amber-500/10 text-amber-400 border border-amber-500/25 !text-[9px]">รุนแรง {n.impact.toFixed(0)}/3</span>}
+                        {n.stocks.slice(0, 4).map(s => (
+                          <Link key={s.t} href={`/stock/${encodeURIComponent(s.t)}`} className="chip bg-base-800 text-zinc-300 border border-base-700 !text-[9px] hover:border-accent/40">
+                            {prettySym(s.t)}
+                            {s.chgPct !== null && <span className={s.chgPct >= 0 ? "text-up ml-0.5" : "text-down ml-0.5"}>{s.chgPct >= 0 ? "+" : ""}{s.chgPct.toFixed(1)}%</span>}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
           ))}
         </div>
       )}
