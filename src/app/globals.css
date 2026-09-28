@@ -249,6 +249,18 @@ body {
   color: #52525b;
   background: #fafafa;
 }
+/* กล่องคำเตือนท้ายรายงาน — พิมพ์อยู่ท้ายเนื้อหา PDF ทุกฉบับ */
+.rp-disclaimer {
+  border: 1px solid #e8d48b;
+  background: #fdf9ec;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-top: 14px;
+  font-size: 9.5px;
+  color: #57534e;
+  line-height: 1.65;
+  break-inside: avoid;
+}
 .rp-quote {
   font-size: 24px;
   font-weight: 700;

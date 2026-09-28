@@ -2,8 +2,9 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import type { Candle, StockAnalysis } from "@/lib/types";
+import type { Candle, Quote, StockAnalysis } from "@/lib/types";
 import { mdToHtml } from "@/lib/markdown";
+import { prettySym } from "@/lib/prettySymbol";
 
 // หน้ารายงานพร้อมพิมพ์เป็น PDF (Ctrl+P → Save as PDF) — มาตรฐานสิ่งพิมพ์ A4
 // หัวกระดาษแบรนด์สีตาม tier · ตารางมีหัวซ้ำทุกหน้า · section ไม่ขาดกลางหน้า · footer ทุกหน้า · watermark กันแชร์ไฟล์
@@ -77,11 +78,36 @@ function ReportInner() {
   const [aiText, setAiText] = useState("");
   const [candles, setCandles] = useState<Candle[]>([]);
   const [flash, setFlash] = useState<null | { headline: string; narrative?: string; engine: string; chains: { name: string; reason: string; stocks: { ticker: string; direction: string; reason: string }[] }[] }>(null);
+  // ข้อมูลส่วนเสริม Pro (Daily Brief): movers + อารมณ์ข่าว Jev + USD/THB
+  const [extra, setExtra] = useState<null | {
+    gainers: Quote[];
+    losers: Quote[];
+    usdThb: number;
+    mood: { dir: "bullish" | "bearish" | "neutral"; score: number } | null;
+    news: { title: string; source: string; lang: string; score: { sentiment: string; impact: number } | null }[];
+  }>(null);
 
   const isStockReport = type === "deepdive" || (type === "flash" && !!ticker);
 
   useEffect(() => {
-    if (type === "brief") fetch("/api/brief").then((r) => r.json()).then(setBrief).catch(() => {});
+    if (type === "brief") {
+      fetch("/api/brief").then((r) => r.json()).then(setBrief).catch(() => {});
+      if (tier === "pro") {
+        // ส่วนเฉพาะ Pro: ข้อมูลตลาดลึกกว่า + อารมณ์ข่าวจาก Jev
+        Promise.all([
+          fetch("/api/dashboard").then((r) => r.json()).catch(() => null),
+          fetch("/api/news/latest").then((r) => r.json()).catch(() => null),
+        ]).then(([d, n]) => {
+          setExtra({
+            gainers: d?.gainers ?? [],
+            losers: d?.losers ?? [],
+            usdThb: d?.usdThb ?? 0,
+            mood: n?.mood ?? null,
+            news: (n?.items ?? []).slice(0, 8),
+          });
+        });
+      }
+    }
     if (isStockReport && ticker) {
       fetch(`/api/analysis?s=${encodeURIComponent(ticker)}`).then((r) => r.json()).then(setA).catch(() => {});
       fetch(`/api/chart?s=${encodeURIComponent(ticker)}&range=1Y`).then((r) => r.json()).then((j) => setCandles(j.candles ?? [])).catch(() => {});
@@ -153,7 +179,7 @@ function ReportInner() {
                     <tbody>
                       {brief.indices.map((i) => (
                         <tr key={i.symbol}>
-                          <td className="font-semibold">{i.symbol}</td>
+                          <td className="font-semibold">{prettySym(i.symbol)}</td>
                           <td className="num" style={{ textAlign: "right" }}>{i.price.toFixed(2)}</td>
                           <td className={`num font-semibold ${i.changePct >= 0 ? "text-emerald-700" : "text-rose-700"}`} style={{ textAlign: "right" }}>
                             {i.changePct >= 0 ? "▲ +" : "▼ "}{i.changePct.toFixed(2)}%
@@ -214,13 +240,72 @@ function ReportInner() {
                 </section>
 
                 {tier === "pro" ? (
-                  <section className="rp-callout">
-                    <h2 style={{ border: "none", margin: "0 0 4px", padding: 0 }}>🥇 ส่วนเฉพาะ Pro ในฉบับนี้</h2>
-                    <p>Watchlist เฉพาะกลุ่ม · Flash Alert ผ่าน LINE เมื่อเกิดเหตุการณ์ใหญ่ (ภายใน 24 ชม.) · เจาะรายตัว Deep Dive ในฉบับถัดไป — อย่าลืมเปิดแจ้งเตือน LINE</p>
-                  </section>
+                  <>
+                    {/* 🥇 ส่วนเฉพาะ Pro — ข้อมูลจริงลึกกว่าฉบับ Starter */}
+                    {extra && (extra.gainers.length > 0 || extra.losers.length > 0) && (
+                      <section>
+                        <h2>🚀 หุ้นเด่นวันนี้ — Top Movers (Pro)</h2>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                          {([["🟢 ขึ้นแรงสุด", extra.gainers], ["🔴 ลงแรงสุด", extra.losers]] as const).map(([label, rows]) => (
+                            <div key={label}>
+                              <p className="font-bold" style={{ fontSize: 11, marginBottom: 4 }}>{label}</p>
+                              <table>
+                                <tbody>
+                                  {rows.slice(0, 5).map((q) => (
+                                    <tr key={q.symbol}>
+                                      <td className="font-bold" style={{ width: "32%" }}>{prettySym(q.symbol)}</td>
+                                      <td style={{ fontSize: 10, color: "#52525b" }}>{q.name?.slice(0, 26)}</td>
+                                      <td className={`num font-semibold ${q.changePct >= 0 ? "text-emerald-700" : "text-rose-700"}`} style={{ textAlign: "right", width: "22%" }}>
+                                        {q.changePct >= 0 ? "+" : ""}{q.changePct.toFixed(1)}%
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          ))}
+                        </div>
+                      </section>
+                    )}
+
+                    {extra && (
+                      <section>
+                        <h2>🧠 อารมณ์ข่าว 24 ชม. โดย Jev (Pro)</h2>
+                        <p style={{ fontSize: 11, marginBottom: 6 }}>
+                          ภาพรวม:{" "}
+                          <b className={extra.mood?.dir === "bullish" ? "text-emerald-700" : extra.mood?.dir === "bearish" ? "text-rose-700" : ""}>
+                            {extra.mood ? (extra.mood.dir === "bullish" ? "🟢 เอียงบวก" : extra.mood.dir === "bearish" ? "🔴 เอียงลบ" : "⚪ สมดุล") : "—"}
+                          </b>
+                          {extra.mood ? ` (คะแนนถ่วงน้ำหนัก ${extra.mood.score})` : ""}
+                          {extra.usdThb ? <span> · USD/THB <b className="num">{extra.usdThb.toFixed(2)}</b></span> : ""}
+                        </p>
+                        <table>
+                          <thead>
+                            <tr><th style={{ width: "14%" }}>ทิศทาง</th><th>ข่าว</th><th style={{ width: "18%" }}>แหล่ง</th></tr>
+                          </thead>
+                          <tbody>
+                            {extra.news.map((n, i) => (
+                              <tr key={i}>
+                                <td className="font-semibold">
+                                  {n.score?.sentiment === "bullish" ? "🟢 บวก" : n.score?.sentiment === "bearish" ? "🔴 ลบ" : "⚪ กลาง"}
+                                </td>
+                                <td style={{ fontSize: 10 }}>{n.title.slice(0, 90)}{n.title.length > 90 ? "…" : ""}</td>
+                                <td style={{ fontSize: 10, color: "#71717a" }}>{n.lang === "th" ? "🇹🇭 " : "🌍 "}{n.source}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </section>
+                    )}
+
+                    <section className="rp-callout">
+                      <h2 style={{ border: "none", margin: "0 0 4px", padding: 0 }}>🥇 สิทธิ์ Pro เพิ่มในฉบับนี้</h2>
+                      <p>Flash Alert ผ่าน LINE เมื่อเกิดเหตุการณ์ใหญ่ (ภายใน 24 ชม.) · Deep Dive รายตัว 8-12 หน้า · AI ปรับพอร์ตส่วนตัว · Live Q&A เดือนละครั้ง — เปิดแจ้งเตือน LINE ไว้ด้วย</p>
+                    </section>
+                  </>
                 ) : (
                   <section className="rp-lock">
-                    🔒 <strong>อัปเกรด Pro</strong> เพื่อรับ Flash Alert 24 ชม. + Deep Dive รายตัว + สัญญาณเทคนิคเต็ม — รายละเอียดในกลุ่ม VIP
+                    🔒 <strong>ฉบับ Starter แสดงภาพรวมหลัก</strong> — อัปเกรด Pro เพื่อรับเพิ่มในรายงานทุกวัน: 🚀 Top Movers พร้อมเหตุผล · 🧠 อารมณ์ข่าว 24 ชม. โดย Jev · ⚡ Flash Alert LINE 24 ชม. · Deep Dive รายตัว + สัญญาณเทคนิคเต็ม
                   </section>
                 )}
               </>
@@ -384,6 +469,20 @@ function ReportInner() {
               </>
             )
           )}
+
+          {/* กล่องคำเตือนท้ายรายงาน — พิมพ์อยู่ท้าย PDF ทุกฉบับ */}
+          <div className="rp-disclaimer">
+            <p style={{ fontWeight: 700, marginBottom: 3 }}>⚠️ คำเตือน</p>
+            <p>
+              รายงานฉบับนี้จัดทำเพื่อการศึกษาและเป็นสื่อบทวิเคราะห์เชิงข้อมูลเท่านั้น มิใช่คำเชิงชวนให้ซื้อขายหลักทรัพย์ และมิใช่คำแนะนำการลงทุนเฉพาะบุคคล
+              ผู้จัดทำมิได้เป็นที่ปรึกษาการลงทุนที่ขึ้นทะเบียนกับสำนักงาน ก.ล.ต. การลงทุนมีความเสี่ยง ผู้ลงทุนอาจสูญเสียเงินต้นทั้งจำนวนหรือบางส่วน
+              ผลการดำเนินงานในอดีตไม่เป็นสิ่งยืนยันถึงผลในอนาคต — ผู้จัดทำไม่รับผิดชอบต่อความเสียหายใด ๆ ทั้งทางตรงและทางอ้อมที่เกิดจากการใช้รายงานนี้
+            </p>
+            <p style={{ color: "#a1a1aa", fontSize: 8.5, marginTop: 3 }}>
+              For educational purposes only. Not investment advice or a solicitation to trade securities. Not a SEC-registered adviser. Investing involves risk of
+              loss; we assume no liability for any damages arising from the use of this report. ข้อมูล: Yahoo Finance (delay ~15 นาที) · อ้างอิง {refNo}
+            </p>
+          </div>
 
           {/* ท้ายกระดาษ */}
           <div className="rp-footer">
