@@ -2,7 +2,7 @@
 // หลักการ: จัดสรรจากเครื่องยนต์ข้อมูลจริงที่มีอยู่แล้ว (Daily Picks / หุ้นปันผล / ETF ดัชนี / 13F กูรู)
 // ผู้ใช้เลือกแค่ 2 อย่าง: งบเท่าไหร่ + อยากแบบไหน (6 สไตล์) — ที่เหลือคำนวณให้ พร้อมสถิติพอร์ตรวม
 // สำคัญ: เป็น "ตัวอย่างเพื่อการเรียนรู้" ไม่ใช่คำแนะนำการลงทุน — หมุนตามข้อมูลวันนั้นอัตโนมัติ
-import { getQuotes, getUsdThb, getChart } from "./yahoo";
+import { getQuotes, getUsdThb, getChart, cached } from "./yahoo";
 import { getPicks } from "./picks";
 import { getSurge } from "./surge";
 import { getLongterm, type LTRow } from "./longterm";
@@ -60,7 +60,7 @@ export interface StarterResult {
   note: string;
 }
 
-let cached: { at: number; data: StarterResult } | null = null;
+let starterCache: { at: number; data: StarterResult } | null = null;
 const TTL = 30 * 60_000;
 
 interface Draft {
@@ -226,26 +226,40 @@ async function build(): Promise<StarterResult> {
     guru: { emoji: "🐋", title: "ตามรอยบัฟเฟต์", desc: "ก๊อปปี้ตำแหน่งหุ้นที่เจ้าแห่ง value investing ถืออยู่จริง (13F ล่าช้า 45 วัน)" },
   };
 
-  // ราคาสดรวมก้อนเดียว
+  // ราคาสดรวมก้อนเดียว — แต่ถ้า batch ใหญ่พัง ลองเป็นก้อนเล็ก
   const allSymbols = ["VOO", "QQQ", "GLD", ...Object.values(draftsOf).flat().map((d) => d.symbol)].filter(
     (x, i, arr) => !!x && arr.indexOf(x) === i
   );
-  const quotes: Record<string, Quote> = await getQuotes(allSymbols).catch(() => ({} as Record<string, Quote>));
+  let quotes: Record<string, Quote> = {};
+  console.log("[starter] DEBUG allSymbols:", allSymbols.length, allSymbols.slice(0,5));
+  try {
+    quotes = await getQuotes(allSymbols);
+  } catch { /* ผ่าน */ }
+  // fallback: ถ้าไม่ได้ราคาเลย ลองทีละก้อนเล็ก (5 ตัว)
+  // DEBUG_QUOTE
+  if (Object.keys(quotes).filter(s => isFinite(quotes[s]?.price)).length < 3) {
+    for (let i = 0; i < allSymbols.length; i += 5) {
+      try {
+        const batch = await getQuotes(allSymbols.slice(i, i + 5));
+        Object.assign(quotes, batch);
+      } catch { /* ข้าม */ }
+    }
+  }
 
   const mk = (d: Draft): StarterPosition | null => {
     const q = quotes[d.symbol];
-    if (!q || !isFinite(q.price) || q.price <= 0) return null;
-    const isThb = q.currency === "THB";
+    const price = q && isFinite(q.price) && q.price > 0 ? q.price : null;
+    const isThb = q?.currency === "THB" || d.symbol.endsWith(".BK");
     return {
-      symbol: q.symbol,
+      symbol: d.symbol,
       name: d.name,
       kind: d.kind,
       weight: d.weight,
-      priceThb: isThb ? q.price : q.price * usdThb,
-      priceLocal: q.price,
-      currency: q.currency,
+      priceThb: price !== null ? (isThb ? price : price * usdThb) : null,
+      priceLocal: price,
+      currency: isThb ? "THB" : "USD",
       unitThb: isThb,
-      changePct: isFinite(q.changePct) ? q.changePct : null,
+      changePct: q && isFinite(q.changePct) ? q.changePct : null,
       reason: d.reason,
       risk: d.risk,
       market: isThb ? "TH" : "US",
@@ -259,6 +273,7 @@ async function build(): Promise<StarterResult> {
     };
   };
 
+  console.log("[starter] DEBUG quotes:", Object.keys(quotes).length, "valid:", Object.values(quotes).filter(q=>isFinite(q?.price)).length);
   const profiles: StarterProfile[] = (Object.keys(draftsOf) as RiskId[]).map((id) => {
     const wanted = cashOf[id];
     const have = 100 - wanted;
@@ -281,8 +296,12 @@ async function build(): Promise<StarterResult> {
 }
 
 export async function getStarterPortfolios(): Promise<StarterResult> {
-  if (cached && Date.now() - cached.at < TTL) return cached.data;
-  const data = await build();
-  cached = { at: Date.now(), data };
-  return data;
+  // Redis cache 6 ชั่วโมง — Vercel serverless รีเซ็ต in-memory ทุกครั้ง
+  return cached("starter:portfolios", 6 * 3600_000, async () => {
+    if (cached_ && Date.now() - cached_.at < TTL) return cached_.data;
+    const data = await build();
+    cached_ = { at: Date.now(), data };
+    return data;
+  }) as Promise<StarterResult>;
 }
+let cached_: { at: number; data: StarterResult } | null = null;
