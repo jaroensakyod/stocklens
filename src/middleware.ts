@@ -1,15 +1,59 @@
-// Rate-limit กลาง — ก่อนเปิดใช้จริงบน internet (ป้องกันคนยิง AI/ค่าใช้จ่าย/scraper)
+// 🔒 Security กลาง — 3 ชั้น: (1) บล็อก AI crawler ที่ runtime (2) rate limit Redis-backed กันยิง API
+// (3) security headers + noai กัน AI ดึงไปเทรน — ใช้ Upstash Redis ถ้าตั้ง env ไว้ (ข้าม instance ได้จริงบน Vercel)
+// fallback in-memory เสมอ — Redis ล่มไม่กระทบผู้ใช้ปกติ
 import { NextRequest, NextResponse } from "next/server";
 
-// หมายเหตุ: in-memory — พอสำหรับ instance เดียว (Vercel serverless อาจแยก instance,
-// ยกฐานะเป็น DB-backed ภายหลังเมื่อคนเยอะ)
+// ---------- ชั้น 1: บล็อก AI bot/crawler ที่ runtime (robots.txt ฝ่ายละเมิดได้ อันนี้บังคับจริง) ----------
+const AI_BOTS = [
+  "GPTBot", "OAI-SearchBot", "ChatGPT-User", "ClaudeBot", "Claude-Web", "Claude-SearchBot", "anthropic-ai",
+  "CCBot", "Google-Extended", "Google-Extended-AI", "Bytespider", "Amazonbot", "PerplexityBot", "Perplexity-User",
+  "Diffbot", "YouBot", "Omgilibot", "OMGI", "ImagesiftBot", "cohere-ai", "Applebot-Extended", "meta-externalagent",
+  "FacebookBot", "VelenPublicWebCrawler", "DuckAssistBot", "Timpibot", "iaskspider", "Panscient", "Rowsagent",
+  "Scrapy", "python-requests", "curl/", "wget", "httpx", "node-fetch", "axios/",
+];
+const AI_UA_RE = new RegExp(`(${AI_BOTS.map((b) => b.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`, "i");
+// หมายเหตุ curl/wget/python-requests บล็อกเฉพาะเมื่อไม่ได้แอบอ้าง UA เบราว์เซอร์ — สคริปต์ที่แอบอ้างจะตกไปโดน rate limit แทน
 
-const AI_BUCKET = { limit: 20, windowMs: 5 * 60_000 }; // /api/chat, /api/ai/*, /api/gurus/why, /api/radar/analyze, /api/timemachine
-const GEN_BUCKET = { limit: 120, windowMs: 60_000 }; // /api/* ทั่วไป
+// ---------- ชั้น 2: rate limit — Redis fixed-window (primary) + in-memory (fallback) ----------
+type Bucket = { id: string; limit: number; windowSec: number };
+const BUCKET_AI: Bucket = { id: "ai", limit: 20, windowSec: 300 }; // AI แพง: 20 ครั้ง/5 นาที
+const BUCKET_AUTH: Bucket = { id: "auth", limit: 8, windowSec: 600 }; // login: กัน brute force รหัส
+const BUCKET_ADMIN: Bucket = { id: "admin", limit: 10, windowSec: 60 }; // เดารหัสแอดมิน
+const BUCKET_GEN: Bucket = { id: "gen", limit: 120, windowSec: 60 }; // API ทั่วไป
+const BUCKET_PAGE: Bucket = { id: "page", limit: 240, windowSec: 60 }; // หน้า HTML — กันครอว์เร็วจัง
 
+const AI_PATHS = ["/api/chat", "/api/ai/", "/api/gurus/why", "/api/radar/analyze", "/api/timemachine", "/api/starter-custom-ai", "/api/advisor-backtest", "/api/portfolio-xray"];
+
+const RU = process.env.UPSTASH_REDIS_REST_URL;
+const RT = process.env.UPSTASH_REDIS_REST_TOKEN;
+
+/** Redis INCR+EXPIRE (fixed window) — true = เกินลิมิต · null = Redis ใช้ไม่ได้ (ให้ fallback) */
+async function redisLimited(key: string, limit: number, windowSec: number): Promise<boolean | null> {
+  if (!RU || !RT) return null;
+  try {
+    const res = await fetch(`${RU}/pipeline`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${RT}`, "Content-Type": "application/json" },
+      body: JSON.stringify([
+        ["INCR", key],
+        ["EXPIRE", key, String(windowSec + 1), "NX"],
+      ]),
+      cache: "no-store",
+      signal: AbortSignal.timeout(1500),
+    });
+    if (!res.ok) return null;
+    const j = (await res.json()) as { result?: { result?: unknown }[] };
+    const count = Number(j.result?.[0]?.result);
+    if (!isFinite(count)) return null;
+    return count > limit;
+  } catch {
+    return null;
+  }
+}
+
+// in-memory fallback (เอาตัวรอดเมื่อไม่มี Redis / Redis ล่ม)
 const hits = new Map<string, number[]>();
-
-function limited(key: string, limit: number, windowMs: number): boolean {
+function memLimited(key: string, limit: number, windowMs: number): boolean {
   const now = Date.now();
   const arr = (hits.get(key) ?? []).filter((t) => now - t < windowMs);
   if (arr.length >= limit) {
@@ -18,20 +62,31 @@ function limited(key: string, limit: number, windowMs: number): boolean {
   }
   arr.push(now);
   hits.set(key, arr);
-  // กันหน่วยความจำโต: ถ้า map ใหญ่เกิน เช็ดของเก่า
-  if (hits.size > 5000) {
-    for (const [k, v] of hits) if (!v.some((t) => now - t < 60_000)) hits.delete(k);
-  }
+  if (hits.size > 8000) for (const [k, v] of hits) if (!v.some((t) => now - t < windowMs)) hits.delete(k);
   return false;
 }
 
-const AI_PATHS = ["/api/chat", "/api/ai/", "/api/gurus/why", "/api/radar/analyze", "/api/timemachine"];
+async function isLimited(ip: string, b: Bucket): Promise<boolean> {
+  const slot = Math.floor(Date.now() / (b.windowSec * 1000));
+  const rkey = `rl:${b.id}:${ip}:${slot}`;
+  const viaRedis = await redisLimited(rkey, b.limit, b.windowSec);
+  if (viaRedis !== null) return viaRedis;
+  return memLimited(`m:${b.id}:${ip}`, b.limit, b.windowSec * 1000);
+}
 
-export function middleware(req: NextRequest) {
+export async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
 
-  // 🚪 โหมดปิดเว็บส่วนตัว: ตั้ง SITE_REQUIRE_LOGIN=true ใน .env.local → ทุกหน้าต้อง login ก่อน
-  // (ค่า default = false เพื่อให้หน้าฟรียังดึงคนเข้าเว็บได้ — เปิดเมื่อพร้อมปิดระบบเต็มตัว)
+  // ชั้น 1: AI bot → 403 ทันที (ทุก path รวมหน้า HTML และ API)
+  const ua = req.headers.get("user-agent") ?? "";
+  if (ua && AI_UA_RE.test(ua)) {
+    return new NextResponse("Forbidden", {
+      status: 403,
+      headers: { "X-Robots-Tag": "noai, noimageai, noindex, nofollow" },
+    });
+  }
+
+  // 🚪 โหมดปิดเว็บส่วนตัว: SITE_REQUIRE_LOGIN=true → ทุกหน้าต้อง login
   if (process.env.SITE_REQUIRE_LOGIN === "true") {
     const isPublic =
       path.startsWith("/login") ||
@@ -52,21 +107,39 @@ export function middleware(req: NextRequest) {
     }
   }
 
-  if (!path.startsWith("/api/")) return NextResponse.next();
-  // /api/admin/* ยกเว้น (มีรหัสคุมอยู่แล้ว) และไฟล์ static
-  if (path.startsWith("/api/admin")) return NextResponse.next();
-
   const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "local";
-  const bucket = AI_PATHS.some((p) => path.startsWith(p)) ? AI_BUCKET : GEN_BUCKET;
-  if (limited(ip + ":" + bucket.limit, bucket.limit, bucket.windowMs)) {
+
+  // ชั้น 2: เลือกถังตามชนิด request
+  let bucket: Bucket;
+  if (path.startsWith("/api/admin")) bucket = BUCKET_ADMIN;
+  else if (path.startsWith("/api/auth")) bucket = BUCKET_AUTH;
+  else if (AI_PATHS.some((p) => path.startsWith(p)) || (path === "/api/political" && req.method === "POST")) bucket = BUCKET_AI;
+  else if (path.startsWith("/api/")) bucket = BUCKET_GEN;
+  else bucket = BUCKET_PAGE;
+
+  // หน้า HTML ใช้ in-memory อย่างเดียว (เร็ว ไม่ต้องรอ Redis ทุกคลิก) / API ใช้ Redis
+  const limited =
+    bucket === BUCKET_PAGE
+      ? memLimited(`m:page:${ip}`, bucket.limit, bucket.windowSec * 1000)
+      : await isLimited(ip, bucket);
+  if (limited) {
     return NextResponse.json(
       { error: "คำขอเยอะเกินไป (rate limit) — พักสักครู่แล้วลองใหม่ หรือลดความถี่การกด" },
       { status: 429, headers: { "Retry-After": "60" } }
     );
   }
-  return NextResponse.next();
+
+  // ชั้น 3: security headers + บอก AI ว่าห้ามใช้เทรน
+  const res = NextResponse.next();
+  res.headers.set("X-Robots-Tag", "noai, noimageai");
+  res.headers.set("X-Content-Type-Options", "nosniff");
+  res.headers.set("X-Frame-Options", "SAMEORIGIN");
+  res.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=(), interest-cohort=()");
+  res.headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+  return res;
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 };
