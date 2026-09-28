@@ -79,7 +79,6 @@ export default function NewsSplit({ news, aiAvailable }: { news: NewsItem[]; aiA
           >
             {featured.loading ? "กำลังสรุป…" : "🇹🇭 สรุปไทยโดย AI"}
           </button>
-          ).replacenothing()
           {openIdx === 0 && featured.summary && (
             <p className="text-sm text-zinc-300 leading-relaxed mt-2.5 bg-base-850 rounded-lg p-3 border border-base-700/60">{featured.summary}</p>
           )}
