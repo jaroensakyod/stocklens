@@ -3,7 +3,7 @@
 import TrumpPulse from "@/components/TrumpPulse";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import NewsSplit from "@/components/NewsSplit";
+import LatestNews from "@/components/LatestNews";
 import WatchlistStrip from "@/components/WatchlistStrip";
 import MarketHeatmap from "@/components/MarketHeatmap";
 import MoversByMarket from "@/components/MoversByMarket";
@@ -43,34 +43,12 @@ function QuoteRow({ q, usdThb }: { q: Quote; usdThb: number }) {
 
 export default function HomePage() {
   const [data, setData] = useState<DashboardData | null>(null);
-  const [newsUpdatedAt, setNewsUpdatedAt] = useState<number | null>(null);
-  const [now, setNow] = useState(Date.now());
 
   useEffect(() => {
     fetch("/api/dashboard")
       .then((r) => r.json())
-      .then((j) => {
-        setData(j);
-        if (j.news?.length) setNewsUpdatedAt(Date.now());
-      })
+      .then((j) => setData(j))
       .catch(() => {});
-    // ข่าวอัปเดตอัตโนมัติทุก 60 วิ (server cache 2 นาทีกันยิง Yahoo บ่อย) — กรองเฉพาะ 12 ชม.ล่าสุดให้รู้สึก "สด"
-    const newsTimer = setInterval(() => {
-      fetch("/api/news?q=stock%20market&count=8&fresh=43200000")
-        .then((r) => r.json())
-        .then((j) => {
-          if (j.news?.length) {
-            setData((d) => (d ? { ...d, news: j.news } : d));
-            setNewsUpdatedAt(Date.now());
-          }
-        })
-        .catch(() => {});
-    }, 60_000);
-    const tick = setInterval(() => setNow(Date.now()), 15_000);
-    return () => {
-      clearInterval(newsTimer);
-      clearInterval(tick);
-    };
   }, []);
 
   if (!data) {
@@ -136,20 +114,9 @@ export default function HomePage() {
       </section>
 
       <div className="grid lg:grid-cols-3 gap-6">
-        {/* ข่าว */}
+        {/* ข่าวล่าสุด + อัปเดตหุ้น (สไตล์ investing.com — Jev บวก/ลบ/ผลกระทบ ทุกชิ้น) */}
         <section className="lg:col-span-2">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-bold text-zinc-400">📰 ข่าวที่ต้องรู้วันนี้</h2>
-            <div className="flex items-center gap-2">
-              {newsUpdatedAt && (
-                <span className="text-[10px] chip bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                  🔴 อัปเดตอัตโนมัติ · {Math.max(0, Math.round((now - newsUpdatedAt) / 1000))} วิที่แล้ว
-                </span>
-              )}
-              <span className="text-xs text-zinc-600 num">USD/THB {data.usdThb.toFixed(2)}</span>
-            </div>
-          </div>
-          <NewsSplit news={data.news} aiAvailable={data.aiAvailable} />
+          <LatestNews usdThb={data.usdThb} />
         </section>
 
         <div className="space-y-6">
