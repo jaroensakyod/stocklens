@@ -6,6 +6,7 @@ import TickerTape from "@/components/TickerTape";
 import ChatWidget from "@/components/ChatWidget";
 import AlertWatcher from "@/components/AlertWatcher";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
+import DisclaimerGate from "@/components/DisclaimerGate";
 import { AuthProvider } from "@/lib/authContext";
 import UserWatermark from "@/components/UserWatermark";
 
@@ -59,6 +60,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <ChatWidget />
           <AlertWatcher />
           <UserWatermark />
+          <DisclaimerGate />
         </AuthProvider>
         <ServiceWorkerRegister />
       </body>

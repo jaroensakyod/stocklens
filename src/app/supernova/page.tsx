@@ -13,6 +13,8 @@ interface Data {
   note: string;
 }
 
+import InvestWarn from "@/components/InvestWarn";
+
 export default function SupernovaPage() {
   const [data, setData] = useState<Data | null>(null);
   const [err, setErr] = useState("");
@@ -34,6 +36,7 @@ export default function SupernovaPage() {
     <div className="space-y-5">
       <div>
         <h1 className="text-2xl font-bold text-zinc-50">🛰️ Supernova Monitor — สัญญาณมหภาครายวัน</h1>
+        <div className="mt-3"><InvestWarn /></div>
         <p className="text-sm text-zinc-400 mt-1 leading-relaxed">
           รวมเกจวัดที่นักวิเคราะห์สายมหภาคใช้เป็นแกน: <b className="text-zinc-200">พันธบัตร US 10 ปี</b> (เกจความเชื่อมั่น/ความเสี่ยงสงคราม) ·{" "}
           <b className="text-zinc-200">VIX</b> (ความกลัว) · <b className="text-zinc-200">ทอง vs ดอลลาร์</b> (ความเชื่อในระบบเงินกระดาษ) ·{" "}

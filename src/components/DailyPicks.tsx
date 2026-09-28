@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import InvestWarn from "@/components/InvestWarn";
 
 interface Pick {
   ticker: string;
@@ -37,6 +38,8 @@ export default function DailyPicks() {
         <h2 className="text-sm font-bold text-zinc-400">🎯 หุ้นน่าสนใจวันนี้</h2>
         {data?.date && <span className="text-[11px] text-zinc-600 shrink-0">{data.date}</span>}
       </div>
+
+      <div className="mb-3"><InvestWarn /></div>
 
       {!data && !failed && (
         <div className="card p-8 text-center text-xs text-zinc-500">กำลังสแกนตลาดหาหุ้นที่ขยับแรง + งบแข็งแรง… (~20 วินาที)</div>

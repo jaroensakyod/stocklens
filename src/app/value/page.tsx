@@ -56,6 +56,8 @@ function Row({ r, side }: { r: ValueRow; side: "under" | "over" }) {
   );
 }
 
+import InvestWarn from "@/components/InvestWarn";
+
 export default function ValuePage() {
   const [data, setData] = useState<ApiData | null>(null);
   const [history, setHistory] = useState<{ date: string; dateTh: string }[]>([]);
@@ -90,6 +92,7 @@ export default function ValuePage() {
         <h1 className="text-3xl md:text-4xl font-bold text-zinc-50">
           🤿 หุ้นใต้น้ำ <span className="text-zinc-500">vs</span> <span className="text-orange-300">🎈 หุ้นแพงเกินตัว</span>
         </h1>
+        <InvestWarn />
         <p className="text-zinc-400 mt-3 text-sm leading-relaxed max-w-2xl mx-auto">
           สแกนรายวันจากข้อมูลจริง — <b className="text-sky-300">ฝั่งใต้น้ำ</b>: พื้นฐานแข็ง (คะแนนจากงบจริง) ราคาตกจากยอดมาแล้ว แต่สัญญาณเทคนิคเริ่มกลับตัว ·{" "}
           <b className="text-orange-300">ฝั่งแพง</b>: ตรงกันข้าม — ราคาวิ่งแรงจนแพงเทียบงบ และร้อนเกินตัว ระวังไว้ก่อน

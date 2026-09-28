@@ -25,6 +25,8 @@ interface SurgeRow {
 
 // 🚀 เรดาร์หุ้นซิ่ง — ขยับแรง + วอลุ่มพุ่ง + ใกล้/ทะลุจุดสูงสุด 52 สัปดาห์ (ทั้งหมดจากข้อมูลจริง)
 // หุ้นซิ่ง = ความเสี่ยงสูง หน้านี้เป็น "สื่อแสดงข้อมูล" ไม่ใช่คำแนะนำให้ซื้อตาม
+import InvestWarn from "@/components/InvestWarn";
+
 export default function SurgePage() {
   const { tier } = useAuth();
   const [rows, setRows] = useState<SurgeRow[] | null>(null);
@@ -48,6 +50,7 @@ export default function SurgePage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-zinc-50">🚀 เรดาร์หุ้นซิ่ง</h1>
+        <div className="mt-3"><InvestWarn /></div>
         <p className="text-sm text-zinc-400 mt-1 max-w-3xl leading-relaxed">
           หุ้นที่ขยับแรงวันนี้ (≥3%) พร้อมหลักฐาน 3 ชั้นจากข้อมูลจริง: <span className="text-zinc-200">วอลุ่มวันนี้มากกว่าเฉลี่ย 20 วันก่อนกี่เท่า</span> (มีเงินจริงเข้าหรือเด้งเฉยๆ) ·{" "}
           <span className="text-zinc-200">ระยะจากจุดสูงสุด 52 สัปดาห์</span> (ทะลุ = breakout) · พรีมาร์เก็ต — ทั้งสหรัฐฯและไทย อัปเดตทุก 10 นาที {asOf && <span className="text-zinc-600">(ข้อมูลล่าสุด {asOf})</span>}

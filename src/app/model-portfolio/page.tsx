@@ -35,6 +35,8 @@ function Spark({ navs }: { navs: number[] }) {
   );
 }
 
+import InvestWarn from "@/components/InvestWarn";
+
 export default function ModelPortfolioPage() {
   const [data, setData] = useState<ApiData | null>(null);
   const [busy, setBusy] = useState(false);
@@ -75,6 +77,7 @@ export default function ModelPortfolioPage() {
         <h1 className="text-3xl md:text-4xl font-bold text-zinc-50">
           💼 พอร์ตจำลอง StockLens <span className="text-accent">AI ปรับรายสัปดาห์</span>
         </h1>
+        <div className="mt-3"><InvestWarn /></div>
         <p className="text-zinc-400 mt-3 text-sm leading-relaxed max-w-2xl mx-auto">
           ทุนสมมติ <b className="text-zinc-200">฿100,000</b> — ทุกสัปดาห์ AI ของเราปรับสัดส่วนพอร์ตจากข้อมูลจริง (คะแนนงบ · Daily Picks · ความร้อนธีม)
           แล้ว<b className="text-zinc-200">บันทึกผลจริงทุกสัปดาห์</b>ไว้ที่นี่ ตรวจสอบย้อนหลังได้ทั้งหมด — โปร่งใส ไม่มีการลบประวัติ

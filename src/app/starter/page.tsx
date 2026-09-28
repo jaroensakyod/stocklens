@@ -73,6 +73,8 @@ const CUSTOM_DEFAULTS: StarterCustomOptions = {
 };
 const CUSTOM_LS = "sl-starter-custom";
 
+import InvestWarn from "@/components/InvestWarn";
+
 export default function StarterPage() {
   const [data, setData] = useState<StarterResult | null>(null);
   const [risk, setRisk] = useState<StarterProfile["id"]>("balance");
@@ -299,6 +301,7 @@ export default function StarterPage() {
         <h1 className="text-3xl md:text-4xl font-bold text-zinc-50">
           🧑‍🎓 พอร์ตตัวอย่างรายวัน <span className="text-accent">สำหรับมือใหม่</span>
         </h1>
+        <div className="mt-3"><InvestWarn /></div>
         <p className="text-zinc-400 mt-3 text-sm leading-relaxed max-w-2xl mx-auto">
           ไม่รู้เรื่องหุ้นเลย? เลือก <b className="text-zinc-200">งบ</b> กับ <b className="text-zinc-200">สไตล์ 6 แบบ</b>{" "}
           หรือสลับไปแท็บ <b className="text-zinc-200">🛠️ ปรับเอง</b> — สัดส่วนไทย/เมกา/กองทุน/ต่างประเทศ จำนวนตัว

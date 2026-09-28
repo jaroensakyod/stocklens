@@ -11,6 +11,8 @@ interface Meta {
   firstSignalDateTh?: string;
 }
 
+import InvestWarn from "@/components/InvestWarn";
+
 export default function TrackRecordPage() {
   // อ่านสดจาก API — เพื่อให้เห็นรายการที่บันทึกใหม่แม้บน Vercel (DB)
   const [entries, setEntries] = useState<TrackRecordEntry[]>([]);
@@ -84,6 +86,7 @@ export default function TrackRecordPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-zinc-50">🏆 Track Record สาธารณะ</h1>
+        <div className="mt-3"><InvestWarn /></div>
         <p className="text-sm text-zinc-400 mt-1 max-w-3xl leading-relaxed">
           เราบันทึกทุกสัญญาณที่ระบบปล่อยและทุกสมมติฐานที่เขียนไว้ — ถูกก็บอกว่าถูก ผิดก็บอกว่าผิด ไม่ลบ ไม่แก้
           นี่คือเหตุผลที่คุณควรเชื่อ (หรือไม่เชื่อ) เรา — ตรวจสอบย้อนได้ทุกตัวเลขที่หน้าสัญญาณต้นทาง
