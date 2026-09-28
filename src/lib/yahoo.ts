@@ -674,7 +674,7 @@ export async function searchSymbols(query: string) {
 
 // ---------- News ----------
 export async function getNews(query = "stock market", count = 12, freshMs?: number) {
-  const key = `n:${query}:${freshMs ?? "all"}`;
+  const key = `n2:${query}:${freshMs ?? "all"}`;
   const hit = getCached<{ title: string; publisher: string; link: string; time: number; relatedTickers?: string[] }[]>(key, TTL.news);
   if (hit) return hit;
   const json = (await jget(`/v1/finance/search?q=${encodeURIComponent(query)}&quotesCount=0&newsCount=${count * 2}`)) as
@@ -688,8 +688,9 @@ export async function getNews(query = "stock market", count = 12, freshMs?: numb
     relatedTickers: n.relatedTickers ?? [],
   }));
   if (freshMs) {
-    const fresh = items.filter((n) => Date.now() - n.time < freshMs);
-    if (fresh.length >= 4) items = fresh;
+    // ข่าวสดขึ้นหน้าเสมอแม้เหลือไม่กี่ชิ้น — ที่เก่ากว่าเกณฑ์เรียงใหม่สุดก่อนต่อท้าย (query เงียบคนอ่านยังเห็นข่าวสดก่อน)
+    const cutoff = Date.now() - freshMs;
+    items = [...items.filter((n) => n.time >= cutoff), ...items.filter((n) => n.time < cutoff).sort((a, b) => b.time - a.time)];
   }
   items = items.slice(0, count);
   if (items.length) setCached(key, items);

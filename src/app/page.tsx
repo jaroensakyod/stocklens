@@ -18,7 +18,6 @@ interface DashboardData {
   popular: Quote[];
   gainers: Quote[];
   losers: Quote[];
-  news: { title: string; publisher: string; link: string; time: number; relatedTickers?: string[] }[];
   events: { date: string; label: string; impact: string; star: number }[];
   usdThb: number;
   aiAvailable: boolean;

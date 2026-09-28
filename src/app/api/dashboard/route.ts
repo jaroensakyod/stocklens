@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getNews, getQuotes } from "@/lib/yahoo";
+import { getQuotes } from "@/lib/yahoo";
 import { getUsdThb } from "@/lib/yahoo";
 import { getUpcomingEvents } from "@/lib/econCalendar";
 import universe from "@/data/universe.json";
@@ -52,12 +52,12 @@ async function getTvMovers(): Promise<Quote[]> {
   return { gainers, losers } as unknown as Quote[];
 }
 
-// GET /api/dashboard — ข้อมูลหน้าแรกครบชุด (ดัชนี + movers ทั้งตลาด + ข่าว + ปฏิทิน + FX)
+// GET /api/dashboard — ข้อมูลหน้าแรกครบชุด (ดัชนี + movers ทั้งตลาด + ปฏิทิน + FX)
+// หมายเหตุ: ข่าวหน้าแรกมาจาก /api/news/latest (LatestNews component) — ไม่ดึงในนี้แล้ว (เดิมดึงทิ้งไม่มีผู้ใช้ render)
 export async function GET() {
-  const [quotes, popularQ, news, usdThb] = await Promise.all([
+  const [quotes, popularQ, usdThb] = await Promise.all([
     getQuotes(INDICES.map((i) => i.s)),
     getQuotes(POPULAR),
-    getNews("stock market", 8, 48 * 3600_000),
     getUsdThb(),
   ]);
 
@@ -85,5 +85,5 @@ export async function GET() {
     events = [];
   }
 
-  return NextResponse.json({ indices, popular, gainers, losers, news, events, usdThb, universeSize: (universe as { tickers: unknown[] }).tickers.length });
+  return NextResponse.json({ indices, popular, gainers, losers, events, usdThb, universeSize: (universe as { tickers: unknown[] }).tickers.length });
 }
