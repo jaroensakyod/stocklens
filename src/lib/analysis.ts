@@ -20,17 +20,50 @@ export interface AnalysisConfidence {
 
 export async function buildAnalysis(ticker: string): Promise<StockAnalysis & { usdThb?: number; confidence: AnalysisConfidence; scenarios?: Scenarios }> {
   const sym = decodeURIComponent(ticker).toUpperCase();
+  // ข่าว: ใช้ ticker ถ้าสหรัฐฯ แต่ใช้ "ชื่อบริษัท + หุ้น" ถ้าไทย (Yahoo search หา .BK ไม่เจอ)
+  const isThai = sym.endsWith(".BK");
+  const newsQuery = isThai ? sym.replace(".BK", " หุ้น") : sym;
   const [quotes, chart, fund, news] = await Promise.all([
     getQuotes([sym]),
     getChart(sym, "1Y"),
     getFundamentals(sym),
-    getNews(sym, 6),
+    getNews(newsQuery, 15),
   ]);
+  // ไทย: ถ้าได้น้อย → Yahoo ชื่อบริษัท → Google News RSS (Yahoo ไม่ครอบคลุมไทย)
+  const quote0 = quotes[sym];
+  let allNews = news;
+  if (isThai && news.length < 4 && quote0?.name && quote0.name !== sym) {
+    const extra = await getNews(`${quote0.name} หุ้น`, 10).catch(() => []);
+    const seen = new Set(news.map(n => n.title.slice(0, 40)));
+    allNews = [...news, ...extra.filter(n => !seen.has(n.title.slice(0, 40)))].slice(0, 15);
+  }
+  // ถ้ายังน้อย → Google News RSS ตรง (ภาษาไทย) — ใช้ชื่อบริษัทหรือ ticker สั้น
+  if (allNews.length < 4) {
+    // ไทย: ใช้ ticker สั้น (PTTEP) — ค้นเจอง่ายกว่า full name / สหรัฐ: ใช้ ticker ตรง
+    const q2 = isThai ? sym.replace(".BK", "") : sym;
+    const locale = isThai ? "hl=th&gl=TH&ceid=TH:th" : "hl=en-US&gl=US&ceid=US:en";
+    const suffix = isThai ? "+หุ้น" : "+stock";
+    try {
+      const rssRes = await fetch(`https://news.google.com/rss/search?q=${encodeURIComponent(q2)}${suffix}&${locale}`, { headers: { "User-Agent": "Mozilla/5.0" }, signal: AbortSignal.timeout(10_000) });
+      if (rssRes.ok) {
+        const xml = await rssRes.text();
+        const items = (xml.match(/<item>[\s\S]*?<\/item>/g) ?? []).slice(0, 10).map(item => {
+          const title = (item.match(/<title>(.*?)<\/title>/)?.[1] ?? "").replace(/&#39;/g, "'").replace(/&amp;/g, "&").replace(/&quot;/g, '"');
+          const publisher = item.match(/<source[^>]*>(.*?)<\/source>/)?.[1] ?? "Google News";
+          const link = item.match(/<link>(.*?)<\/link>/)?.[1] ?? "";
+          const pubDate = item.match(/<pubDate>(.*?)<\/pubDate>/)?.[1] ?? "";
+          return { title, publisher, link, time: pubDate ? new Date(pubDate).getTime() : Date.now() };
+        }).filter(x => x.title.length > 10);
+        const seen = new Set(allNews.map(n => n.title.slice(0, 40)));
+        allNews = [...allNews, ...items.filter(n => !seen.has(n.title.slice(0, 40)))].slice(0, 15);
+      }
+    } catch { /* RSS ล่ม = ใช้ข่าวเดิม */ }
+  }
   const quote = quotes[sym] ?? { symbol: sym, name: sym, price: NaN, change: 0, changePct: 0, currency: "USD", exchange: "" };
 
   // ให้คะแนนข่าวรายหุ้นด้วย Jev (ถ้ามี key — แคช 24 ชม./พาดหัว) + กรองข่าวขยะ/วาไรตี้ออก (คงไว้อย่างน้อย 3 ชิ้น)
-  const newsScores = await scoreNewsMany(news.map((n) => n.title)).catch(() => new Map());
-  const newsMarked = news.map((n) => {
+  const newsScores = await scoreNewsMany(allNews.map((n) => n.title)).catch(() => new Map());
+  const newsMarked = allNews.map((n) => {
     const score = newsScores.get(n.title);
     const cred = credibilityBadge(score ?? null, n.title);
     return cred ? { ...n, score, cred } : { ...n, score };

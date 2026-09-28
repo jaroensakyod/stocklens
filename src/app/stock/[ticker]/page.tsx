@@ -23,6 +23,15 @@ import type { Scenarios } from "@/lib/scenarios";
 import { formatBig } from "@/lib/factors";
 import type { StockAnalysis } from "@/lib/types";
 
+const fmtAgo = (t: number) => {
+  const h = Math.floor((Date.now() - t) / 3600e3);
+  if (h < 1) return "เมื่อสักครู่";
+  if (h < 24) return h + " ชม.ก่อน";
+  const d = Math.floor(h / 24);
+  return d === 1 ? "เมื่อวาน" : d + " วันก่อน";
+};
+const isOld = (t: number) => Date.now() - t > 3 * 86400e3;
+
 export default function StockPage() {
   const routeParams = useParams<{ ticker: string }>();
   // useParams คืนค่ายัง encode (BML%2FPL) — decode ให้ก่อนใช้ทั้งแสดงผลและค้นหา
@@ -285,13 +294,14 @@ export default function StockPage() {
         <div className="card p-5 mt-6">
           <h3 className="text-sm font-bold text-zinc-100 mb-3">📰 ข่าวล่าสุดของ {q.symbol}</h3>
           <ul className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {a.news.slice(0, 6).map((n, i) => (
+            {a.news.slice(0, 10).map((n, i) => (
               <li key={i} className={`border-l-2 pl-3 ${n.score?.sentiment === "bullish" ? "border-up/60" : n.score?.sentiment === "bearish" ? "border-down/60" : "border-base-700"}`}>
                 <a href={n.link} target="_blank" rel="noopener noreferrer" className="text-xs text-zinc-300 hover:text-accent-soft leading-snug">
                   {n.score ? (n.score.sentiment === "bullish" ? "🟢" : n.score.sentiment === "bearish" ? "🔴" : "⚪") : "📰"} {n.title}
                 </a>
-                <span className="text-[10px] text-zinc-600 block">
-                  {n.publisher}
+                <span className="text-[10px] text-zinc-600 block flex flex-wrap gap-x-2">
+                  {n.time && <span className={isOld(n.time) ? "text-zinc-500" : "text-accent-soft font-semibold"}>🕐 {fmtAgo(n.time)}</span>}
+                  <span>{n.publisher}</span>
                   {n.score && n.score.impact >= 1.2 ? " · ⚡ ข่าวตัวจักร" : ""}
                   {n.cred?.label === "danger" && <span className="text-down"> · 🚫 {n.cred.text}</span>}
                   {n.cred?.label === "warn" && <span className="text-yellow-500"> · ⚠️ {n.cred.text}</span>}
