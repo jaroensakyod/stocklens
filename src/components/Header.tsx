@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/lib/authContext";
+import LogoMark from "./LogoMark";
 
 // ===== โครงแถบเมนู: 5 จุดหลัก — หน้าแรก / ค้นหาหุ้น / ภาพตลาด / พอร์ต / เครื่องมือ =====
 // ทุก dropdown มีคำอธิบายสั้นๆ กำกับ เพื่อให้ผู้ใช้ใหม่เข้าใจใน 3 วินาที
@@ -113,7 +114,7 @@ export default function Header() {
     <header className="sticky top-0 z-40 bg-base-950/95 backdrop-blur border-b border-base-700/60">
       <div className="max-w-7xl mx-auto px-4 h-14 flex items-center gap-4">
         <Link href="/" className="flex items-center gap-2 shrink-0">
-          <span className="text-xl">🔬</span>
+          <LogoMark size={26} />
           <span className="font-bold text-lg text-zinc-50">
             Stock<span className="text-accent">Lens</span>
           </span>

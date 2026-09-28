@@ -10,6 +10,7 @@ import MoversByMarket from "@/components/MoversByMarket";
 import DailyPicks from "@/components/DailyPicks";
 import TodayBoard from "@/components/TodayBoard";
 import CommoditiesStrip from "@/components/CommoditiesStrip";
+import LogoMark from "@/components/LogoMark";
 import type { Quote } from "@/lib/types";
 
 interface DashboardData {
@@ -55,7 +56,7 @@ export default function HomePage() {
   if (!data) {
     return (
       <div className="flex flex-col items-center justify-center py-32 gap-3">
-        <div className="text-4xl animate-pulse">🔬</div>
+        <LogoMark size={44} className="animate-pulse" />
         <p className="text-zinc-500 text-sm">กำลังโหลดข้อมูลตลาด…</p>
       </div>
     );

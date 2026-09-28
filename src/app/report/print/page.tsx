@@ -1,5 +1,6 @@
 "use client";
 
+import LogoMark from "@/components/LogoMark";
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import type { Candle, Quote, StockAnalysis } from "@/lib/types";
@@ -154,7 +155,7 @@ function ReportInner() {
         {/* หัวกระดาษแบรนด์ — สีตามระดับสมาชิก */}
         <header className={`rp-header ${tier === "pro" ? "tier-pro" : "tier-starter"}`}>
           <div>
-            <h1>🔬 StockLens</h1>
+            <h1 style={{ display: "flex", alignItems: "center", gap: 6 }}><LogoMark size={22} /> StockLens</h1>
             <p className="rp-sub">{title}</p>
             <p className="rp-sub" style={{ fontSize: 10, opacity: 0.7 }}>{sub}</p>
           </div>
@@ -486,7 +487,7 @@ function ReportInner() {
 
           {/* ท้ายกระดาษ */}
           <div className="rp-footer">
-            <span>🔬 StockLens — {title} · {tier === "pro" ? "Pro" : "Starter"} · {refNo}</span>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}><LogoMark size={13} /> StockLens — {title} · {tier === "pro" ? "Pro" : "Starter"} · {refNo}</span>
             <span>⚠️ บทวิเคราะห์เชิงข้อมูล ไม่ใช่คำแนะนำการลงทุน · ข้อมูล Yahoo Finance (delay ~15 นาที)</span>
           </div>
         </div>

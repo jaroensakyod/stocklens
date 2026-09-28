@@ -1,4 +1,5 @@
 import Link from "next/link";
+import LogoMark from "./LogoMark";
 
 // Footer มาตรฐานเว็บการเงิน — คอลัมน์ลิงก์ + คำเตือนครบ (ไทย/อังกฤษ) + copyright
 const COLS: { title: string; links: { href: string; label: string; ext?: boolean }[] }[] = [
@@ -52,7 +53,7 @@ export default function Footer() {
         <div className="grid gap-8 md:grid-cols-[1.4fr_repeat(4,1fr)]">
           <div>
             <Link href="/" className="flex items-center gap-2">
-              <span className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center text-zinc-950 font-bold text-sm">SL</span>
+              <LogoMark size={28} />
               <span className="font-bold text-zinc-100">StockLens</span>
             </Link>
             <p className="text-[11px] text-zinc-500 leading-relaxed mt-3">
