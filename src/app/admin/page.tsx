@@ -115,6 +115,7 @@ export default function AdminPage() {
       <div className="flex items-center justify-between flex-wrap gap-2">
         <h1 className="text-2xl font-bold text-zinc-50">🔐 Admin Console</h1>
         <div className="flex gap-2">
+          <a className="btn-primary text-xs" href="/admin/studio">🎨 Content Studio (การ์ดจัดพอร์ต)</a>
           <a className="btn-ghost text-xs" href="/report/print?type=brief&tier=starter" target="_blank">📄 Daily Brief (Starter)</a>
           <a className="btn-ghost text-xs" href="/report/print?type=brief&tier=pro" target="_blank">📄 Daily Brief (Pro)</a>
         </div>

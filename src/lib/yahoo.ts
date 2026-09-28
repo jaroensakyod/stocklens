@@ -279,6 +279,29 @@ export async function getTrailingDividends(symbol: string): Promise<DividendTrai
   return out;
 }
 
+export interface DividendEvent {
+  ts: number; // วันขึ้นเครื่องหมาย XD (.BK) / ex-date (US)
+  amount: number; // ต่อหุ้น (สกุลเงินของหุ้นนั้น)
+}
+
+/** ประวัติปันผลย้อนหลังหลายปี (events=div ของ chart endpoint) — ใช้คัด "จ่ายต่อเนื่อง N ปี" */
+export async function getDividendHistory(symbol: string, years = 10): Promise<DividendEvent[]> {
+  const key = `divh:${symbol.toUpperCase()}:${years}y`;
+  const out = await cached<DividendEvent[]>(key, 24 * 3600_000, async () => {
+    const json = (await jget(`/v8/finance/chart/${encodeURIComponent(symbol)}?range=${years}y&interval=1mo&events=div`)) as
+      | { chart?: { result?: { events?: { dividends?: Record<string, { amount?: number; date?: number }> } }[] } }
+      | null;
+    const divs = json?.chart?.result?.[0]?.events?.dividends;
+    if (!divs) return null;
+    const list = Object.entries(divs)
+      .map(([k, d]) => ({ ts: Number(d.date ?? k), amount: Number(d.amount ?? 0) }))
+      .filter((d) => isFinite(d.amount) && d.amount > 0 && isFinite(d.ts) && d.ts > 0)
+      .sort((a, b) => a.ts - b.ts);
+    return list.length ? list : null;
+  });
+  return out ?? [];
+}
+
 // ---------- Fundamentals (timeseries จาก filings จริง) ----------
 const TS_TYPES = [
   "quarterlyTotalRevenue", "quarterlyGrossProfit", "quarterlyOperatingIncome", "quarterlyNetIncome", "quarterlyDilutedEPS", "quarterlyDilutedAverageShares", "quarterlyNormalizedEBITDA",
