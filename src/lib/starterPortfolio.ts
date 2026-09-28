@@ -10,6 +10,8 @@ import { getLiveGurus } from "./gurus13f";
 import type { Quote } from "./types";
 
 export type RiskId = "calm" | "balance" | "grow" | "tech" | "thai" | "guru";
+/** รวม id ของพอร์ตที่ผู้ใช้ปรับเอง (🛠️ ปรับพอร์ตเอง) เข้ามาในระบบเดียวกัน */
+export type ProfileId = RiskId | "custom";
 
 export interface StarterPosition {
   symbol: string;
@@ -23,7 +25,10 @@ export interface StarterPosition {
   changePct: number | null;
   reason: string; // ทำไมอยู่ในพอร์ต — ภาษาคนไม่มีความรู้
   risk: "ต่ำ" | "กลาง" | "สูง";
-  market: "US" | "TH";
+  market: "US" | "TH" | "INTL"; // INTL = หุ้น/ETF ต่างประเทศนอกเหนือจากเมกา (ADR/ETF ที่จดทะเบียนเมกา เป็น USD)
+  flag?: string; // ธงประเทศแสดงผล (🇺🇸 🇹🇭 🇯🇵 …) — ไม่ใส่ = ดูจาก market
+  grade?: string | null; // เกรด StockLens AAA/AA/A/B (มีเมื่อเปิดกรองเกรด)
+  scoreTotal?: number | null; // คะแนนรวม StockLens /100 (มีเมื่อเปิดกรองเกรด)
   // รายละเอียดเพิ่ม (มีเมื่อข้อมูลจริงรองรับ)
   pe?: number | null;
   yieldPct?: number | null; // ปันผล % ต่อปี
@@ -35,7 +40,7 @@ export interface StarterPosition {
 }
 
 export interface StarterProfile {
-  id: RiskId;
+  id: ProfileId;
   emoji: string;
   title: string;
   desc: string;
@@ -47,6 +52,7 @@ export interface StarterProfile {
     avgCagr5yPct: number | null; // 5 ปีเฉลี่ยถ่วงน้ำหนัก (ราคาล้วน — อดีต)
     usPct: number;
     thPct: number;
+    intlPct: number; // สัดส่วนตลาดอื่นๆ นอกเมกา/ไทย (ADR/ETF ต่างประเทศ)
     riskLow: number;
     riskMid: number;
     riskHigh: number;
@@ -93,7 +99,7 @@ async function cagr5y(symbol: string): Promise<number | null> {
   }
 }
 
-function statsOf(positions: StarterPosition[]): StarterProfile["stats"] {
+export function statsOf(positions: StarterPosition[]): StarterProfile["stats"] {
   const wSum = positions.reduce((a, p) => a + p.weight, 0) || 1;
   const yieldKnown = positions.filter((p) => p.yieldPct != null);
   const cagrKnown = positions.filter((p) => p.cagr5yPct != null);
@@ -105,6 +111,7 @@ function statsOf(positions: StarterPosition[]): StarterProfile["stats"] {
     avgCagr5yPct: cagrWSum > 0 ? cagrKnown.reduce((a, p) => a + (p.cagr5yPct ?? 0) * p.weight, 0) / cagrWSum : null,
     usPct: Math.round(positions.filter((p) => p.market === "US").reduce((a, p) => a + p.weight, 0)),
     thPct: Math.round(positions.filter((p) => p.market === "TH").reduce((a, p) => a + p.weight, 0)),
+    intlPct: Math.round(positions.filter((p) => p.market === "INTL").reduce((a, p) => a + p.weight, 0)),
     riskLow: Math.round(positions.filter((p) => p.risk === "ต่ำ").reduce((a, p) => a + p.weight, 0)),
     riskMid: Math.round(positions.filter((p) => p.risk === "กลาง").reduce((a, p) => a + p.weight, 0)),
     riskHigh: Math.round(positions.filter((p) => p.risk === "สูง").reduce((a, p) => a + p.weight, 0)),

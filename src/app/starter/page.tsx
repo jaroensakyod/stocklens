@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import type { StarterProfile, StarterResult } from "@/lib/starterPortfolio";
 import type { StarterBtResult } from "@/lib/starterBacktest";
+import type { StarterCustomResult } from "@/lib/starterCustom";
+import { CUSTOM_THEMES, INTL_REGIONS, type StarterCustomOptions } from "@/lib/customThemes";
 import { usePortfolio } from "@/lib/store";
 
-// 🧑‍🎓 พอร์ตตัวอย่างรายวันสำหรับมือใหม่ — เลือก 2 อย่าง: งบ + สไตล์(6 แบบ) → ได้สัดส่วน+สถิติพอร์ต พร้อมเหตุผลภาษาคนไม่มีความรู้
+// 🧑‍🎓 พอร์ตตัวอย่างรายวันสำหรับมือใหม่ — 2 โหมด: ⭐ สไตล์สำเร็จ 6 แบบ หรือ 🛠️ ปรับเอง (สัดส่วน/ธีม/เกรด/ซิ่ง)
 // (ข้อมูลจากเครื่องยนต์จริง หมุนรายวัน — เป็นตัวอย่างเพื่อการเรียนรู้ ไม่ใช่คำแนะนำการลงทุน)
 
 const BUDGETS = [5000, 10000, 50000, 100000];
@@ -36,6 +38,41 @@ const QUIZ: { q: string; opts: [string, string, string] }[] = [
   { q: "3️⃣ มีเวลา/ตั้งใจตามข่าวและพอร์ตแค่ไหน?", opts: ["แทบไม่มีเวลาดู", "บางวันเปิดดู", "ทุกวัน ชอบตลาดมาก"] },
 ];
 
+// ===== 🛠️ ปรับพอร์ตเอง — ตัวเลือก สัดส่วน/จำนวนตัว/ธีม/เกรด/หุ้นซิ่ง =====
+type MixKey = "th" | "us" | "fund" | "intl";
+type CustomMix = Record<MixKey, number>;
+const MIX_SLOTS: { key: MixKey; label: string; emoji: string }[] = [
+  { key: "th", label: "หุ้นไทย", emoji: "🇹🇭" },
+  { key: "us", label: "หุ้นเมกา", emoji: "🇺🇸" },
+  { key: "fund", label: "กองทุน/ETF", emoji: "🧺" },
+  { key: "intl", label: "หุ้นประเทศอื่น", emoji: "🌏" },
+];
+const MIX_PRESETS: { id: string; label: string; mix: CustomMix }[] = [
+  { id: "thai", label: "🇹🇭 ไทยล้วน", mix: { th: 100, us: 0, fund: 0, intl: 0 } },
+  { id: "us", label: "🇺🇸 เมกาล้วน", mix: { th: 0, us: 100, fund: 0, intl: 0 } },
+  { id: "fifty", label: "🇹🇭+🇺🇸 50/50", mix: { th: 50, us: 50, fund: 0, intl: 0 } },
+  { id: "fund", label: "🧺 กองทุนล้วน (DCA)", mix: { th: 0, us: 0, fund: 100, intl: 0 } },
+  { id: "world", label: "🌐 กระจายทั่วโลก", mix: { th: 15, us: 40, fund: 25, intl: 20 } },
+  { id: "core", label: "🛰️ Core-Satellite", mix: { th: 15, us: 25, fund: 60, intl: 0 } },
+];
+const COUNT_OPTS = [3, 5, 8, 10, 12];
+const GRADE_OPTS: { id: StarterCustomOptions["minGrade"]; label: string }[] = [
+  { id: "all", label: "ทุกเกรด" },
+  { id: "AAA", label: "AAA เท่านั้น" },
+  { id: "AA", label: "AA ขึ้นไป" },
+  { id: "A", label: "A ขึ้นไป" },
+  { id: "B", label: "B ขึ้นไป" },
+];
+const CUSTOM_DEFAULTS: StarterCustomOptions = {
+  mix: { th: 20, us: 40, fund: 25, intl: 15 },
+  count: 5,
+  themes: [],
+  regions: [],
+  minGrade: "all",
+  momentum: false,
+};
+const CUSTOM_LS = "sl-starter-custom";
+
 export default function StarterPage() {
   const [data, setData] = useState<StarterResult | null>(null);
   const [risk, setRisk] = useState<StarterProfile["id"]>("balance");
@@ -53,6 +90,16 @@ export default function StarterPage() {
   const [bt, setBt] = useState<StarterBtResult | null>(null);
   const [btBusy, setBtBusy] = useState(false);
   const [btYears, setBtYears] = useState(5);
+  // 🛠️ ปรับพอร์ตเอง: โหมด + ตัวเลือก (จำใน localStorage) + ผลลัพธ์
+  const [mode, setMode] = useState<"preset" | "custom">("preset");
+  const [cOpts, setCOpts] = useState<StarterCustomOptions>(CUSTOM_DEFAULTS);
+  const [customRes, setCustomRes] = useState<StarterCustomResult | null>(null);
+  const [customBusy, setCustomBusy] = useState(false);
+  const [customErr, setCustomErr] = useState<string | null>(null);
+  // 🧠 โหมด Jev: โจทย์ภาษาอิสระ + สถานะ busy + ชั้นข้อมูล AI ของผลลัพธ์ล่าสุด
+  const [brief, setBrief] = useState("");
+  const [aiBusy, setAiBusy] = useState(false);
+  const [aiInfo, setAiInfo] = useState<StarterCustomResult["ai"] | null>(null);
 
   useEffect(() => {
     fetch("/api/starter")
@@ -61,12 +108,34 @@ export default function StarterPage() {
       .catch(() => {});
   }, []);
 
-  // สลับพอร์ต → รีเซ็ตอัตราโตกลับไปใช้ default ของพอร์ตใหม่
+  // โหลดตัวเลือกที่บันทึกไว้ + บันทึกทุกครั้งที่แก้ (รอโหลดเสร็จก่อนจึงบันทึก กันทับค่าเก่าด้วย default ตอน mount)
+  const [optsReady, setOptsReady] = useState(false);
+  useEffect(() => {
+    try {
+      const raw = JSON.parse(localStorage.getItem(CUSTOM_LS) || "null");
+      if (raw && typeof raw === "object") {
+        setCOpts({ ...CUSTOM_DEFAULTS, ...raw, mix: { ...CUSTOM_DEFAULTS.mix, ...(raw.mix ?? {}) } });
+        if (typeof raw.brief === "string") setBrief(raw.brief.slice(0, 300));
+      }
+    } catch {
+      /* เริ่มด้วยค่า default */
+    }
+    setOptsReady(true);
+  }, []);
+  useEffect(() => {
+    if (!optsReady) return;
+    try {
+      localStorage.setItem(CUSTOM_LS, JSON.stringify({ ...cOpts, brief }));
+    } catch {}
+  }, [cOpts, brief, optsReady]);
+
+  // สลับพอร์ต/โหมด → รีเซ็ตอัตราโตกลับไปใช้ default ของพอร์ตใหม่
   useEffect(() => {
     setRateOverride(null);
-  }, [risk]);
+  }, [risk, mode, customRes]);
 
-  const profile = useMemo(() => data?.profiles.find((p) => p.id === risk), [data, risk]);
+  const presetProfile = useMemo(() => data?.profiles.find((p) => p.id === risk), [data, risk]);
+  const profile = mode === "custom" ? customRes?.profile ?? null : presetProfile;
   const yearlyDiv = profile?.stats.yieldPerYearPct != null ? (budget * profile.stats.yieldPerYearPct) / 100 : null;
 
   // ===== 🤔 quiz → สไตล์ที่เหมาะ (คะแนนรวม + กติกากันพลาด: ขายตอนติดลบ = ต้องผันผวนต่ำสุด / ไม่มีเวลาดู = ไม่เกินสมดุล) =====
@@ -96,6 +165,77 @@ export default function StarterPage() {
   useEffect(() => {
     if (recId) setRisk(recId);
   }, [recId]);
+
+  // ===== 🛠️ เลื่อนสไลเดอร์สัดส่วน: แท่งที่เหลือปรับตามสัดส่วนเดิมให้รวมเป็น 100% เสมอ =====
+  function setMixSlot(key: MixKey, val: number) {
+    const v = Math.max(0, Math.min(100, Math.round(val)));
+    const others = MIX_SLOTS.map((s) => s.key).filter((k) => k !== key);
+    const restTarget = 100 - v;
+    const restCur = others.reduce((a, k) => a + cOpts.mix[k], 0);
+    const next: CustomMix = { ...cOpts.mix, [key]: v };
+    if (restCur === 0) {
+      next[others[0]] = restTarget;
+    } else {
+      for (const k of others) next[k] = Math.round((restTarget * cOpts.mix[k]) / restCur);
+      const drift = restTarget - others.reduce((a, k) => a + next[k], 0);
+      const big = [...others].sort((a, b) => next[b] - next[a])[0];
+      next[big] = Math.max(0, next[big] + drift);
+    }
+    setCOpts({ ...cOpts, mix: next });
+  }
+  const toggleIn = (arr: string[], id: string) => (arr.includes(id) ? arr.filter((x) => x !== id) : [...arr, id]);
+
+  // ===== ✨ ประกอบพอร์ตจากตัวเลือกของผู้ใช้ (engine บน server) =====
+  function buildCustom() {
+    setCustomBusy(true);
+    setCustomErr(null);
+    setAiInfo(null);
+    fetch("/api/starter-custom", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(cOpts),
+    })
+      .then(async (r) => {
+        const j = await r.json().catch(() => null);
+        if (!r.ok) throw new Error(j?.error || "สร้างพอร์ตไม่สำเร็จ");
+        return j as StarterCustomResult;
+      })
+      .then((j) => setCustomRes(j))
+      .catch((e) => setCustomErr(e instanceof Error ? e.message : "สร้างพอร์ตไม่สำเร็จ — ลองอีกครั้ง"))
+      .finally(() => setCustomBusy(false));
+  }
+
+  // ===== 🧠 ให้ Jev จัดให้ — Jev คัดตัวจากคลังจริง + AI เขียนวิเคราะห์ (ใช้ตัวเลือกชุดเดียวกัน + โจทย์ brief) =====
+  function buildCustomAI() {
+    setAiBusy(true);
+    setCustomErr(null);
+    fetch("/api/starter-custom-ai", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...cOpts, brief }),
+    })
+      .then(async (r) => {
+        const j = await r.json().catch(() => null);
+        if (!r.ok) throw new Error(j?.error || "Jev จัดพอร์ตไม่สำเร็จ");
+        return j as StarterCustomResult;
+      })
+      .then((j) => {
+        setCustomRes(j);
+        setAiInfo(j.ai ?? null);
+      })
+      .catch((e) => setCustomErr(e instanceof Error ? e.message : "Jev จัดพอร์ตไม่สำเร็จ — ลองอีกครั้ง หรือใช้ปุ่มประกอบด้วยเครื่องยนต์ก่อน"))
+      .finally(() => setAiBusy(false));
+  }
+
+  // สลับมาแท็บปรับเองครั้งแรก → ประกอบให้เลยด้วยตัวเลือกปัจจุบัน (ไม่ต้องรอกดเอง)
+  const customTouched = useRef(false);
+  useEffect(() => {
+    if (mode === "custom" && !customTouched.current) {
+      customTouched.current = true;
+      buildCustom();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode]);
 
   // ===== ➕ ส่งพอร์ตนี้เข้า "พอร์ตของฉัน" (localStorage) — ตัวที่ถืออยู่แล้วรวมจำนวน + ต้นทุนเฉลี่ยถ่วงน้ำหนัก =====
   function addToPortfolio() {
@@ -160,8 +300,9 @@ export default function StarterPage() {
           🧑‍🎓 พอร์ตตัวอย่างรายวัน <span className="text-accent">สำหรับมือใหม่</span>
         </h1>
         <p className="text-zinc-400 mt-3 text-sm leading-relaxed max-w-2xl mx-auto">
-          ไม่รู้เรื่องหุ้นเลย? เลือกแค่ 2 อย่าง — <b className="text-zinc-200">มีเงินเท่าไหร่</b> กับ{" "}
-          <b className="text-zinc-200">อยากแบบไหน (6 สไตล์)</b> — เราจัดสัดส่วนให้จากข้อมูลจริงของวันนี้
+          ไม่รู้เรื่องหุ้นเลย? เลือก <b className="text-zinc-200">งบ</b> กับ <b className="text-zinc-200">สไตล์ 6 แบบ</b>{" "}
+          หรือสลับไปแท็บ <b className="text-zinc-200">🛠️ ปรับเอง</b> — สัดส่วนไทย/เมกา/กองทุน/ต่างประเทศ จำนวนตัว
+          ธีมที่สนใจ เกรดขั้นต่ำ และจะเติมหุ้นซิ่งไหม — เราจัดสัดส่วนให้จากข้อมูลจริงของวันนี้
           พร้อมเหตุผลกำกับทุกตัว ปันผลคาดหมาย ผลตอบแทนย้อนหลัง และสัดส่วนความเสี่ยงของพอร์ต
         </p>
         {data && (
@@ -171,7 +312,230 @@ export default function StarterPage() {
         )}
       </section>
 
+      {/* แท็บโหมด: ⭐ สไตล์สำเร็จ | 🛠️ ปรับพอร์ตเอง */}
+      <div className="flex gap-2 justify-center">
+        {(
+          [
+            ["preset", "⭐ สไตล์สำเร็จ 6 แบบ"],
+            ["custom", "🛠️ ปรับพอร์ตเอง"],
+          ] as const
+        ).map(([m, label]) => (
+          <button
+            key={m}
+            onClick={() => setMode(m)}
+            className={`chip !text-sm !px-4 !py-2 ${mode === m ? "bg-accent text-zinc-950" : "bg-base-800 text-zinc-400 border border-base-700 hover:text-zinc-200"}`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {/* 🛠️ โหมดปรับเอง — แผงตัวเลือก */}
+      {mode === "custom" && (
+        <section>
+          <h2 className="text-sm font-bold text-zinc-400 mb-1">1️⃣🛠️ ปรับพอร์ตเอง — เลือกสัดส่วน ธีม จำนวนตัว แล้วเราจัดให้</h2>
+          <p className="text-[11px] text-zinc-500 mb-3 leading-relaxed">
+            ปรับได้ทั้งหมด: สัดส่วนตลาด · จำนวนตัว · ธีมที่สนใจ · เกรดขั้นต่ำ · เติมหุ้นซิ่ง — งบ สถิติ ทบต้น และไทม์แมชชีนด้านล่างใช้ร่วมกับโหมดสไตล์สำเร็จ
+          </p>
+          <div className="card p-4 space-y-5">
+            {/* สัดส่วน — พรีเซ็ต + สไลเดอร์ 4 แท่ง */}
+            <div>
+              <div className="text-xs text-zinc-300 font-semibold mb-2">สัดส่วนสินทรัพย์ (ปรับแล้วรวม 100% เสมอ)</div>
+              <div className="flex flex-wrap gap-2 mb-3">
+                {MIX_PRESETS.map((p) => {
+                  const on = MIX_SLOTS.every((s) => p.mix[s.key] === cOpts.mix[s.key]);
+                  return (
+                    <button
+                      key={p.id}
+                      onClick={() => setCOpts({ ...cOpts, mix: { ...p.mix } })}
+                      className={`chip ${on ? "bg-accent text-zinc-950" : "bg-base-800 text-zinc-400 border border-base-700 hover:text-zinc-200"}`}
+                    >
+                      {p.label}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="grid md:grid-cols-2 gap-x-6 gap-y-3">
+                {MIX_SLOTS.map((s) => (
+                  <div key={s.key}>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-zinc-400">
+                        {s.emoji} {s.label}
+                      </span>
+                      <span className="num font-bold text-accent">{cOpts.mix[s.key]}%</span>
+                    </div>
+                    <input
+                      type="range"
+                      min={0}
+                      max={100}
+                      step={5}
+                      value={cOpts.mix[s.key]}
+                      onChange={(e) => setMixSlot(s.key, Number(e.target.value))}
+                      className="w-full mt-1 accent-[var(--accent,#f5b340)]"
+                      aria-label={`สัดส่วน ${s.label} (%)`}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* จำนวนตัว */}
+            <div>
+              <div className="text-xs text-zinc-300 font-semibold mb-2">อยากถือกี่ตัว?</div>
+              <div className="flex flex-wrap gap-2">
+                {COUNT_OPTS.map((n) => (
+                  <button
+                    key={n}
+                    onClick={() => setCOpts({ ...cOpts, count: n })}
+                    className={`chip num ${cOpts.count === n ? "bg-accent text-zinc-950" : "bg-base-800 text-zinc-400 border border-base-700"}`}
+                  >
+                    {n} ตัว
+                  </button>
+                ))}
+                <span className="text-[10px] text-zinc-600 self-center ml-1">มือใหม่แนะนำ 5-8 ตัว — กระจายพอโดยไม่ต้องตามเยอะ</span>
+              </div>
+            </div>
+
+            {/* ธีม */}
+            <div>
+              <div className="text-xs text-zinc-300 font-semibold mb-1">สนใจแนวไหน? (เลือกได้หลายธีม · ไม่เลือก = ไม่จำกัด)</div>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {CUSTOM_THEMES.map((t) => (
+                  <button
+                    key={t.id}
+                    onClick={() => setCOpts({ ...cOpts, themes: toggleIn(cOpts.themes, t.id) })}
+                    className={`chip ${cOpts.themes.includes(t.id) ? "bg-accent text-zinc-950" : "bg-base-800 text-zinc-400 border border-base-700 hover:text-zinc-200"}`}
+                  >
+                    {t.emoji} {t.label}
+                  </button>
+                ))}
+              </div>
+              <p className="text-[10px] text-zinc-600 mt-1.5">ธีมใช้กับหุ้นไทย+เมกา · บางธีม (อวกาศ กลาโหม ทอง) ยังไม่มีหุ้นไทย — ระบบจะเติมหุ้นไทยทั่วไปแทนและบอกในหมายเหตุใต้ปุ่มประกอบ</p>
+            </div>
+
+            {/* ภูมิภาคหุ้นนอก — แสดงเมื่อสัดส่วน 🌏 > 0 */}
+            {cOpts.mix.intl > 0 && (
+              <div>
+                <div className="text-xs text-zinc-300 font-semibold mb-1">🌏 หุ้นประเทศอื่น — เลือกภูมิภาค (ไม่เลือก = กระจาย 4 ภูมิภาคหลัก)</div>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {INTL_REGIONS.map((r) => (
+                    <button
+                      key={r.id}
+                      onClick={() => setCOpts({ ...cOpts, regions: toggleIn(cOpts.regions, r.id) })}
+                      className={`chip ${cOpts.regions.includes(r.id) ? "bg-accent text-zinc-950" : "bg-base-800 text-zinc-400 border border-base-700 hover:text-zinc-200"}`}
+                    >
+                      {r.flag} {r.label}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-[10px] text-zinc-600 mt-1.5">
+                  แต่ละภูมิภาคประกอบจาก ETF ดัชนีประเทศ + หุ้นใหญ่รายประเทศที่ซื้อในตลาดเมกาเป็นดอลลาร์ (ADR) — ไม่ต้องเปิดบัญชีที่ประเทศนั้น
+                </p>
+              </div>
+            )}
+
+            {/* เกรดขั้นต่ำ */}
+            <div>
+              <div className="text-xs text-zinc-300 font-semibold mb-1">เกรดขั้นต่ำ (เกรด StockLens ของเว็บเรา — AAA ดีสุด)</div>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {GRADE_OPTS.map((g) => (
+                  <button
+                    key={g.id}
+                    onClick={() => setCOpts({ ...cOpts, minGrade: g.id })}
+                    className={`chip ${cOpts.minGrade === g.id ? "bg-accent text-zinc-950" : "bg-base-800 text-zinc-400 border border-base-700 hover:text-zinc-200"}`}
+                  >
+                    {g.label}
+                  </button>
+                ))}
+              </div>
+              {cOpts.minGrade !== "all" && (
+                <p className="text-[10px] text-amber-400/80 mt-1.5">
+                  เปิดกรองเกรด = คำนวณคะแนน 6 เสาใหม่ ครั้งแรกใช้ ~20-40 วิ (ครั้งต่อไปเร็วเพราะ cache) · เกรดนี้เป็นระบบของ StockLens ไม่ใช่เกรดทางการเช่น SET ESG หรือเครดิตเรตติ้ง
+                </p>
+              )}
+            </div>
+
+            {/* หุ้นซิ่ง */}
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <div className="text-xs text-zinc-300 font-semibold">🚀 เติมหุ้นซิ่ง/หุ้นเด่นวันนี้ ~10%</div>
+                <p className="text-[10px] text-zinc-600 mt-0.5 leading-relaxed">
+                  จากเรดาร์หุ้นซิ่ง + Daily Picks ของวัน — ความเสี่ยงสูง เหมาะเฉพาะเงินที่เสียได้ไม่เจ็บ
+                </p>
+              </div>
+              <button
+                onClick={() => setCOpts({ ...cOpts, momentum: !cOpts.momentum })}
+                className={`chip whitespace-nowrap ${cOpts.momentum ? "bg-red-500/20 text-red-300 border border-red-500/40" : "bg-base-800 text-zinc-400 border border-base-700"}`}
+                aria-pressed={cOpts.momentum}
+              >
+                {cOpts.momentum ? "เปิดอยู่ 🚀" : "ปิดอยู่"}
+              </button>
+            </div>
+
+            {/* ปุ่มประกอบ 2 โหมด + โจทย์ให้ Jev + หมายเหตุของผลลัพธ์ */}
+            <div className="pt-3 border-t border-base-700/60 space-y-3">
+              <div className="flex flex-wrap items-center gap-3">
+                <button onClick={buildCustomAI} disabled={aiBusy || customBusy} className="btn-primary whitespace-nowrap">
+                  {aiBusy ? "🧠 Jev กำลังคิด…" : "🧠 ให้ Jev จัด + วิเคราะห์ให้"}
+                </button>
+                <button onClick={buildCustom} disabled={customBusy || aiBusy} className="btn-ghost whitespace-nowrap">
+                  {customBusy ? "⏳ กำลังประกอบ…" : "⚙️ ประกอบด้วยเครื่องยนต์"}
+                </button>
+                {customRes && !customBusy && !aiBusy && (
+                  <span className="text-[11px] text-zinc-500">คำนวณล่าสุด {customRes.asOf} · ปรับตัวเลือกแล้วกดประกอบใหม่ได้เลย</span>
+                )}
+              </div>
+              <div>
+                <textarea
+                  value={brief}
+                  onChange={(e) => setBrief(e.target.value.slice(0, 300))}
+                  placeholder={'เล่าเพิ่มให้ Jev ฟัง (ไม่บังคับ) เช่น "กลัวขาดทุน เน้นปันผล อยากมีทองนิดๆ"'}
+                  rows={2}
+                  maxLength={300}
+                  className="input w-full !py-2 text-sm"
+                  aria-label="โจทย์เพิ่มเติมสำหรับ Jev"
+                />
+                <p className="text-[10px] text-zinc-600 mt-1 leading-relaxed">
+                  ใช้ตัวเลือกชุดเดียวกันด้านบน — Jev คัดหุ้นจากคลังจริงของวัน แล้ว AI เขียนเหตุผลภาษามือใหม่ แล้ว Jev ตรวซ้ำอีกรอบ (~10-40 วิ ครั้งแรก)
+                </p>
+              </div>
+            </div>
+            {(customBusy || aiBusy) && (
+              <p className="text-xs text-zinc-500 animate-pulse">
+                {aiBusy ? "🧠 Jev กำลังคัดหุ้น และ AI กำลังเขียนวิเคราะห์จากข้อมูลจริงของวัน…" : "กำลังดึงราคา/คะแนนจริงของวันนี้มาจัดพอร์ต…"}
+              </p>
+            )}
+            {customErr && <p className="text-xs text-down">{customErr}</p>}
+            {customRes && customRes.notes.length > 0 && (
+              <div className="space-y-1">
+                {customRes.notes.map((n, i) => (
+                  <p key={i} className="text-[11px] text-zinc-400 leading-relaxed">
+                    {n}
+                  </p>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* 🧠 การ์ดวิเคราะห์จาก Jev+AI ของพอร์ตที่เพิ่งจัด */}
+          {aiInfo && (aiInfo.summary || aiInfo.jevCheck) && (
+            <div className="card p-4 mt-3 border-accent/40 !bg-accent/5">
+              <div className="flex flex-wrap items-center gap-2 mb-2">
+                <span className="chip bg-accent text-zinc-950 text-[10px]">🧠 Jev คัดตัว · AI วิเคราะห์</span>
+                {aiInfo.engine === "rules" && <span className="chip bg-base-800 text-zinc-400 text-[10px]">วันนี้ AI ไม่ว่าง — ผลจากเครื่องยนต์กฎ</span>}
+              </div>
+              {aiInfo.summary && <p className="text-sm text-zinc-200 leading-relaxed whitespace-pre-line">{aiInfo.summary}</p>}
+              {aiInfo.jevCheck && <p className="text-xs text-zinc-400 mt-2 leading-relaxed">{aiInfo.jevCheck}</p>}
+              <p className="text-[10px] text-zinc-600 mt-2 leading-relaxed">
+                Jev คัดหุ้นจากคลังจริงของวัน · น้ำหนักตามสัดส่วนที่คุณเลือกเอง · เหตุผลอ้างข้อมูลที่ให้เท่านั้น — เป็นตัวอย่างเพื่อการเรียนรู้ ไม่ใช่คำแนะนำการลงทุน
+              </p>
+            </div>
+          )}
+        </section>
+      )}
+
       {/* เลือกสไตล์ — 6 แบบ */}
+      {mode === "preset" && (
       <section>
         <h2 className="text-sm font-bold text-zinc-400 mb-3">1️⃣ เลือกสไตล์ของคุณ (6 แบบ)</h2>
 
@@ -239,6 +603,7 @@ export default function StarterPage() {
           )}
         </div>
       </section>
+      )}
 
       {/* เลือกงบ — chips + slider + พิมพ์เอง */}
       <section>
@@ -295,8 +660,16 @@ export default function StarterPage() {
             </div>
             <div className="card p-3">
               <div className="text-[10px] text-zinc-500">สัดส่วนตลาด</div>
-              <div className="text-lg font-bold text-zinc-50">🇺🇸 {profile.stats.usPct}% <span className="text-zinc-600">|</span> 🇹🇭 {profile.stats.thPct}%</div>
-              <div className="text-[10px] text-zinc-500">สหรัฐฯ ซื้อเป็นบาทผ่าน Dime ได้</div>
+              <div className="text-lg font-bold text-zinc-50">
+                🇺🇸 {profile.stats.usPct}% <span className="text-zinc-600">|</span> 🇹🇭 {profile.stats.thPct}%
+                {profile.stats.intlPct > 0 && (
+                  <>
+                    {" "}
+                    <span className="text-zinc-600">|</span> 🌏 {profile.stats.intlPct}%
+                  </>
+                )}
+              </div>
+              <div className="text-[10px] text-zinc-500">{profile.stats.intlPct > 0 ? "ต่างประเทศซื้อเป็น USD (ADR/ETF) ผ่านบัญชีเมกา" : "สหรัฐฯ ซื้อเป็นบาทผ่าน Dime ได้"}</div>
             </div>
             <div className="card p-3">
               <div className="text-[10px] text-zinc-500">ความเสี่ยงพอร์ต</div>
@@ -337,6 +710,7 @@ export default function StarterPage() {
                   const money = (budget * p.weight) / 100;
                   const units = p.priceThb ? money / p.priceThb : null;
                   const facts: string[] = [];
+                  if (p.grade) facts.push(`เกรด ${p.grade}${p.scoreTotal != null ? ` · ${p.scoreTotal}/100` : ""}`);
                   if (p.pe != null) facts.push(`P/E ${p.pe.toFixed(1)}`);
                   if (p.yieldPct != null) facts.push(`ปันผล ${p.yieldPct.toFixed(1)}%/ปี`);
                   if (p.roePct != null) facts.push(`ROE ${p.roePct.toFixed(0)}%`);
@@ -352,7 +726,7 @@ export default function StarterPage() {
                         <span className="text-zinc-500 text-xs ml-2">{p.name}</span>
                         <div className="text-[11px] text-zinc-500 mt-0.5">
                           {KIND_LABEL[p.kind].emoji} {KIND_LABEL[p.kind].label}
-                          {p.market === "TH" ? " · 🇹🇭" : " · 🇺🇸"}
+                          {` · ${p.flag ?? (p.market === "TH" ? "🇹🇭" : "🇺🇸")}`}
                           {p.changePct !== null && (
                             <span className={p.changePct >= 0 ? "text-up ml-1 num" : "text-down ml-1 num"}>
                               {p.changePct >= 0 ? "+" : ""}
