@@ -1,24 +1,40 @@
 import plansJson from "@/data/plans.json";
 import Link from "next/link";
 
-// ตารางเทียบสิทธิ์ 3 ระดับ — "คนจ่ายต้องได้มากกว่าเห็นชัด"
+// ตารางเทียบสิทธิ์ 3 ระดับ — บอก "ได้เท่าไหร่" เป็นตัวเลข (แนวการใช้งานปกติ ไม่ใช่มิเตอร์ตัดกลางคัน)
 const COMPARE: { label: string; free: string; starter: string; pro: string }[] = [
-  { label: "ข้อมูลตลาด 30 ประเทศ · ทุกหน้าเว็บ · พอร์ตมือใหม่รายวัน", free: "✓", starter: "✓", pro: "✓" },
-  { label: "Watchlist + พอร์ต + แจ้งเตือนราคา (เก็บในเครื่อง)", free: "✓", starter: "✓", pro: "✓" },
-  { label: "💬 แชท AI ถามได้ทุกอย่าง (12 หัวข้อ ตอบจากข้อมูลจริง)", free: "—", starter: "✓", pro: "✓ เจาะลึก" },
-  { label: "AI วิเคราะห์หุ้นรายตัว มุมมองนักวิเคราะห์ + สรุปข่าวไทย", free: "—", starter: "✓", pro: "✓" },
-  { label: "Daily Brief ภาคเช้า + Weekly ย่อ + กลุ่ม Facebook", free: "—", starter: "✓", pro: "✓" },
-  { label: "🦈 AI 5 มุมมอง (Burry · Buffett · Lynch · ภูมิรัฐศาสตร์)", free: "—", starter: "—", pro: "✓" },
-  { label: "🤖 AI ปรับพอร์ตส่วนตัว + พิสูจน์ผลย้อนหลัง 3 ปี", free: "—", starter: "—", pro: "✓" },
-  { label: "⚡ Flash Report 24 ชม. + LINE ส่วนตัว (เหตุการณ์ + watchlist รายวัน)", free: "—", starter: "—", pro: "✓" },
-  { label: "Deep Dive PDF + Weekly เต็ม + Live Q&A + Track Record เต็ม", free: "—", starter: "—", pro: "✓" },
+  { label: "ข้อมูล 30 ตลาด · ทุกหน้าเว็บ · พอร์ตมือใหม่รายวัน · ข่าวล่าสุด+ป้ายบวก/ลบ", free: "✓", starter: "✓", pro: "✓" },
+  { label: "Watchlist + พอร์ต + แจ้งเตือนราคา", free: "✓ ไม่จำกัด", starter: "✓", pro: "✓" },
+  { label: "🧑‍🎓 AI ผสมพอร์ตมือใหม่ (Jev คัดตัว + AI อธิบาย)", free: "~10 ครั้ง/วัน", starter: "✓", pro: "✓" },
+  { label: "💬 แชท AI ถามได้ทุกอย่าง (12 หัวข้อ ตอบจากข้อมูลจริง)", free: "—", starter: "~100 คำถาม/เดือน", pro: "~300/เดือน + โหมดเจาะลึก" },
+  { label: "AI วิเคราะห์หุ้นรายตัว + สรุปข่าวไทย", free: "—", starter: "~60 ครั้ง/เดือน", pro: "~200 ครั้ง/เดือน" },
+  { label: "Daily Brief ภาคเช้า + Weekly ย่อ + กลุ่ม Facebook", free: "—", starter: "✓ ทุกวันทำการ", pro: "✓ + Weekly เต็ม" },
+  { label: "🦈 AI 5 มุมมอง (Burry · Buffett · Lynch · ภูมิรัฐศาสตร์)", free: "—", starter: "—", pro: "~40 หุ้น/เดือน" },
+  { label: "🤖 AI ปรับพอร์ตส่วนตัว + พิสูจน์ผลย้อนหลัง 3 ปี", free: "—", starter: "—", pro: "~20 ครั้ง/เดือน" },
+  { label: "⚡ Flash Report 24 ชม. + LINE ส่วนตัว + Deep Dive PDF + Live Q&A", free: "—", starter: "—", pro: "✓" },
 ];
 
 function Cell({ v }: { v: string }) {
   if (v === "✓") return <span className="text-up">✓</span>;
   if (v === "—") return <span className="text-zinc-600">—</span>;
-  return <span className="text-accent font-bold text-[11px]">{v}</span>;
+  return <span className="text-accent font-bold text-[11px] whitespace-nowrap">{v}</span>;
 }
+
+const FAQ: [string, string][] = [
+  [
+    "ฟรีได้จริงไหม หรือแค่ล่อ?",
+    "ได้จริง — ทุกหน้าข้อมูล พอร์ตตัวอย่างมือใหม่ ข่าวล่าสุดพร้อมป้ายบวก/ลบ และลอง AI ผสมพอร์ตได้เลย ไม่ต้องสมัคร ไม่ต้องรหัส ของที่เป็นของสมาชิกคือ AI ตัวหลัก (แชท/วิเคราะห์รายตัว) ที่ต้นทุนต่อครั้งสูงกว่า",
+  ],
+  [
+    "ตัวเลข \"~100 คำถาม/เดือน\" คืออะไร เกินแล้วโดนตัดไหม?",
+    "เป็นแนวการใช้งานปกติ (fair use) ไม่ใช่มิเตอร์นับถอยหลัง ไม่มีการตัดกลางคัน — คนใช้เองแทบไม่มีทางแตะเพดาน ตั้งไว้กันสคริปต์/bot ยิงรัวเท่านั้น ถ้าใช้เกินปกติมากเราจะทักไปคุยก่อนเสมอ",
+  ],
+  [
+    "ราคาคิดมาจากอะไร?",
+    "คิดจากต้นทุน AI จริงต่อการใช้งาน (ดูกล่อง \"ทำไมราคานี้คุ้ม\" ด้านบน) — สมาชิกใช้หนักตามแนวปฏิบัติทั้งเดือน ต้นทุน AI ยังต่ำกว่าค่าสมาชิก 3-5 เท่า ราคาจึงยั่งยืนโดยไม่ต้องอั้นการใช้งานของคนจริง",
+  ],
+  ["จ่ายยังไง ต่ออายุยังไง?", "PromptPay ตามขั้นตอนด้านล่าง แอดมินออกรหัสภายใน 24 ชม. · หมดอายุทุกสิ้นเดือนถัดไป ต่ออายุเช่นเดิม (ราคาเดิมลูกค้าเก่าถามแอดมิน)"],
+];
 
 export default function PricingPage() {
   const { plans, disclaimer } = plansJson as {
@@ -33,70 +49,92 @@ export default function PricingPage() {
   return (
     <div className="space-y-10">
       <div className="text-center">
-        <h1 className="text-2xl md:text-3xl font-bold text-zinc-50">🔓 StockLens VIP</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-zinc-50">เลือกใช้ตามจริง — <span className="text-accent">ฟรีก็ครบ จ่ายเพื่อ AI</span></h1>
         <p className="text-sm text-zinc-400 mt-2 max-w-2xl mx-auto leading-relaxed">
-          สมาชิกได้ <span className="text-accent-soft">ทั้ง AI บนเว็บ + รายงานรายวันในกลุ่ม Facebook ปิด</span> — จ่ายด้วย PromptPay แล้วแอดมินออกรหัสเข้าเว็บ + เชิญเข้ากลุ่มภายใน 24 ชม.
+          ข้อมูลตลาดทั้งเว็บใช้ฟรีถาวร · สมาชิกได้ <span className="text-accent-soft">AI ตัวหลัก + รายงานรายวันในกลุ่ม Facebook ปิด</span> — จ่ายด้วย PromptPay
+          แล้วแอดมินออกรหัสเข้าเว็บภายใน 24 ชม.
         </p>
       </div>
 
-      {/* ฟรีได้อะไรก่อน — ทำให้เห็นว่าจ่ายแล้วได้ "เพิ่ม" อะไร */}
-      <div className="card p-4 max-w-4xl mx-auto text-center">
-        <p className="text-xs text-zinc-400">
-          🆓 <b className="text-zinc-200">ไม่จ่ายก็ใช้ได้:</b> ข้อมูล 30 ตลาด · พอร์ตตัวอย่างมือใหม่รายวัน · watchlist/แจ้งเตือนราคา — แต่ไม่มี AI วิเคราะห์และรายงานประจำวัน
-        </p>
-      </div>
-
-      {/* การ์ดแพ็กเกจ */}
-      <div className="grid md:grid-cols-2 gap-5 max-w-4xl mx-auto">
+      {/* การ์ด 3 แพ็กเกจ */}
+      <div className="grid md:grid-cols-3 gap-5 max-w-5xl mx-auto items-start">
         {plans.map((p) => (
           <div key={p.id} className={`card p-6 flex flex-col ${p.id === "pro" ? "border-accent/50 relative" : ""}`}>
-            {p.id === "pro" && (
-              <span className="absolute -top-3 left-1/2 -translate-x-1/2 chip bg-accent text-zinc-950 font-bold">แนะนำ · คุ้มสุด</span>
-            )}
+            {p.id === "pro" && <span className="absolute -top-3 left-1/2 -translate-x-1/2 chip bg-accent text-zinc-950 font-bold">แนะนำ · คุ้มสุด</span>}
+            {p.id === "starter" && <span className="absolute -top-3 left-1/2 -translate-x-1/2 chip bg-base-800 text-zinc-300 border border-base-700 font-bold">ยอดนิยม</span>}
             <div className="flex items-center gap-2">
               <span className="text-2xl">{p.emoji}</span>
               <h2 className="text-xl font-bold text-zinc-50">{p.name}</h2>
             </div>
-            <p className="text-sm text-zinc-400 mt-1">{p.tagline}</p>
+            <p className="text-sm text-zinc-400 mt-1 min-h-[40px]">{p.tagline}</p>
             <div className="mt-4 flex items-end gap-2">
               <span className="num text-4xl font-bold text-accent-soft">{p.priceMonthly.toLocaleString()}</span>
               <span className="text-sm text-zinc-500 mb-1">{p.priceNote}</span>
-              <span className="text-[11px] text-zinc-500 mb-1">≈ {(p.priceMonthly / 30).toFixed(0)}฿/วัน</span>
+              {p.priceMonthly > 0 && <span className="text-[11px] text-zinc-500 mb-1">≈ {(p.priceMonthly / 30).toFixed(0)}฿/วัน</span>}
             </div>
             <ul className="mt-5 space-y-2 flex-1">
               {p.features.map((f) => (
-                <li key={f} className="text-sm text-zinc-300 flex gap-2">
+                <li key={f} className="text-sm text-zinc-300 flex gap-2 leading-snug">
                   <span className="text-up shrink-0">✓</span>
                   {f}
                 </li>
               ))}
               {p.notFeatures.map((f) => (
-                <li key={f} className="text-sm text-zinc-600 flex gap-2">
+                <li key={f} className="text-sm text-zinc-600 flex gap-2 leading-snug">
                   <span className="shrink-0">✕</span>
                   {f}
                 </li>
               ))}
             </ul>
-            {p.id === "pro" ? (
+            {p.id === "free" ? (
+              <Link href="/starter" className="btn-ghost mt-6">เริ่มใช้ฟรี ไม่ต้องสมัคร</Link>
+            ) : p.id === "pro" ? (
               fbPro ? (
                 <a href={fbPro} className="btn-primary mt-6">🥇 สมัคร Pro</a>
               ) : (
                 <span className="btn-primary mt-6 cursor-default">🥇 สมัคร Pro</span>
               )
             ) : fbStarter ? (
-              <a href={fbStarter} className="btn-ghost mt-6">สมัคร Starter</a>
+              <a href={fbStarter} className="btn-primary mt-6">สมัคร Starter</a>
             ) : (
-              <span className="btn-ghost mt-6 cursor-default">สมัคร Starter</span>
+              <span className="btn-primary mt-6 cursor-default">สมัคร Starter</span>
             )}
           </div>
         ))}
       </div>
 
-      {/* ตารางเทียบ — เห็นชัดว่าจ่ายแล้วได้อะไรเพิ่ม */}
+      {/* กล่องความคุ้มทุน — ซื่อสัตย์กับต้นทุนจริง */}
       <section className="max-w-4xl mx-auto">
-        <h2 className="text-sm font-bold text-zinc-400 mb-3 text-center">เทียบทุกระดับก่อนตัดสินใจ</h2>
+        <div className="card p-6 border border-base-700">
+          <h2 className="font-bold text-zinc-100 text-center">🧮 ทำไมราคานี้คุ้ม — คิดจากต้นทุนจริง ไม่ใช่ตั้งลอยๆ</h2>
+          <p className="text-xs text-zinc-500 text-center mt-1">ทุกฟีเจอร์ AI มีค่าตัวจริงต่อครั้งที่เราจ่ายให้โมเดล — เราเปิดให้ดูเลย เพื่อให้มั่นใจว่าราคายั่งยืน ไม่มีวันต้องปิดตัวแล้วเอาค่าสมาชิกคืนไม่ได้</p>
+          <div className="grid sm:grid-cols-3 gap-3 mt-4">
+            {[
+              ["ต้นทุนต่อการใช้ 1 ครั้ง", ["💬 แชท AI ≈ 0.15฿", "🔬 วิเคราะห์หุ้น 1 ตัว ≈ 0.25฿", "🦈 5 มุมมอง 1 หุ้น ≈ 0.70฿", "📰 สรุปข่าวไทย 1 ชิ้น ≈ 0.05฿"]],
+              ["สมาชิกใช้ \"หนัก\" ทั้งเดือน", ["Starter: ต้นทุน AI ≈ 50฿ → เหลือ 150฿ ดูแลข้อมูล+รายงาน", "Pro: ต้นทุน AI ≈ 100฿ → เหลือ 400฿ คุ้คุณภาพรายงาน/LINE", "ฟรี: ถูกจำกัด+แคชหนัก → ต่อหัว < 1฿/เดือน"]],
+              ["แปลว่าอะไรสำหรับคุณ", ["ไม่มีมิเตอร์ตัดกลางคัน — ใช้จริงไม่มีทางขาดทุนเพราะคุณ", "แนวปฏิบัติ \"~กี่ครั้ง\" ไว้กัน bot ยิงรัว ไม่ใช่กับคน", "ราคานิ่ง — ไม่มีขึ้นเงียบๆ ราคาเดิมลูกค้าเก่าตลอด"]],
+            ].map(([h, rows]) => (
+              <div key={h as string} className="rounded-xl bg-base-900 border border-base-700 p-4">
+                <div className="text-xs font-bold text-accent-soft mb-2">{h as string}</div>
+                <ul className="space-y-1.5">
+                  {(rows as string[]).map((r) => (
+                    <li key={r} className="text-[11px] text-zinc-300 leading-snug flex gap-1.5">
+                      <span className="text-zinc-600 shrink-0">·</span>
+                      {r}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ตารางเทียบ */}
+      <section className="max-w-4xl mx-auto">
+        <h2 className="text-sm font-bold text-zinc-400 mb-3 text-center">เทียบทุกระดับ — ใช้อะไรได้บ้าง ได้เท่าไหร่</h2>
         <div className="card overflow-x-auto">
-          <table className="w-full text-xs min-w-[560px]">
+          <table className="w-full text-xs min-w-[620px]">
             <thead>
               <tr className="border-b border-base-700 text-zinc-500">
                 <th className="text-left py-2.5 px-3 font-medium">ฟีเจอร์</th>
@@ -116,7 +154,22 @@ export default function PricingPage() {
               ))}
             </tbody>
           </table>
+          <p className="px-3 py-2 text-[10px] text-zinc-600">ตัวเลข ~ คือแนวการใช้งานปกติ (fair use) ป้องกัน bot/สคริปต์ — คนใช้เองไม่มีมิเตอร์ตัดกลางคัน</p>
         </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="max-w-4xl mx-auto space-y-2">
+        <h2 className="text-sm font-bold text-zinc-400 mb-3 text-center">คำถามที่เจอบ่อย</h2>
+        {FAQ.map(([q, a]) => (
+          <details key={q} className="card p-4 group">
+            <summary className="text-sm font-semibold text-zinc-200 cursor-pointer list-none flex items-center justify-between gap-2">
+              {q}
+              <span className="text-zinc-600 group-open:rotate-180 transition-transform">▾</span>
+            </summary>
+            <p className="text-xs text-zinc-400 leading-relaxed mt-2.5">{a}</p>
+          </details>
+        ))}
       </section>
 
       <div className="card p-6 max-w-4xl mx-auto">
