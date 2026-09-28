@@ -10,6 +10,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ["/pricing", 0.9, false],
     ["/screener", 0.8, false],
     ["/radar", 0.8, true],
+    ["/calendar", 0.8, true],
+    ["/earnings", 0.8, true],
     ["/dividend", 0.8, true],
     ["/politics", 0.7, true],
     ["/surge", 0.7, true],

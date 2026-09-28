@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { getNews, getQuotes } from "@/lib/yahoo";
 import { getUsdThb } from "@/lib/yahoo";
+import { getUpcomingEvents } from "@/lib/econCalendar";
 import universe from "@/data/universe.json";
-import calendarJson from "@/data/calendar.json";
 import type { Quote } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -77,8 +77,13 @@ export async function GET() {
     losers = sorted.slice(-5).reverse();
   }
 
-  const today = new Date().toISOString().slice(0, 10);
-  const events = (calendarJson as { events: { date: string; label: string; impact: string; star: number }[] }).events.filter((e) => e.date >= today).slice(0, 4);
+  // เหตุการณ์สำคัญถัดไป — จากปฏิทินเศรษฐกิจ (สด + curated) ถ้าพัง fallback เป็นตารางเดิมในไฟล์
+  let events: { date: string; label: string; impact: string; star: number }[] = [];
+  try {
+    events = await getUpcomingEvents(4);
+  } catch {
+    events = [];
+  }
 
   return NextResponse.json({ indices, popular, gainers, losers, news, events, usdThb, universeSize: (universe as { tickers: unknown[] }).tickers.length });
 }

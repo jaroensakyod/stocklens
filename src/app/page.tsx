@@ -9,6 +9,7 @@ import MarketHeatmap from "@/components/MarketHeatmap";
 import MoversByMarket from "@/components/MoversByMarket";
 import DailyPicks from "@/components/DailyPicks";
 import TodayBoard from "@/components/TodayBoard";
+import CommoditiesStrip from "@/components/CommoditiesStrip";
 import type { Quote } from "@/lib/types";
 
 interface DashboardData {
@@ -113,6 +114,9 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ทอง · น้ำมัน · FX · คริปโต */}
+      <CommoditiesStrip />
+
       <div className="grid lg:grid-cols-3 gap-6">
         {/* ข่าวล่าสุด + อัปเดตหุ้น (สไตล์ investing.com — Jev บวก/ลบ/ผลกระทบ ทุกชิ้น) */}
         <section className="lg:col-span-2">
@@ -125,7 +129,10 @@ export default function HomePage() {
       <TrumpPulse />
     {/* ปฏิทิน */}
           <section>
-            <h2 className="text-sm font-bold text-zinc-400 mb-3">🗓️ ปฏิทินเหตุการณ์สำคัญ</h2>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-bold text-zinc-400">🗓️ เหตุการณ์สำคัญถัดไป</h2>
+              <Link href="/calendar" className="text-xs text-accent-soft hover:underline">ดูปฏิทินเต็ม →</Link>
+            </div>
             <div className="card divide-y divide-base-700/60">
               {data.events.length === 0 && <p className="p-4 text-xs text-zinc-500">ไม่มีเหตุการณ์ที่บันทึกไว้ล่วงหน้า</p>}
               {data.events.map((e) => (

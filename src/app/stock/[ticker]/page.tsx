@@ -10,14 +10,13 @@ import BrokerBadge from "@/components/BrokerBadge";
 import BudgetCalc from "@/components/BudgetCalc";
 import StarButton from "@/components/StarButton";
 import QuickAlert from "@/components/QuickAlert";
-import LockGate from "@/components/LockGate";
-import { useCan } from "@/lib/authContext";
 import TrustPanel from "@/components/TrustPanel";
 import ThesisLogger from "@/components/ThesisLogger";
 import SeasonalityPanel from "@/components/SeasonalityPanel";
 import HoldersPanel from "@/components/HoldersPanel";
 import RevenueStructurePanel from "@/components/RevenueStructurePanel";
 import AnalystPanel from "@/components/AnalystPanel";
+import TechnicalPanel from "@/components/TechnicalPanel";
 import ScenarioPanel from "@/components/ScenarioPanel";
 import type { Scenarios } from "@/lib/scenarios";
 import { formatBig } from "@/lib/factors";
@@ -36,7 +35,6 @@ export default function StockPage() {
   const routeParams = useParams<{ ticker: string }>();
   // useParams คืนค่ายัง encode (BML%2FPL) — decode ให้ก่อนใช้ทั้งแสดงผลและค้นหา
   const ticker = decodeURIComponent(Array.isArray(routeParams.ticker) ? routeParams.ticker[0] : routeParams.ticker ?? "");
-  const can = useCan();
   const [a, setA] = useState<(StockAnalysis & { usdThb?: number; confidence?: { score: number; coveredCount: number; totalCount: number; missing: string[]; hasTechnicals: boolean; hasNews: boolean; priceSource: string; fundamentalsSource: string }; scenarios?: Scenarios }) | null>(null);
   const [err, setErr] = useState("");
   const [suggestions, setSuggestions] = useState<{ symbol: string; name: string; exchange: string }[]>([]);
@@ -166,87 +164,14 @@ export default function StockPage() {
         <div className="lg:col-span-2 space-y-6">
           <PriceChart symbol={q.symbol} />
 
+          {/* วิเคราะห์ทางเทคนิคเต็มรูปแบบ — ตารางสัญญาณ + MA + Pivot + สรุป 5 ระดับ (สไตล์ investing.com) */}
+          <TechnicalPanel ticker={q.symbol} price={q.price} />
+
           {/* StockLens Score — แทนการ์ดปัจจัย 5 มิติเดิม (5 มิติรวมอยู่ในเสา Quality/Valuation/Momentum) */}
           <ScorePanel ticker={q.symbol} />
 
           {/* งบการเงิน 4 ปี (คลัง kb — TTM ละเอียด + ประวัติรายปี + EDGAR) */}
           <FinancialsPanel ticker={q.symbol} />
-
-          {/* เทคนิค */}
-          {t && (
-            <div className="card p-5">
-              <h3 className="text-sm font-bold text-zinc-100 mb-3">📐 สัญญาณเทคนิค</h3>
-              <div className="grid grid-cols-2 gap-2 text-xs mb-3">
-                {t.rsi14 !== undefined && <Stat k="RSI (14)" v={t.rsi14.toFixed(1)} />}
-                {t.sma20 !== undefined && <Stat k="SMA 20" v={t.sma20.toFixed(1)} />}
-                {t.sma50 !== undefined && <Stat k="SMA 50" v={t.sma50.toFixed(1)} />}
-                {t.sma200 !== undefined && <Stat k="SMA 200" v={t.sma200.toFixed(1)} />}
-                {t.macd && <Stat k="MACD hist" v={t.macd.hist.toFixed(2)} />}
-                {t.bollinger && <Stat k="%B (Bollinger)" v={(t.bollinger.pctB * 100).toFixed(0) + "%"} />}
-              </div>
-
-              {/* 🧩 เทคนิคขั้นสูง: Fibonacci · Elliott Wave · Divergence · ATR */}
-              {(t.fib || t.elliott || t.divergence || t.atrStop) && (can.pro ? (
-                <div className="border border-base-700 rounded-xl p-3.5 bg-base-850 mb-3 space-y-3">
-                  <h4 className="text-xs font-bold text-accent-soft">🧩 เทคนิคขั้นสูง</h4>
-
-                  {t.fib && (
-                    <div>
-                      <p className="text-[11px] text-zinc-300 font-semibold">
-                        📐 Fibonacci — ขา{t.fib.direction === "up" ? "ขึ้น" : "ลง"} {t.fib.from.toFixed(1)} → {t.fib.to.toFixed(1)} ({t.fib.legPct.toFixed(0)}%)
-                        {t.fib.retracedPct !== null && <> · ตอนนี้{t.fib.retracedPct < 0 ? `ทะลุปลายขาไปแล้ว ${Math.abs(t.fib.retracedPct).toFixed(0)}%` : t.fib.retracedPct > 100 ? `ย่อเกินต้นขา ${t.fib.retracedPct.toFixed(0)}%` : `ย่อ ${t.fib.retracedPct.toFixed(0)}% ของขา`}</>}
-                      </p>
-                      <div className="flex flex-wrap gap-1 mt-1.5">
-                        {t.fib.levels.map((l) => (
-                          <span key={l.ratio} className="chip text-[10px] bg-base-800 text-zinc-400 border border-base-700 num">
-                            {(l.ratio * 100).toFixed(1)}% → {l.price.toFixed(1)}
-                          </span>
-                        ))}
-                      </div>
-                      <p className="text-[10px] text-zinc-500 mt-1">
-                        {t.fib.nearestSupport && <>แนวรับย่อถัดไป: <span className="text-up num">{t.fib.nearestSupport.price.toFixed(1)}</span> ({(t.fib.nearestSupport.ratio * 100).toFixed(1)}%) · </>}
-                        {t.fib.nearestResistance && <>แนวต้าน: <span className="text-down num">{t.fib.nearestResistance.price.toFixed(1)}</span> · </>}
-                        เป้าส่วนขยาย: {t.fib.extensions.map((e) => `${(e.ratio * 100).toFixed(1)}%→${e.price.toFixed(1)}`).join(" / ")}
-                      </p>
-                    </div>
-                  )}
-
-                  {t.elliott && (
-                    <div>
-                      <p className="text-[11px] text-zinc-300 font-semibold">
-                        🌊 Elliott Wave — {t.elliott.structure} · ความเชื่อมั่น {t.elliott.confidence}%
-                      </p>
-                      <p className="text-[11px] text-zinc-400 leading-snug mt-0.5">{t.elliott.waveLabel}</p>
-                      <p className="text-[10px] text-zinc-500 leading-snug">{t.elliott.expectation}</p>
-                      {t.elliott.invalidation !== null && (
-                        <p className="text-[10px] text-amber-500/90 mt-0.5 num">จุดยกเลิกนับเวฟ: ทะลุ {t.elliott.invalidation.toFixed(2)}</p>
-                      )}
-                    </div>
-                  )}
-
-                  {t.divergence && (
-                    <p className={`text-[11px] font-semibold ${t.divergence.type === "bullish" ? "text-up" : "text-down"}`}>
-                      {t.divergence.type === "bullish" ? "🔀 Divergence บวก" : "🔀 Divergence ลบ"} — <span className="text-zinc-400 font-normal">{t.divergence.detail}</span>
-                    </p>
-                  )}
-
-                  {t.atr14 !== undefined && t.atrStop && (
-                    <p className="text-[10px] text-zinc-500 num">
-                      📏 ATR14 {t.atr14.toFixed(2)} ({((t.atr14 / q.price) * 100).toFixed(1)}% ของราคา) — จุดตัดขาดทุนอ้างอิง 2×ATR: กลับตัวลง {t.atrStop.long.toFixed(2)} / เบรกชั่วคราว {t.atrStop.short.toFixed(2)}
-                    </p>
-                  )}
-                </div>
-              ) : (
-                <LockGate need="pro" title="เทคนิคขั้นสูง: Fibonacci · Elliott Wave · Divergence · ATR" desc="ระดับราคา Fib / นับเวฟ / สัญญาณกลับตัว / จุดตัดขาดทุน — สิทธิ์สมาชิก🥇 Pro" />
-              ))}
-
-              <ul className="space-y-1.5">
-                {t.reasons.map((r, i) => (
-                  <li key={i} className="text-xs text-zinc-400 flex gap-1.5"><span className="text-zinc-600">•</span>{r}</li>
-                ))}
-              </ul>
-            </div>
-          )}
 
           {/* AI */}
           <AIAnalysis ticker={q.symbol} />
@@ -324,15 +249,6 @@ export default function StockPage() {
 
       {/* คอนเซนซัสนักวิเคราะห์ + วันออกงบ */}
       <AnalystPanel ticker={q.symbol} price={q.price} />
-    </div>
-  );
-}
-
-function Stat({ k, v }: { k: string; v: string }) {
-  return (
-    <div className="bg-base-850 rounded-lg px-2.5 py-1.5">
-      <div className="text-zinc-500 text-[10px]">{k}</div>
-      <div className="num text-zinc-200 font-semibold">{v}</div>
     </div>
   );
 }
