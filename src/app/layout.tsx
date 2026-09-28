@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     locale: "th_TH",
     siteName: "StockLens",
     title: "StockLens — วิเคราะห์หุ้น + Global Radar ด้วย AI",
-    description: "คะแนนปัจจัย 5 มิติจากงบจริง · Global Radar แปลงเหตุการณ์โลกเป็นหุ้น · AI วิเคราะห์ภาษาไทย · 30 ตลาด · ซื้อผ่าน Dime ได้",
+    description: "คะแนนปัจจัย 5 มิติจากงบจริง · Global Radar แปลงเหตุการณ์โลกเป็นหุ้น · AI วิเคราะห์ภาษาไทย · 30 ตลาด",
   },
   twitter: {
     card: "summary_large_image",

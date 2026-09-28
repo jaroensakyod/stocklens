@@ -1,6 +1,5 @@
 import { tvUniverse, toYahooSymbol } from "@/lib/tvscanner";
 import { buildAnalysis } from "@/lib/analysis";
-import { getUsdThb } from "@/lib/yahoo";
 
 // 🎯 Daily Picks — "หุ้นน่าสนใจวันนี้" ตอบคำถามแรกของคนเข้าใหม่
 // คัดจากข้อมูลจริงล้วน: หุ้นที่ขยับแรงวันนี้ (TV universe) → ไล่คะแนนปัจจัย 5 มิติจากงบจริง (buildAnalysis)
@@ -18,7 +17,6 @@ interface Pick {
   tag: string;
   tagEmoji: string;
   reason: string;
-  dime: string | null; // บรรทัดช่องทางซื้อ (สหรัฐฯ)
 }
 
 interface PicksResult {
@@ -41,10 +39,10 @@ function tagOf(overall: number, dims: { valuation: number; growth: number; profi
 }
 
 async function buildPicks(): Promise<PicksResult> {
-  const [usAll, thAll, usdThb] = await Promise.all([tvUniverse("america", 600), tvUniverse("thailand", 900), getUsdThb()]);
+  const [usAll, thAll] = await Promise.all([tvUniverse("america", 600), tvUniverse("thailand", 900)]);
 
   // สหรัฐฯ: หุ้นใหญ่พอ (mcap USD ปกติใน universe america) ขยับพอสมควรแต่ไม่ใช่ปั๊มน้ำมัน
-  // กรอง ticker ยาวเกิน 4 ตัวอักษร (เช่น OVCHF, MRAAF = OTC foreign ordinary ไม่มีสภาพคล่อง หาซื้อยากใน Dime)
+  // กรอง ticker ยาวเกิน 4 ตัวอักษร (เช่น OVCHF, MRAAF = OTC foreign ordinary ไม่มีสภาพคล่อง หาซื้อยากในโบรกทั่วไป)
   const usOk = usAll.filter(
     (r) => r.price >= 2 && r.mcap >= 5e9 && r.symbol.length <= 4 && /^[A-Z]+$/.test(r.symbol) && Math.abs(r.changePct) >= 1.5 && Math.abs(r.changePct) <= 12
   );
@@ -94,7 +92,6 @@ async function buildPicks(): Promise<PicksResult> {
         tag,
         tagEmoji,
         reason: reasonParts.join(" · "),
-        dime: a.quote.currency === "USD" ? `ซื้อได้ใน Dime ≈ ${(a.quote.price * usdThb).toFixed(0)}฿/หุ้น (เศษหุ้นเริ่ม 50฿)` : null,
         rankScore,
       });
     } catch {

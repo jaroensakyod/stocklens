@@ -10,7 +10,7 @@ const BROKERS = (brokersJson as {
 }).brokers;
 
 // 📅 หุ้นปันผลรายเดือน + ตัววางแผนรายได้ปันผล — "สร้างเงินเดือนเสริมจากปันผลทุกเดือน"
-// หุ้นไทยจ่ายสูงสุดปีละ 2 ครั้ง — ตัวจ่าย "เดือนละครั้ง" อยู่ตลาดสหรัฐฯ (ซื้อผ่าน Dime/โบรกต่างประเทศได้)
+// หุ้นไทยจ่ายสูงสุดปีละ 2 ครั้ง — ตัวจ่าย "เดือนละครั้ง" อยู่ตลาดสหรัฐฯ (ซื้อผ่านโบรกเกอร์ที่รองรับตลาดต่างประเทศได้)
 
 const RISK_COLOR: Record<string, string> = {
   "ต่ำ": "chip bg-emerald-500/10 text-emerald-400 text-[10px]",
@@ -77,7 +77,7 @@ export default function DividendPage() {
           📅 ปันผลรายเดือน <span className="text-accent">สร้างเงินเดือนเสริมทุกเดือน</span>
         </h1>
         <p className="text-zinc-400 mt-3 text-sm leading-relaxed max-w-2xl mx-auto">
-          หุ้นไทยจ่ายปันผลสูงสุดปีละ 2 ครั้ง — แต่ตลาดสหรัฐฯ มีหุ้น/ETF ที่จ่าย <b className="text-zinc-200">เดือนละครั้ง</b> ซื้อผ่าน Dime (เศษหุ้นเริ่ม 50฿) ได้เลย
+          หุ้นไทยจ่ายปันผลสูงสุดปีละ 2 ครั้ง — แต่ตลาดสหรัฐฯ มีหุ้น/ETF ที่จ่าย <b className="text-zinc-200">เดือนละครั้ง</b> (ซื้อผ่านโบรกเกอร์ที่รองรับตลาดสหรัฐฯ)
           หน้านี้รวมรายชื่อยอดนิยม + <b className="text-zinc-200">ตัววางแผนรายได้ปันผล</b> ให้เห็นว่าต้องมีทุนเท่าไหร่ หรือต้องสะสมนานแค่ไหน
         </p>
         {asOf && <p className="text-[11px] text-zinc-500 mt-2">ราคา/yield ล่าสุด {asOf} · หุ้นไทยปันผลดูที่ <Link href="/longterm" className="text-accent-soft underline">หน้าระยะยาว</Link></p>}

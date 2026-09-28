@@ -28,8 +28,7 @@ export default function BrokerBadge({ ticker, compact = false }: { ticker: strin
   if (!b.buyable && compact) return null;
 
   const color =
-    b.label === "Dime" ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
-    : b.label === "โบรกเกอร์ไทย" ? "bg-sky-500/15 text-sky-400 border-sky-500/30"
+    b.label === "โบรกเกอร์ไทย" ? "bg-sky-500/15 text-sky-400 border-sky-500/30"
     : b.label === "InnovestX" ? "bg-violet-500/15 text-violet-400 border-violet-500/30"
     : "bg-zinc-500/15 text-zinc-400 border-zinc-500/30";
 
@@ -45,7 +44,7 @@ export default function BrokerBadge({ ticker, compact = false }: { ticker: strin
         className={`chip border ${color} cursor-pointer hover:brightness-125`}
         title="กดดูช่องทางซื้อทั้งหมด + ค่าธรรมเนียม"
       >
-        {compact ? (b.label === "Dime" ? "✓ " : "") : "🛒 ซื้อผ่าน "}
+        {compact ? "" : "🛒 ซื้อผ่าน "}
         {b.label}
         {extra > 0 && <span className="opacity-70 ml-1">+{extra} ▾</span>}
       </button>

@@ -21,7 +21,7 @@ export interface StarterPosition {
   priceThb: number | null; // ราคาต่อหน่วย ณ ตอนนี้ (บาท)
   priceLocal: number | null; // ราคาในสกุลของหุ้นเอง (บาท/ดอลลาร์) — ใช้บันทึกต้นทุนเข้า "พอร์ตของฉัน"
   currency: string; // "THB" | "USD"
-  unitThb: boolean; // true = ซื้อเป็นหุ้นเต็ม (ไทย) / false = ซื้อเศษได้ (Dime)
+  unitThb: boolean; // true = ซื้อเป็นหุ้นเต็ม (ไทย) / false = ซื้อเศษได้ (โบรกที่รองรับเศษหุ้น)
   changePct: number | null;
   reason: string; // ทำไมอยู่ในพอร์ต — ภาษาคนไม่มีความรู้
   risk: "ต่ำ" | "กลาง" | "สูง";

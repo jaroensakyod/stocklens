@@ -74,7 +74,7 @@ export async function buildBrief() {
     .map((p, i) => `${i + 1}. ${p.tagEmoji} ${p.ticker} ${p.currency === "USD" ? "$" : ""}${p.price.toFixed(2)} (${p.changePct >= 0 ? "+" : ""}${p.changePct.toFixed(1)}%) — ${p.tag} · ${p.reason}`)
     .join("\n");
   const proPicks = picks.picks
-    .map((p, i) => `${i + 1}. ${p.tagEmoji} ${p.ticker} ${p.currency === "USD" ? "$" : ""}${p.price.toFixed(2)} (${p.changePct >= 0 ? "+" : ""}${p.changePct.toFixed(1)}%) — ${p.reason}${p.dime ? ` · ${p.dime}` : ""}`)
+    .map((p, i) => `${i + 1}. ${p.tagEmoji} ${p.ticker} ${p.currency === "USD" ? "$" : ""}${p.price.toFixed(2)} (${p.changePct >= 0 ? "+" : ""}${p.changePct.toFixed(1)}%) — ${p.reason}`)
     .join("\n");
 
   // สถานการณ์ 12 เดือนของ pick อันดับ 1 (Pro เท่านั้น) — EPS จริง × สมมติ P/E

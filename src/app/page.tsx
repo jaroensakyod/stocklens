@@ -70,7 +70,7 @@ export default function HomePage() {
         </h1>
         <p className="text-zinc-400 mt-3 max-w-2xl mx-auto text-sm leading-relaxed">
           เครื่องมือระดับมืออาชีพ: คะแนนปัจจัย 5 มิติ · สัญญาณเทคนิค · AI วิเคราะห์ภาษาไทย · Global Radar ที่แปลง
-          &ldquo;เหตุการณ์โลก&rdquo; เป็นห่วงโซ่หุ้นที่ได้/เสียประโยชน์ — พร้อมบอกว่าซื้อหุ้นตัวไหนจาก Dime! / โบรกเกอร์ไหน
+          &ldquo;เหตุการณ์โลก&rdquo; เป็นห่วงโซ่หุ้นที่ได้/เสียประโยชน์ พร้อมช่องทางซื้อสำหรับคนไทย
         </p>
         <div className="flex gap-3 justify-center mt-5 flex-wrap">
           <Link href="/starter" className="btn-primary">🧑‍🎓 มือใหม่? ดูพอร์ตตัวอย่างรายวัน</Link>

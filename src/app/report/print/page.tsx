@@ -377,7 +377,7 @@ function ReportInner() {
                       {a.quote.changePct >= 0 ? "▲ +" : "▼ "}{a.quote.changePct.toFixed(2)}%
                     </span>
                     {a.usdThb && a.quote.currency === "USD" && (
-                      <span className="text-zinc-500" style={{ fontSize: 12, marginLeft: 8 }}>≈ {(a.quote.price * a.usdThb).toFixed(0)} ฿ · ซื้อได้ใน Dime (เศษหุ้นเริ่ม 50฿)</span>
+                      <span className="text-zinc-500" style={{ fontSize: 12, marginLeft: 8 }}>≈ {(a.quote.price * a.usdThb).toFixed(0)} ฿</span>
                     )}
                   </p>
                   <PriceSpark candles={candles} currency={a.quote.currency} />

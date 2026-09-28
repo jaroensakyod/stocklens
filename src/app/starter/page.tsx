@@ -641,7 +641,7 @@ export default function StarterPage() {
           className="w-full mt-3 accent-[var(--accent,#f5b340)]"
           aria-label="เลื่อนปรับงบประมาณ"
         />
-        {budget < 1000 && <p className="text-[11px] text-amber-400 mt-1">เริ่มจริงได้จากหลักร้อย (เศษหุ้น Dime เริ่ม 50฿) แต่แนะนำ ≥1,000฿ ให้กระจายพอ</p>}
+        {budget < 1000 && <p className="text-[11px] text-amber-400 mt-1">เริ่มจริงได้จากหลักร้อย (บางโบรกเกอร์รองรับเศษหุ้น) แต่แนะนำ ≥1,000฿ ให้กระจายพอ</p>}
       </section>
 
       {/* สถิติพอร์ตรวม — เห็นภาพก่อนดูตาราง */}
@@ -672,7 +672,7 @@ export default function StarterPage() {
                   </>
                 )}
               </div>
-              <div className="text-[10px] text-zinc-500">{profile.stats.intlPct > 0 ? "ต่างประเทศซื้อเป็น USD (ADR/ETF) ผ่านบัญชีเมกา" : "สหรัฐฯ ซื้อเป็นบาทผ่าน Dime ได้"}</div>
+              <div className="text-[10px] text-zinc-500">{profile.stats.intlPct > 0 ? "ต่างประเทศซื้อเป็น USD (ADR/ETF) ผ่านบัญชีเมกา" : "สหรัฐฯ ซื้อเป็นบาทผ่านบางโบรกเกอร์ได้"}</div>
             </div>
             <div className="card p-3">
               <div className="text-[10px] text-zinc-500">ความเสี่ยงพอร์ต</div>
@@ -1019,7 +1019,7 @@ export default function StarterPage() {
           <div className="card p-4">
             <div className="font-bold text-zinc-100">🇺🇸 หุ้น/กองทุนต่างประเทศ</div>
             <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
-              ซื้อได้ใน <b className="text-accent">Dime</b> (เศษหุ้นเริ่ม 50฿, ค่าธรรมเนียม ~0.15%) หรือ InnovestX / Webull — เปิดบัญชี 1 วันเสร็จ ใช้แค่บัตรประชาชน+บัญชีธนาคาร
+              เปิดบัญชีโบรกเกอร์ที่รองรับตลาดสหรัฐฯ (แอปไทย / โบรกไทย / ต่างประเทศ — เทียบค่าธรรมเนียมทั้งหมดกดป้าย 🛒 ในหน้าหุ้น) ได้ใน ~1 วัน ใช้แค่บัตรประชาชน+บัญชีธนาคาร
             </p>
           </div>
           <div className="card p-4">

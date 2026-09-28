@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
         const up = q.changePct >= 0;
         lines.push(`${up ? "🟢" : "🔴"} ${q.symbol} ${q.price.toFixed(2)} ${q.currency} (${up ? "+" : ""}${q.changePct.toFixed(2)}%)`);
         if (Math.abs(q.changePct) >= 2) flags++;
-        if (q.currency === "USD" && usdThb > 0) lines.push(`   ≈ ${(q.price * usdThb).toFixed(0)}฿ · ซื้อได้ใน Dime`);
+        if (q.currency === "USD" && usdThb > 0) lines.push(`   ≈ ${(q.price * usdThb).toFixed(0)}฿`);
       }
       if (flags > 0) lines.push("", `🚨 มี ${flags} ตัวขยับแรงวันนี้ (≥2%) — เข้าไปดูห่วงโซ่เหตุการณ์ได้ที่ StockLens`);
       lines.push("", "— ข้อมูลหน่วง ~15 นาที · ไม่ใช่คำแนะนำการลงทุน");

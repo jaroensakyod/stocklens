@@ -491,7 +491,7 @@ export async function buildCustomPortfolio(opts: StarterCustomOptions, override?
         ? `จากธีม${c.themeLabel} ที่คุณสนใจ${c.sector ? ` — หมวด ${c.sector}` : ""} — เลือกจากบริษัทใหญ่ของ S&P500`
         : ltRow
           ? `หุ้นสหรัฐฯ จ่ายปันผล งบแข็งแรง — ปันผล ~${ltRow.yieldPct?.toFixed(1) ?? "?"}%/ปี`
-          : `หุ้นแกนใหญ่ของตลาดสหรัฐฯ (S&P500) — ธุรกิจที่ยืนหยัดมานาน ซื้อผ่าน Dime เป็นบาทได้`;
+          : `หุ้นแกนใหญ่ของตลาดสหรัฐฯ (S&P500) — ธุรกิจที่ยืนหยัดมานาน บางโบรกซื้อเป็นบาทได้`;
     }
     return {
       symbol: c.symbol,

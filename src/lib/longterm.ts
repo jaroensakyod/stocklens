@@ -3,7 +3,7 @@
 // (Health/ROE/หนี้/FCF) (3) ผลตอบแทน 5 ปีจริงจากกราฟราคารายวัน (ราคาล้วน ไม่รวมปันผล — ระบุชัด)
 import { tvUniverse, toYahooSymbol } from "@/lib/tvscanner";
 import { buildAnalysis } from "@/lib/analysis";
-import { getChart, getUsdThb } from "@/lib/yahoo";
+import { getChart } from "@/lib/yahoo";
 
 export interface LTRow {
   ticker: string;
@@ -20,13 +20,12 @@ export interface LTRow {
   cagr5yPct: number | null;
   score: number;
   note: string;
-  dime: string | null;
 }
 
 let cached: { at: number; data: { dividends: LTRow[]; compounders: LTRow[]; asOf: string; note: string } } | null = null;
 const TTL = 60 * 60_000;
 
-async function rowFor(ticker: string, name: string, market: string, tvYield: number | null, usdThb: number): Promise<LTRow | null> {
+async function rowFor(ticker: string, name: string, market: string, tvYield: number | null): Promise<LTRow | null> {
   try {
     const a = await buildAnalysis(ticker);
     if (!isFinite(a.quote.price)) return null;
@@ -87,7 +86,6 @@ async function rowFor(ticker: string, name: string, market: string, tvYield: num
       cagr5yPct: cagr5y !== null ? Math.round(cagr5y * 10) / 10 : null,
       score,
       note: parts.join(" · "),
-      dime: a.quote.currency === "USD" ? `ซื้อได้ใน Dime ≈ ${(a.quote.price * usdThb).toFixed(0)}฿` : null,
     };
   } catch {
     return null;
@@ -95,7 +93,6 @@ async function rowFor(ticker: string, name: string, market: string, tvYield: num
 }
 
 async function build() {
-  const usdThb = await getUsdThb().catch(() => 33);
   const [us, th] = await Promise.all([tvUniverse("america", 600), tvUniverse("thailand", 400)]);
 
   // ผู้สมัคร: สายปันผล (ใหญ่ + yield ไม่ต่ำกว่าเกณฑ์) + สาย mega-cap (หุ้นชั้นนำไม่ว่าจะจ่ายปันผลไหม)
@@ -114,7 +111,7 @@ async function build() {
     jobs.push({ yahoo, name: r.name.includes("_") ? r.name.split("_").pop()! : r.name, market: r.country === "Thailand" ? "🇹🇭" : "🇺🇸", y: r.dividendYield });
   }
 
-  const rows = (await Promise.all(jobs.map((j) => rowFor(j.yahoo, j.name, j.market, j.y, usdThb)))).filter((r): r is LTRow => !!r);
+  const rows = (await Promise.all(jobs.map((j) => rowFor(j.yahoo, j.name, j.market, j.y)))).filter((r): r is LTRow => !!r);
 
   const dividends = rows
     // ต้องมีงบจริงให้ตรวจ (PE + Health ไม่ null) — ตัด ETF/ตราสารที่ TV จัดเป็น stock หลุดมา เช่น SOJD/SOJE

@@ -27,7 +27,7 @@ export function brokerFor(symbol: string): BrokerInfo {
   const m = detectMarket(symbol);
   switch (m) {
     case "US":
-      return { label: "Dime", detail: "ซื้อได้ใน Dime! (เศษหุ้นเริ่ม 50฿, ค่าธรรมเนียม ~0.15%) หรือ InnovestX / Webull", buyable: true };
+      return { label: "โบรกเกอร์", detail: "เปิดบัญชีโบรกเกอร์ที่รองรับตลาดสหรัฐฯ (แอปไทย / โบรกไทย / ต่างประเทศ) — เทียบค่าธรรมเนียมทั้งหมดกดที่ป้าย 🛒 ในหน้าหุ้น", buyable: true };
     case "TH":
       return { label: "โบรกเกอร์ไทย", detail: "ซื้อผ่านโบรกเกอร์ไทยที่มีบัญชี SET", buyable: true };
     case "HK":

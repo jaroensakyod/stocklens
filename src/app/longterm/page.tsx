@@ -20,7 +20,6 @@ interface LTRow {
   cagr5yPct: number | null;
   score: number;
   note: string;
-  dime: string | null;
 }
 
 interface LTData {
@@ -148,7 +147,6 @@ function Card({ r, rank, kind }: { r: LTRow; rank: number; kind: "div" | "growth
         </span>
       </div>
       <p className="text-[11px] text-zinc-400 mt-2 leading-snug">{r.note}</p>
-      {r.dime && <p className="text-[10px] text-zinc-600 mt-1">🪙 {r.dime}</p>}
     </Link>
   );
 }

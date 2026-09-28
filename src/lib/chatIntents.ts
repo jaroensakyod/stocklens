@@ -180,7 +180,7 @@ async function buildStockPacket(tickers: string[]): Promise<{ packet: string; de
     );
     lines.push(
       `ราคา ${a.quote.price.toFixed(2)} ${a.quote.currency} (${spct(a.quote.changePct) ?? "?"} วันนี้)` +
-        (a.usdThb && a.quote.currency === "USD" ? ` ≈ ${(a.quote.price * a.usdThb).toFixed(0)}บาท (ซื้อได้ใน Dime เศษหุ้นเริ่ม 50฿)` : "")
+        (a.usdThb && a.quote.currency === "USD" ? ` ≈ ${(a.quote.price * a.usdThb).toFixed(0)}บาท` : "")
     );
     if (p?.marketCap) {
       lines.push(
@@ -220,7 +220,7 @@ async function buildStockPacket(tickers: string[]): Promise<{ packet: string; de
       lines.push(`เหตุผลเทคนิค: ${tech.reasons.slice(0, 5).join(" · ")}`);
     }
     if (a.news.length) lines.push(`ข่าวล่าสุด: ${a.news.slice(0, 3).map((n) => n.title).join(" / ")}`);
-    lines.push(`ความน่าเชื่อถือข้อมูล: ${a.confidence.score}% (${a.confidence.coveredCount}/${a.confidence.totalCount} ฟิลด์) · ช่องทางซื้อ: ${brokerFor(sym).detail}${brokerFor(sym).label === "Dime" ? " และช่องทางอื่นอีก 8 ที่ (InnovestX/BLS/Kim Eng/CGS/Phillip/IBKR/Webull — เทียบที่หน้าหุ้นปุ่ม 🛒)" : ""}`);
+    lines.push(`ความน่าเชื่อถือข้อมูล: ${a.confidence.score}% (${a.confidence.coveredCount}/${a.confidence.totalCount} ฟิลด์) · ช่องทางซื้อ: ${brokerFor(sym).detail}`);
 
     const demo =
       `**${sym} — ${a.quote.name}** ${a.quote.price.toFixed(2)} ${a.quote.currency} (${spct(a.quote.changePct) ?? "?"})` +

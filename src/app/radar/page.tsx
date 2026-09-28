@@ -55,7 +55,7 @@ export default function RadarPage() {
         <h1 className="text-2xl md:text-3xl font-bold text-zinc-50">🌍 Global Radar</h1>
         <p className="text-sm text-zinc-400 mt-2 max-w-3xl leading-relaxed">
           เล่าเหตุการณ์เป็นภาษาไทย แล้วให้ระบบถอดรหัสเป็น <span className="text-accent-soft">ห่วงโซ่ผลกระทบ</span>:
-          เหตุการณ์ → สินค้าโภคภัณฑ์/อุตสาหกรรม → หุ้นที่ได้ ✅ / เสีย ❌ ประโยชน์ พร้อมราคาจริงตอนนี้ และช่องทางซื้อ (Dime! / โบรกเกอร์ไทย / InnovestX)
+          เหตุการณ์ → สินค้าโภคภัณฑ์/อุตสาหกรรม → หุ้นที่ได้ ✅ / เสีย ❌ ประโยชน์ พร้อมราคาจริงตอนนี้ และช่องทางซื้อสำหรับคนไทย
         </p>
       </section>
 

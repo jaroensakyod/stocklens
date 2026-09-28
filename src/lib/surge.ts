@@ -1,5 +1,5 @@
 import { tvUniverse, toYahooSymbol } from "@/lib/tvscanner";
-import { getChart, getUsdThb } from "@/lib/yahoo";
+import { getChart } from "@/lib/yahoo";
 
 // 🚀 เรดาร์หุ้นซิ่ง — หุ้นที่ขยับแรงวันนี้ พร้อมหลักฐานจากข้อมูลจริง 3 ชั้น:
 // 1) ราคาขยับ ≥3% (จาก universe ที่กรองสภาพคล่องแล้ว)
@@ -21,7 +21,6 @@ interface SurgeRow {
   marketCapB: number;
   flags: string[];
   surgeScore: number;
-  dime: string | null;
 }
 
 export let cached: { at: number; data: { rows: SurgeRow[]; asOf: string } } | null = null;
@@ -38,7 +37,7 @@ const SURGE_REGIONS: { id: string; flag: string; currency: string; univ: number;
   { id: "china", flag: "🇨🇳", currency: "CNY", univ: 300, mcapMin: 2e9 },
 ];
 
-async function scan(region: (typeof SURGE_REGIONS)[number], out: SurgeRow[], usdThb: number) {
+async function scan(region: (typeof SURGE_REGIONS)[number], out: SurgeRow[]) {
   const all = await tvUniverse(region.id, region.univ);
   const cands = all
     .filter(
@@ -92,7 +91,6 @@ async function scan(region: (typeof SURGE_REGIONS)[number], out: SurgeRow[], usd
         marketCapB: Math.round(c.mcap / 1e9 * 10) / 10,
         flags,
         surgeScore: Math.round(surgeScore),
-        dime: region.id === "america" ? `ซื้อได้ใน Dime ≈ ${(c.price * usdThb).toFixed(0)}฿` : null,
       });
     } catch {
       // ตัวไหนดึงกราฟไม่ได้ข้ามไป
@@ -101,11 +99,10 @@ async function scan(region: (typeof SURGE_REGIONS)[number], out: SurgeRow[], usd
 }
 
 async function build(): Promise<{ rows: SurgeRow[]; asOf: string }> {
-  const usdThb = await getUsdThb().catch(() => 33);
   const rows: SurgeRow[] = [];
   // ทยอยเป็นกลุ่มๆ กันยิงพร้อมกันทีเดียวเต็มที่ (7 ตลาด × universe + chart ต่อตัว)
   for (let i = 0; i < SURGE_REGIONS.length; i += 3) {
-    await Promise.all(SURGE_REGIONS.slice(i, i + 3).map((r) => scan(r, rows, usdThb)));
+    await Promise.all(SURGE_REGIONS.slice(i, i + 3).map((r) => scan(r, rows)));
   }
   rows.sort((a, b) => b.surgeScore - a.surgeScore);
   return { rows: rows.slice(0, 15), asOf: new Date().toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" }) + " น." };

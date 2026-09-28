@@ -20,7 +20,6 @@ interface SurgeRow {
   marketCapB: number;
   flags: string[];
   surgeScore: number;
-  dime: string | null;
 }
 
 // 🚀 เรดาร์หุ้นซิ่ง — ขยับแรง + วอลุ่มพุ่ง + ใกล้/ทะลุจุดสูงสุด 52 สัปดาห์ (ทั้งหมดจากข้อมูลจริง)
@@ -103,7 +102,6 @@ export default function SurgePage() {
               </div>
 
               {r.flags.length > 0 && <p className="text-[11px] text-zinc-400 mt-1.5">{r.flags.join(" · ")}</p>}
-              {r.dime && <p className="text-[10px] text-zinc-600 mt-1">🪙 {r.dime}</p>}
             </Link>
           ))}
         </div>

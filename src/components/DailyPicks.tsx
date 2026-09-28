@@ -16,7 +16,6 @@ interface Pick {
   tag: string;
   tagEmoji: string;
   reason: string;
-  dime: string | null;
 }
 
 // 🎯 Daily Picks — "หุ้นน่าสนใจวันนี้" ตอบคำถามแรกของคนเข้าใหม่จาก Reel: "ตัวไหนน่าสนใจ"
@@ -73,7 +72,6 @@ export default function DailyPicks() {
                     </span>
                   </div>
                   <p className="text-[11px] text-zinc-400 mt-2 leading-snug line-clamp-3">{p.reason}</p>
-                  {p.dime && <p className="text-[10px] text-zinc-600 mt-1.5">🪙 {p.dime}</p>}
                 </Link>
               );
             })}
