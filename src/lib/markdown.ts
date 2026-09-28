@@ -38,7 +38,7 @@ export function mdToHtml(md: string): string {
         const rows = block.slice(2).map(splitRow);
         const thead = `<thead><tr>${header.map((c) => `<th>${bold(c)}</th>`).join("")}</tr></thead>`;
         const tbody = `<tbody>${rows.map((r) => `<tr>${r.map((c) => `<td>${bold(c)}</td>`).join("")}</tr>`).join("")}</tbody>`;
-        out.push(`<table class="md-table">${thead}${tbody}</table>`);
+        out.push(`<div class="md-table-wrap"><table class="md-table">${thead}${tbody}</table></div>`);
       } else {
         out.push(`<p>${block.map((b) => bold(b.trim())).join("<br>")}</p>`);
       }

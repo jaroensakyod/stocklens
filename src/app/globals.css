@@ -73,6 +73,13 @@ body {
 }
 
 /* ===== markdown ในแชท ===== */
+/* ตัวห่อตาราง: กว้างเกินกรอบแชท = เลื่อนแนวนอนดูต่อ แทนที่จะล้นกรอบ */
+.md-table-wrap {
+  overflow-x: auto;
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
 .ai-chat p {
   margin-bottom: 4px;
 }
@@ -84,13 +91,17 @@ body {
   color: #fafafa;
 }
 .ai-chat .md-table {
-  @apply my-2 w-full text-left text-[11px] border-collapse;
+  @apply my-2 text-left text-[11px] border-collapse;
+  width: max-content; /* ขยายตามเนื้อหาจริง แล้วให้ตัวห่อเลื่อน — ไม่อัดจนอ่านไม่ออก */
+  min-width: 100%;
 }
 .ai-chat .md-table th {
   @apply px-1.5 py-1 border-b border-base-600 text-zinc-300 font-bold whitespace-nowrap;
 }
 .ai-chat .md-table td {
-  @apply px-1.5 py-1 border-b border-base-700/50 text-zinc-400;
+  @apply px-1.5 py-1 border-b border-base-700/50 text-zinc-400 align-top;
+  word-break: break-word; /* ช่องที่มี ticker/ข้อความยาว ตัดคำได้ ไม่ดันตาราง */
+  max-width: 220px;
 }
 
 /* ===== markdown ในบทวิเคราะห์ AI ===== */
