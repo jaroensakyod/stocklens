@@ -5,6 +5,7 @@ import TickerPicker from "@/components/TickerPicker";
 import InvestWarn from "@/components/InvestWarn";
 import OptionPlayCard from "@/components/OptionPlayCard";
 import PaperPortfolio from "@/components/PaperPortfolio";
+import MyPaperTrades from "@/components/MyPaperTrades";
 
 interface Expiry { date: string; daysToExpiry: number }
 interface ChainIndex { symbol: string; underlyingPrice: number; expiries: Expiry[] }
@@ -18,6 +19,24 @@ interface Chain {
   calls: Contract[]; puts: Contract[];
   atmIv: number | null; hv20: number | null; ivPremiumPct: number | null;
   source: string;
+}
+
+// Wrapper — ดึงไม้ AI เปิดอยู่ส่งให้ MyPaperTrades (ให้คัดลอกได้)
+function MyPaperOptionsWrapper() {
+  const [aiTrades, setAiTrades] = useState<{ id: string; symbol: string; type: string; strike: number; thesis: string }[]>([]);
+  useEffect(() => {
+    fetch("/api/options/paper")
+      .then((r) => r.json())
+      .then((j) => {
+        setAiTrades(
+          (j.trades ?? [])
+            .filter((t: { status: string }) => t.status === "open")
+            .map((t: { id: string; symbol: string; type: string; strike: number; thesis: string }) => ({ id: t.id, symbol: t.symbol, type: t.type, strike: t.strike, thesis: t.thesis }))
+        );
+      })
+      .catch(() => {});
+  }, []);
+  return <MyPaperTrades aiOpenTrades={aiTrades} />;
 }
 
 export default function OptionsPage() {
@@ -141,8 +160,11 @@ export default function OptionsPage() {
         </div>
       )}
 
-      {/* Paper Portfolio */}
+      {/* Paper Portfolio (AI) */}
       <PaperPortfolio />
+
+      {/* Paper Options ของฉัน (สมาชิก) */}
+      <MyPaperOptionsWrapper />
 
       {/* Chain table */}
       {loadingChain && <div className="card p-6 text-center text-xs text-zinc-500">กำลังโหลด chain {expiry}…</div>}
