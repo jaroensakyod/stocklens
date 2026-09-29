@@ -9,6 +9,7 @@ import AIAnalysis from "@/components/AIAnalysis";
 import BrokerBadge from "@/components/BrokerBadge";
 import BudgetCalc from "@/components/BudgetCalc";
 import StarButton from "@/components/StarButton";
+import FavButton from "@/components/FavButton";
 import QuickAlert from "@/components/QuickAlert";
 import TrustPanel from "@/components/TrustPanel";
 import ThesisLogger from "@/components/ThesisLogger";
@@ -18,6 +19,9 @@ import RevenueStructurePanel from "@/components/RevenueStructurePanel";
 import AnalystPanel from "@/components/AnalystPanel";
 import TechnicalPanel from "@/components/TechnicalPanel";
 import ScenarioPanel from "@/components/ScenarioPanel";
+import PeerPanel from "@/components/PeerPanel";
+import GuruHoldersPanel from "@/components/GuruHoldersPanel";
+import PerfStrip from "@/components/PerfStrip";
 import type { Scenarios } from "@/lib/scenarios";
 import { formatBig } from "@/lib/factors";
 import type { StockAnalysis } from "@/lib/types";
@@ -114,6 +118,7 @@ export default function StockPage() {
           <div className="flex items-center gap-3 flex-wrap">
             <h1 className="text-3xl font-bold text-zinc-50">{q.symbol}</h1>
             <StarButton ticker={q.symbol} className="text-2xl leading-none" />
+            <FavButton ticker={q.symbol} className="text-2xl leading-none" />
             <BrokerBadge ticker={q.symbol} />
             {t && <span className={`chip border ${signalLabel.cls}`}>สัญญาณเทคนิค: {signalLabel.text}</span>}
             <a
@@ -161,11 +166,14 @@ export default function StockPage() {
 
       {/* Grid หลัก */}
       <div className="grid lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-6 min-w-0">
           <PriceChart symbol={q.symbol} />
 
           {/* วิเคราะห์ทางเทคนิคเต็มรูปแบบ — ตารางสัญญาณ + MA + Pivot + สรุป 5 ระดับ (สไตล์ investing.com) */}
           <TechnicalPanel ticker={q.symbol} price={q.price} />
+
+          {/* เทียบกับอุตสาหกรรมเดียวกัน (median/percentile + เกรด) — ในตลาดนี้/ทั่วโลก */}
+          <PeerPanel ticker={q.symbol} />
 
           {/* StockLens Score — แทนการ์ดปัจจัย 5 มิติเดิม (5 มิติรวมอยู่ในเสา Quality/Valuation/Momentum) */}
           <ScorePanel ticker={q.symbol} />
@@ -178,7 +186,7 @@ export default function StockPage() {
         </div>
 
         {/* Sidebar */}
-        <div className="space-y-6">
+        <div className="space-y-6 min-w-0">
           <div className="card p-5">
             <h3 className="text-sm font-bold text-zinc-100 mb-3">📋 ข้อมูลหลัก</h3>
             <dl className="text-sm divide-y divide-base-700/50">
@@ -202,6 +210,8 @@ export default function StockPage() {
           </div>
 
           {isUsd && a.usdThb && <BudgetCalc priceUsd={q.price} usdThb={a.usdThb} currency={q.currency} />}
+
+          <PerfStrip ticker={q.symbol} />
 
           {/* Trust: ขอบเขตของข้อมูล */}
           {a.confidence && <TrustPanel confidence={a.confidence} />}
@@ -243,6 +253,9 @@ export default function StockPage() {
 
       {/* ใครถือหุ้นนี้ (Top Shareholders) */}
       <HoldersPanel ticker={q.symbol} market={q.exchange} />
+
+      {/* เซียน/กูรูที่ถือหุ้นนี้ (reverse 13F LIVE จาก SEC) */}
+      <GuruHoldersPanel ticker={q.symbol} />
 
       {/* โครงสร้างรายได้ (Revenue Structure — US auto จาก EDGAR) */}
       <RevenueStructurePanel ticker={q.symbol} />

@@ -4,7 +4,7 @@ import { TV_REGIONS, tvUniverse } from "@/lib/tvscanner";
 export const dynamic = "force-dynamic";
 
 // GET /api/universe?region=america&limit=200&sector=&industry=&ipo=1&pm=1&q=
-// universe ทั้งตลาด 30+ ประเทศ (TradingView) + sector/industry จริง + IPO + premarket
+// universe ทั้งตลาด 30+ ประเทศ (TradingView) + sector/industry จริง + IPO + premarket + เมตริกเชิงลึก (P/E, margins, โต, ราคาเป้าหมาย ฯลฯ)
 export async function GET(req: NextRequest) {
   const sp = req.nextUrl.searchParams;
   const region = TV_REGIONS.find((r) => r.id === (sp.get("region") || "america"))?.id ?? "america";
@@ -15,7 +15,11 @@ export async function GET(req: NextRequest) {
   const pmOnly = sp.get("pm") === "1";
   const q = (sp.get("q") || "").toLowerCase();
 
-  const all = await tvUniverse(region, region === "america" || region === "thailand" ? 1000 : 400);
+  // ตัดเครื่องมือที่ไม่ใช่หุ้นสามัญ (ETF/ETN/warrant/SPAC/notes) ที่หลุด filter type=stock ของ TV
+  const JUNK = /(ETF|ETN|WARRANT|SPAC|BLANK CHECK|NOTES DUE|UNIT INVEST|RIGHTS)/i;
+  const all = (await tvUniverse(region, region === "america" || region === "thailand" ? 1000 : 400)).filter(
+    (r) => !JUNK.test(r.name) && r.sector && Number.isFinite(r.price) && r.price > 0
+  );
   if (!all.length) {
     return NextResponse.json({ error: "โหลด universe ไม่สำเร็จ (TradingView scanner) — ลองใหม่อีกครั้ง" }, { status: 502 });
   }
@@ -45,6 +49,15 @@ export async function GET(req: NextRequest) {
       symbol: r.symbol, name: r.name, price: r.price, changePct: r.changePct, mcap: r.mcap,
       sector: r.sector, industry: r.industry, exchange: r.exchange, ipoDate: r.ipoDate,
       premarketPct: r.premarketPct, divYield: r.dividendYield, country: r.country,
+      // เมตริกเชิงลึก (อาจเป็น null ในบางตลาด)
+      pe: r.pe, pb: r.pb, ps: r.ps, peg: r.peg, evEbitda: r.evEbitda,
+      grossMargin: r.grossMargin, operMargin: r.operMargin, netMargin: r.netMargin,
+      roe: r.roe, roa: r.roa, roic: r.roic,
+      de: r.de, currentRatio: r.currentRatio, quickRatio: r.quickRatio,
+      revYoy: r.revYoy, epsYoy: r.epsYoy, dividendPayout: r.dividendPayout,
+      perf3M: r.perf3M, perfY: r.perfY, perfYTD: r.perfYTD, perf5Y: r.perf5Y,
+      rsi: r.rsi, beta: r.beta, sma200: r.sma200, relVol: r.relVol,
+      targetPrice: r.targetPrice,
     })),
   });
 }

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/authContext";
+import { usePortfolio } from "@/lib/store";
 import BrokerBadge from "@/components/BrokerBadge";
 import type { Quote } from "@/lib/types";
 
@@ -56,7 +57,12 @@ export default function GurusPage() {
           ข้อมูลดึงตรงจาก<b className="text-zinc-200">ใบยื่น 13F-HR ล่าสุดที่ SEC รับไว้</b> (แหล่งเดียวกับที่สถาบันใช้) — ไม่ผ่านคนกลาง ไม่มีค่าใช้จ่าย ·
           พร้อมเหตุผล 💡 ว่าทำไมเขาเลือก และปุ่มให้ AI ถอดรหัสพอร์ตเต็มรูปแบบ
         </p>
+        <div className="flex gap-2 mt-2 flex-wrap">
+          <Link href="/gurus/consensus" className="chip bg-accent/10 text-accent-soft border border-accent/30">🤝 หุ้นที่เซียนถือร่วมกัน →</Link>
+        </div>
       </div>
+
+      <GuruOverlap gurus={gurus} />
 
       {gurus.map((g) => (
         <div key={g.id} className="card p-5">
@@ -75,6 +81,7 @@ export default function GurusPage() {
               </div>
             </div>
             <div className="flex gap-2 flex-wrap">
+              <Link href={`/gurus/${g.id}`} className="btn-ghost text-xs !py-1.5" title="พอร์ตเต็ม + เลือกไตรมาสย้อนหลัง + donut">📜 พอร์ตเต็ม</Link>
               <button className="btn-ghost text-xs !py-1.5" onClick={() => askWhy(g.id)} disabled={busyWhy === g.id}>
                 {busyWhy === g.id ? "AI กำลังถอดรหัส…" : "🧠 ทำไมเขาถึงเลือก (AI)"}
               </button>
@@ -162,6 +169,52 @@ export default function GurusPage() {
         ข้อมูล: SEC EDGAR 13F-HR filings (ดึงสด cache 12 ชม.) · 13F ล่าช้าสูงสุด 45 วันหลังสิ้นไตรมาส และเห็นเฉพาะตำแหน่งหุ้นสหรัฐฯ ·
         เหตุผล 💡 เป็นความรู้สาธารณะเกี่ยวกับสไตล์การลงทุน ไม่ใช่ข้อมูลจากกูรูโดยตรง · เชิงการศึกษา ไม่ใช่คำแนะนำการลงทุน
       </p>
+    </div>
+  );
+}
+
+// ===== 🧬 ซ้อนกับพอร์ตฉัน — เทียบ holdings ผู้ใช้กับ top holdings ทุกกูรู (คู่แข่งไม่มี) =====
+function GuruOverlap({ gurus }: { gurus: Guru[] }) {
+  const { holdings: portfolio } = usePortfolio();
+  const mine = [...new Set((portfolio ?? []).map((h) => h.ticker.toUpperCase()))];
+  if (mine.length === 0) return null;
+
+  const overlaps = gurus
+    .map((g) => ({
+      g,
+      shared: g.holdings.filter((h) => h.ticker && mine.includes(h.ticker.toUpperCase())).map((h) => h.ticker!),
+    }))
+    .filter((x) => x.shared.length > 0)
+    .sort((a, b) => b.shared.length - a.shared.length)
+    .slice(0, 4);
+
+  if (!overlaps.length) {
+    return (
+      <div className="card p-4">
+        <p className="text-xs text-zinc-400">🧬 พอร์ตคุณยังไม่ซ้อนกับ top holdings ของกูรูสักตัว — เพิ่มหุ้นที่ <Link href="/portfolio" className="text-accent-soft hover:underline">พอร์ตของฉัน</Link> เพื่อเช็คว่าเซียนคนไหนถือเหมือนคุณ</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="card p-4">
+      <p className="text-xs text-zinc-400 mb-2.5">
+        🧬 <b className="text-zinc-200">ซ้อนกับพอร์ตฉัน</b> — จาก {mine.length} ตัวที่คุณถือ เซียนเหล่านี้ถือเหมือนคุณ:
+      </p>
+      <div className="space-y-2">
+        {overlaps.map(({ g, shared }) => (
+          <div key={g.id} className="flex items-center gap-2 flex-wrap">
+            <Link href={`/gurus/${g.id}`} className="text-xs font-bold text-zinc-200 hover:text-accent-soft">{g.emoji} {g.name}</Link>
+            <span className="chip bg-up/10 text-up border border-up/30 !text-[10px] num">{shared.length} ตัวซ้อน</span>
+            <div className="flex flex-wrap gap-1">
+              {shared.slice(0, 8).map((t) => (
+                <Link key={t} href={`/stock/${t}`} className="chip bg-base-800 text-zinc-300 border border-base-700 !text-[10px]">{t}</Link>
+              ))}
+              {shared.length > 8 && <span className="text-[10px] text-zinc-600">+{shared.length - 8}</span>}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

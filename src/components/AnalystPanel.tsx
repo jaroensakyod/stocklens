@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import AiBrief from "@/components/AiBrief";
 
 // 🎯 คอนเซนซัสนักวิเคราะห์ — "โบรกเกอร์ 19 สำนักเฉลี่ย ฿42 เทียบราคา 38 = +10%" (ไทย+US)
 interface Data {
@@ -85,6 +86,17 @@ export default function AnalystPanel({ ticker, price }: { ticker: string; price:
           <span className="chip bg-accent/10 text-accent-soft border border-accent/30 num">📅 งบถัดไป ~{fmtDate(data.nextEarnings)}</span>
         )}
       </div>
+      <AiBrief
+        ticker={ticker}
+        section="analyst"
+        lines={[
+          `${isThai ? "โบรกเกอร์ไทย" : "นักวิเคราะห์"} ${data.nAnalysts} สำนัก: ซื้อมาก ${data.strongBuy} · ซื้อ ${data.buy} · ถือ ${data.hold} · ขาย ${data.sell} · ขายมาก ${data.strongSell}`,
+          ...(data.targetMean !== null ? [`ราคาเป้าหมายเฉลี่ย ${unit}${data.targetMean.toFixed(2)} เทียบราคาปัจจุบัน ${unit}${price.toFixed(2)} (${upside !== null ? `${upside >= 0 ? "+" : ""}${upside.toFixed(1)}%` : "—"})`] : []),
+          ...(data.targetLow !== null && data.targetHigh !== null ? [`ช่วงเป้า ${unit}${data.targetLow.toFixed(2)}–${unit}${data.targetHigh.toFixed(2)}`] : []),
+          ...(data.nextEarnings ? [`งบถัดไป ~${fmtDate(data.nextEarnings)}`] : []),
+        ]}
+        rule={`มุมมองนักวิเคราะห์ ${data.nAnalysts} สำนัก เอียงไปทาง${data.strongBuy + data.buy >= data.sell + data.strongSell ? "ซื้อ" : data.sell + data.strongSell > data.strongBuy + data.buy ? "ขาย" : "กลาง"}${upside !== null && data.targetMean ? ` ราคาเป้าหมายเฉลี่ย ${upside >= 0 ? "สูงกว่า" : "ต่ำกว่า"}ราคาปัจจุบัน ${Math.abs(upside).toFixed(1)}%` : ""} — อ่านเป็นข้อมูลประกอบการพิจารณา`}
+      />
       <p className="text-[10px] text-zinc-600 mt-2">คอนเซนซัสจากข้อมูลสาธารณะ (Yahoo Finance) — ค่าเฉลี่ยของฉันทามติโบรกเกอร์ ไม่ใช่คำแนะนำของ StockLens</p>
     </div>
   );

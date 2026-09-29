@@ -15,6 +15,8 @@ interface AuthState {
   loading: boolean;
   login: (code: string) => Promise<{ ok: boolean; error?: string }>;
   logout: () => Promise<void>;
+  /** ดึงสถานะล่าสุดจาก server อีกครั้ง (เช่นหลังใช้รหัส SL ใหม่) */
+  refresh: () => Promise<void>;
   /** สิทธิ์: "free" = ไม่ได้ login · "starter" · "pro" */
   tier: "free" | "starter" | "pro";
   /** 🛡️ โหมดแอดมิน (ล็อกอินด้วยรหัส /admin) — ไม่แสดงลายน้ำรายสมาชิก */
@@ -28,6 +30,7 @@ const AuthContext = createContext<AuthState>({
   loading: true,
   login: async () => ({ ok: false }),
   logout: async () => {},
+  refresh: async () => {},
   tier: "free",
   admin: false,
   adminLogin: async () => ({ ok: false }),
@@ -96,8 +99,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setMember(null);
   }, []);
 
+  const refresh = useCallback(async () => {
+    try {
+      const r = await fetch("/api/auth/me");
+      const j = await r.json();
+      setMember(j.member ?? null);
+      setAdmin(j.admin === true);
+    } catch {}
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ member, loading, login, logout, tier: member ? member.tier : "free", admin, adminLogin, adminLogout }}>
+    <AuthContext.Provider value={{ member, loading, login, logout, refresh, tier: member ? member.tier : "free", admin, adminLogin, adminLogout }}>
       {children}
     </AuthContext.Provider>
   );

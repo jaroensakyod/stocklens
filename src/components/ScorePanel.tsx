@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useCan } from "@/lib/authContext";
 import LockGate from "@/components/LockGate";
+import AiBrief from "@/components/AiBrief";
 
 // 🏆 StockLens Score — คะแนนรวม 6 เสา สูตรเปิดเผย (free: คะแนนรวม+confidence · Starter+: เสา+เหตุผล+ประวัติ)
 interface Pillars { quality: number | null; valuation: number | null; momentum: number | null; news: number | null; street: number | null; safety: number | null }
@@ -122,6 +123,26 @@ export default function ScorePanel({ ticker }: { ticker: string }) {
           {data.risks.map((r) => <span key={r} className="chip bg-down/10 text-down border border-down/30 text-[11px]">⚠️ {r}</span>)}
         </div>
       )}
+
+      {(() => {
+        if (locked || !data.pillars) return null;
+        const scored = PILLARS.map((p) => ({ label: p.label, v: data.pillars![p.k] })).filter((x) => x.v !== null) as { label: string; v: number }[];
+        if (!scored.length) return null;
+        const best = [...scored].sort((a, b) => b.v - a.v)[0];
+        const worst = [...scored].sort((a, b) => a.v - b.v)[0];
+        return (
+          <AiBrief
+            ticker={data.symbol}
+            section="score"
+            lines={[
+              `StockLens Score รวม ${data.total}/100 เกรด ${data.grade} (ความมั่นใจข้อมูล ${data.confidence}%)`,
+              ...scored.map((x) => `${x.label}: ${x.v}/100`),
+              ...(data.risks?.length ? [`ความเสี่ยงที่ตรวจพบ: ${data.risks.slice(0, 3).join(" / ")}`] : []),
+            ]}
+            rule={`คะแนนรวม ${data.total}/100 (${data.grade}) — เสาที่แข็งแรงสุดคือ ${best.label} (${best.v}) ส่วนที่ฉุดรั้งสุดคือ ${worst.label} (${worst.v}) — อ่านเป็นข้อมูลประกอบการพิจารณา`}
+          />
+        );
+      })()}
 
       <p className="text-[10px] text-zinc-600 mt-3">
         คะแนนเชิงข้อมูลจากงบจริง (SEC/56-1) + ราคา + ข่าว + คอนเซนซัส — สูตรถ่วงน้ำหนักเปิดเผยทุกตัว (22/18/18/12/15/15) ไม่ใช่คำแนะนำซื้อขาย · เสาที่ไม่มีข้อมูลใช้ค่ากลาง 50 และหัก Confidence

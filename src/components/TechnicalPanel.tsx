@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import LockGate from "@/components/LockGate";
 import { useCan } from "@/lib/authContext";
+import AiBrief from "@/components/AiBrief";
 import type { FullTechnical, TaSignal } from "@/lib/taFull";
 
 const LEVEL: Record<string, { text: string; cls: string }> = {
@@ -216,6 +217,21 @@ export default function TechnicalPanel({ ticker, price }: { ticker: string; pric
               <li key={i} className="text-xs text-zinc-400 flex gap-1.5"><span className="text-zinc-600">•</span>{r}</li>
             ))}
           </ul>
+
+          <AiBrief
+            ticker={ticker}
+            section="technical"
+            lines={[
+              `สรุปรวม: ${lvl ? lvl.text : "—"}`,
+              `Oscillators: ซื้อ ${t.oscillators.buy} · เป็นกลาง ${t.oscillators.neutral} · ขาย ${t.oscillators.sell}`,
+              `ค่าเฉลี่ยเคลื่อนที่: ซื้อ ${t.movingAverages.buy} · เป็นกลาง ${t.movingAverages.neutral} · ขาย ${t.movingAverages.sell}`,
+              ...t.oscillators.rows.slice(0, 4).map((r) => `${r.name} ${r.value} (${sigText(r.signal)})`),
+              ...(t.pivots ? [`ราคา ${price.toFixed(2)} ${t.pivots.signal === "buy" ? "เหนือ" : "ต่ำกว่า"} Pivot PP ${t.pivots.classic.pp.toFixed(2)}`] : []),
+              ...(t.classic.atr14 !== undefined ? [`ATR14 ${t.classic.atr14.toFixed(2)}`] : []),
+              ...(t.classic.divergence ? [`Divergence ${t.classic.divergence.type === "bullish" ? "บวก" : "ลบ"}`] : []),
+            ]}
+            rule={`สัญญาณทางเทคนิค: ${lvl ? lvl.text : "—"} — oscillator ${t.oscillators.buy > t.oscillators.sell ? "เอียงซื้อ" : t.oscillators.buy < t.oscillators.sell ? "เอียงขาย" : "สมดุล"} (${t.oscillators.buy}:${t.oscillators.sell}) เส้นค่าเฉลี่ย ${t.movingAverages.buy > t.movingAverages.sell ? "ส่วนใหญ่เป็นสัญญาณซื้อ" : "ส่วนใหญ่เป็นสัญญาณขาย"} (${t.movingAverages.buy}:${t.movingAverages.sell})${t.pivots ? ` ราคา${t.pivots.signal === "buy" ? "ยืนเหนือ" : "ต่ำกว่า"}จุดหมุน PP` : ""} — อ่านเป็นข้อมูลประกอบการพิจารณา`}
+          />
 
           <p className="text-[10px] text-zinc-600 mt-3 leading-relaxed">
             * คำนวณจากแท่งเทียนรายวันย้อนหลัง 1 ปี (Yahoo Finance) · สัญญาณเทคนิคเป็นการอ่านข้อมูลราคา ไม่ใช่คำแนะนำซื้อขาย

@@ -5,15 +5,16 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import StarButton from "@/components/StarButton";
 import BrokerBadge from "@/components/BrokerBadge";
 import { useAuth } from "@/lib/authContext";
-import { useAlerts, usePortfolio, useWatchlist } from "@/lib/store";
+import { useAlerts, useFavorites, usePortfolio, useWatchlist } from "@/lib/store";
 import impactJson from "@/data/impact-map.json";
 import themesJson from "@/data/radar-themes.json";
 import type { Quote } from "@/lib/types";
 import PortfolioAdvisor from "@/components/PortfolioAdvisor";
 import XrayPanel from "@/components/XrayPanel";
+import BalancePanel from "@/components/BalancePanel";
 import TickerPicker from "@/components/TickerPicker";
 
-type Tab = "watchlist" | "portfolio" | "xray" | "advisor" | "alerts";
+type Tab = "watchlist" | "favorites" | "portfolio" | "balance" | "xray" | "advisor" | "alerts";
 interface RadarThemeInfo {
   id: string; name: string; emoji: string; heat: number;
 }
@@ -21,9 +22,30 @@ interface RadarThemeInfo {
 export default function PortfolioPage() {
   const [tab, setTab] = useState<Tab>("watchlist");
   const { list: watchlist, toggle } = useWatchlist();
+  const { list: favorites, toggle: toggleFav } = useFavorites();
   const { holdings, upsert, remove: removeHolding, setCore, setHoldings } = usePortfolio();
   const { alerts, add: addAlert, remove: removeAlert, reset: resetAlert } = useAlerts();
   const { member, loading: authLoading } = useAuth();
+  const [pendingAdd, setPendingAdd] = useState<string | null>(null);
+  const [addQty, setAddQty] = useState("");
+  const [addCost, setAddCost] = useState("");
+
+  // ?add=SYMBOL จากปุ่ม ➕ ใน screener/การ์ดหุ้น — เปิดฟอร์มเพิ่มพอร์ตทันที
+  // ?tab=balance|xray|advisor|alerts — ลิงก์ไขว้จากหน้าอื่น (เช่น BalancePanel ชวนไปลอง AI ปรับพอร์ต)
+  useEffect(() => {
+    const sp = new URLSearchParams(location.search);
+    const add = sp.get("add");
+    if (add && /^[A-Za-z0-9.\-]+$/.test(add)) {
+      setPendingAdd(add.toUpperCase());
+      setTab("portfolio");
+    }
+    const tab = sp.get("tab");
+    if (tab && ["watchlist", "favorites", "portfolio", "balance", "xray", "advisor", "alerts"].includes(tab)) {
+      setTab(tab as Tab);
+    }
+    if (add || tab) history.replaceState({}, "", "/portfolio");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ===== ซิงก์พอร์ตกับบัญชีสมาชิก (มี login + มี DB) =====
   // โหลด: ครั้งแรกถ้าเครื่องนี้ยังไม่มีข้อมูล → ดึงจากบัญชี | เซฟ: auto-save ทุกครั้งที่แก้ (debounce)
@@ -55,8 +77,8 @@ export default function PortfolioPage() {
   }, [holdings, member, authLoading]);
 
   const allSymbols = useMemo(
-    () => [...new Set([...watchlist, ...holdings.map((h) => h.ticker), ...alerts.map((a) => a.ticker)])],
-    [watchlist, holdings, alerts]
+    () => [...new Set([...watchlist, ...favorites, ...holdings.map((h) => h.ticker), ...alerts.map((a) => a.ticker)])],
+    [watchlist, favorites, holdings, alerts]
   );
   const [quotes, setQuotes] = useState<Record<string, Quote>>({});
   const [usdThb, setUsdThb] = useState<number | null>(null);
@@ -88,7 +110,9 @@ export default function PortfolioPage() {
 
   const tabs: { id: Tab; label: string; count: number }[] = [
     { id: "watchlist", label: "⭐ Watchlist", count: watchlist.length },
+    { id: "favorites", label: "💜 หุ้นโปรด", count: favorites.length },
     { id: "portfolio", label: "💼 พอร์ตของฉัน", count: holdings.length },
+    { id: "balance", label: "🧭 จัดสมดุล", count: 0 },
     { id: "xray", label: "🩻 X-ray", count: holdings.filter((h) => h.qty > 0).length },
     { id: "advisor", label: "🤖 AI ปรับพอร์ต", count: 0 },
     { id: "alerts", label: "🔔 แจ้งเตือน", count: alerts.filter((a) => !a.triggeredAt).length },
@@ -125,8 +149,35 @@ export default function PortfolioPage() {
         </p>
       )}
 
+      {/* ฟอร์มเพิ่มพอร์ตด่วนจากลิงก์ ?add= (ปุ่ม ➕ ใน screener/การ์ดหุ้น) */}
+      {pendingAdd && (
+        <div className="card p-4 border-accent/40">
+          <p className="text-sm text-zinc-200 mb-2">➕ เพิ่ม <b className="text-accent-soft">{pendingAdd}</b> เข้าพอร์ต — กรอกจำนวนกับราคาเฉลี่ยที่ซื้อจริง</p>
+          <div className="flex gap-2 flex-wrap items-center">
+            <input className="input num !w-28" type="number" placeholder="จำนวนหุ้น" value={addQty} onChange={(e) => setAddQty(e.target.value)} />
+            <input className="input num !w-32" type="number" placeholder="ราคาเฉลี่ย" value={addCost} onChange={(e) => setAddCost(e.target.value)} />
+            <button
+              className="btn-primary text-xs"
+              disabled={!(Number(addQty) > 0 && Number(addCost) >= 0 && addCost !== "")}
+              onClick={() => {
+                upsert(pendingAdd, Number(addQty), Number(addCost));
+                setPendingAdd(null);
+                setAddQty("");
+                setAddCost("");
+              }}
+            >
+              เพิ่มเข้าพอร์ต
+            </button>
+            <button className="btn-ghost text-xs" onClick={() => setPendingAdd(null)}>ยกเลิก</button>
+            {quotes[pendingAdd] && <span className="text-xs text-zinc-500 num">ราคาล่าสุด {quotes[pendingAdd].price.toFixed(2)}</span>}
+          </div>
+        </div>
+      )}
+
       {tab === "watchlist" && <WatchlistTab watchlist={watchlist} quotes={quotes} toggle={toggle} />}
+      {tab === "favorites" && <FavoritesTab favorites={favorites} quotes={quotes} toggle={toggleFav} />}
       {tab === "portfolio" && <PortfolioTab holdings={holdings} quotes={quotes} usdThb={usdThb} upsert={upsert} remove={removeHolding} setCore={setCore} themes={themes} />}
+      {tab === "balance" && <BalancePanel holdings={holdings} quotes={quotes} usdThb={usdThb} />}
       {tab === "xray" && <XrayPanel holdings={holdings} />}
       {tab === "advisor" && <PortfolioAdvisor />}
       {tab === "alerts" && <AlertsTab alerts={alerts} quotes={quotes} add={addAlert} remove={removeAlert} reset={resetAlert} />}
@@ -183,6 +234,54 @@ function WatchlistTab({ watchlist, quotes, toggle }: { watchlist: string[]; quot
         </tbody>
       </table>
       <div className="px-4 py-2 text-[11px] text-zinc-600">{add ? "" : "อัปเดตราคาอัตโนมัติทุก 90 วินาที (delay ~15 นาทีตามแหล่งข้อมูล)"}</div>
+    </div>
+  );
+}
+
+// ================= หุ้นโปรด (แยกจาก Watchlist — "สนใจจริงจัง" กับ "อยากเฝ้าดู") =================
+function FavoritesTab({ favorites, quotes, toggle }: { favorites: string[]; quotes: Record<string, Quote>; toggle: (t: string) => void }) {
+  if (!favorites.length) {
+    return (
+      <div className="card p-10 text-center">
+        <p className="text-3xl mb-2">💜</p>
+        <p className="text-zinc-300 font-semibold">ยังไม่มีหุ้นโปรด</p>
+        <p className="text-xs text-zinc-500 mt-1">กด 💜 ที่หน้าวิเคราะห์หุ้นเพื่อเก็บตัวที่คุณสนใจจริงจังไว้ที่นี่ (แยกจาก ⭐ Watchlist ที่ใช้เฝ้าดูราคา)</p>
+      </div>
+    );
+  }
+  return (
+    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+      {favorites.map((t) => {
+        const q = quotes[t];
+        return (
+          <div key={t} className="card p-4">
+            <div className="flex items-center justify-between">
+              <Link href={`/stock/${t}`} className="text-lg font-bold text-zinc-50 hover:text-accent-soft">{t}</Link>
+              <div className="flex items-center gap-2">
+                <button className="text-sm" onClick={() => toggle(t)} title="เอาออกจากหุ้นโปรด">💜</button>
+                <a href={`/portfolio?add=${encodeURIComponent(t)}`} className="text-zinc-500 hover:text-accent-soft" title="เพิ่มเข้าพอร์ต">➕</a>
+              </div>
+            </div>
+            {q ? (
+              <>
+                <p className="text-xs text-zinc-500 mt-0.5">{q.name}</p>
+                <div className="flex items-baseline gap-2 mt-2">
+                  <span className="num text-xl font-bold text-zinc-100">{q.price.toFixed(2)}</span>
+                  <span className={`num text-xs font-semibold ${q.changePct >= 0 ? "text-up" : "text-down"}`}>
+                    {q.changePct >= 0 ? "+" : ""}{q.changePct.toFixed(2)}%
+                  </span>
+                </div>
+              </>
+            ) : (
+              <p className="text-xs text-zinc-600 mt-2">กำลังโหลดราคา…</p>
+            )}
+            <div className="flex gap-2 mt-3">
+              <a href={`/compare?t=${encodeURIComponent(t)}`} className="chip bg-base-800 text-zinc-300 border border-base-700 !text-[10px]">⚔️ เทียบ</a>
+              <BrokerBadge ticker={t} compact />
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

@@ -10,7 +10,8 @@ import { getQuotes, getNews, getChart, getUsdThb, searchSymbols } from "./yahoo"
 import { keywordAnalyze, computeThemeHeat, IMPACT_NODES } from "./radar";
 import { getPicks } from "./picks";
 import { getSurge } from "./surge";
-import { getLiveGurus } from "./gurus13f";
+import { getLiveGurus, getCachedGurus } from "./gurus13f";
+import { peerBenchmark, peerSummaryLine } from "./peerBenchmark";
 import { runBacktest, STRATEGIES, type StrategyId } from "./backtest";
 import { getLongterm } from "./longterm";
 import { getStarterPortfolios } from "./starterPortfolio";
@@ -220,6 +221,24 @@ async function buildStockPacket(tickers: string[]): Promise<{ packet: string; de
       lines.push(`เหตุผลเทคนิค: ${tech.reasons.slice(0, 5).join(" · ")}`);
     }
     if (a.news.length) lines.push(`ข่าวล่าสุด: ${a.news.slice(0, 3).map((n) => n.title).join(" / ")}`);
+    // 🔗 เชื่อม function ใหม่: เทียบอุตสาหกรรมเดียวกัน (peer benchmark) — บอก AI ว่าแพง/ถูก/แข็ง/อ่อนกว่ากลุ่มแค่ไหน
+    const peer = await peerBenchmark(sym, "market").catch(() => null);
+    if (peer && !("error" in peer) && peer.overall !== null) lines.push(peerSummaryLine(peer));
+    // 🔗 เชื่อม function ใหม่: เซียน 13F ที่ถือหุ้นตัวนี้ (ใช้ cache เท่านั้น — ไม่หน่วงแชท)
+    const cachedGurus = getCachedGurus();
+    if (cachedGurus && !sym.includes(".")) {
+      const holders = cachedGurus
+        .map((g) => ({ g, h: g.holdings.find((x) => x.ticker === sym) }))
+        .filter((x) => x.h)
+        .sort((a, b) => (b.h!.pct ?? 0) - (a.h!.pct ?? 0));
+      if (holders.length) {
+        lines.push(
+          `เซียน13Fถือ(${holders.length}ราย): ` +
+            holders.slice(0, 4).map((x) => `${x.g.name} ${x.h!.pct.toFixed(1)}%${x.h!.change?.type === "increased" ? "(▲เพิ่ม)" : x.h!.change?.type === "decreased" ? "(▼ลด)" : x.h!.change?.type === "new" ? "(🆕)" : ""}`).join(" / ") +
+            " — 13Fล่าช้า45วัน เห็นเฉพาะtop-20"
+        );
+      }
+    }
     lines.push(`ความน่าเชื่อถือข้อมูล: ${a.confidence.score}% (${a.confidence.coveredCount}/${a.confidence.totalCount} ฟิลด์) · ช่องทางซื้อ: ${brokerFor(sym).detail}`);
 
     const demo =

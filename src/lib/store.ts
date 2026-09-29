@@ -26,6 +26,7 @@ const KEYS = {
   watchlist: "sl-watchlist",
   alerts: "sl-alerts",
   portfolio: "sl-portfolio",
+  favorites: "sl-favorites",
 };
 
 export const STORE_EVENT = "sl-store-update";
@@ -88,6 +89,19 @@ export function useWatchlist() {
     [list, setList]
   );
   return { list, toggle, has: (t: string) => list.includes(t.toUpperCase()) };
+}
+
+// ---------- favorites (หุ้นโปรด — แยกจาก watchlist: "อยากดูต่อ" กับ "ถือ/สนใจจริงจัง") ----------
+export function useFavorites() {
+  const [list, setList] = useStore<string[]>("favorites", []);
+  const toggle = useCallback(
+    (ticker: string) => {
+      const t = ticker.toUpperCase();
+      setList(list.includes(t) ? list.filter((x) => x !== t) : [...list, t]);
+    },
+    [list, setList]
+  );
+  return { list, toggle, has: (t: string) => list.includes(t.toUpperCase()), setList };
 }
 
 // ---------- alerts ----------

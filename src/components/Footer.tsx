@@ -30,8 +30,11 @@ const COLS: { title: string; links: { href: string; label: string; ext?: boolean
     links: [
       { href: "/about", label: "เกี่ยวกับ & Methodology" },
       { href: "/pricing", label: "สมัครสมาชิก VIP" },
+      { href: "/dashboard/products", label: "👑 สิทธิ์ของฉัน" },
       { href: "/track-record", label: "🏆 Track Record สาธารณะ" },
       { href: "/login", label: "เข้าสู่ระบบสมาชิก" },
+      { href: "/dashboard/support", label: "🆘 ศูนย์ช่วยเหลือ" },
+      { href: "/contact", label: "📮 ติดต่อเรา" },
     ],
   },
   {

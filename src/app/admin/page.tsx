@@ -145,6 +145,8 @@ export default function AdminPage() {
 
       <FlashMonitor />
 
+      <AdminTickets />
+
       <LineBroadcast />
 
       <div className="grid md:grid-cols-2 gap-4">
@@ -483,6 +485,83 @@ function LineVip({ members, code, onSaved }: { members: MemberRow[]; code: strin
         </div>
       ) : (
         <p className="text-[11px] text-zinc-600">ยังไม่มีสมาชิกที่ผูก LINE User ID — เพิ่มได้ตอนเพิ่มสมาชิก หรือแจ้ง ID มาภายหลัง</p>
+      )}
+    </div>
+  );
+}
+
+// 🎫 ตั๋วสมาชิก — ดูทั้งหมด ตอบ ปิด (ข้อมูลจาก /api/admin/tickets)
+function AdminTickets() {
+  interface T {
+    id: string; memberId: string; memberName: string; subject: string; detail: string;
+    createdAt: number; status: "open" | "answered" | "closed";
+    replies: { by: "member" | "admin"; at: number; text: string }[];
+  }
+  const [tickets, setTickets] = useState<T[]>([]);
+  const [open, setOpen] = useState<string | null>(null);
+  const [reply, setReply] = useState("");
+  const code = () => sessionStorage.getItem("sl-admin") || "";
+
+  const load = useCallback(() => {
+    fetch("/api/admin/tickets", { headers: { "x-admin-code": code() } })
+      .then((r) => (r.ok ? r.json() : { tickets: [] }))
+      .then((j) => setTickets(j.tickets ?? []))
+      .catch(() => {});
+  }, []);
+  useEffect(load, [load]);
+
+  const act = async (id: string, close?: boolean) => {
+    if (!close && !reply.trim()) return;
+    await fetch("/api/admin/tickets", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", "x-admin-code": code() },
+      body: JSON.stringify({ ticketId: id, reply: close ? undefined : reply, close }),
+    });
+    setReply("");
+    load();
+  };
+
+  const openCount = tickets.filter((t) => t.status === "open").length;
+  return (
+    <div className="card p-4">
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="text-sm font-bold text-zinc-100">🎫 ตั๋วสมาชิก ({tickets.length} · รอตอบ {openCount})</h3>
+        <button className="btn-ghost !py-1 !text-xs" onClick={load}>รีเฟรช</button>
+      </div>
+      {!tickets.length ? (
+        <p className="text-[11px] text-zinc-600">ยังไม่มีตั๋ว (หรือยังไม่ได้ต่อ Redis — ดู SETUP-EXTERNALS.md)</p>
+      ) : (
+        <div className="space-y-2">
+          {tickets.slice(0, 10).map((t) => (
+            <div key={t.id} className="rounded-lg border border-base-700 p-3">
+              <button className="w-full flex items-center justify-between gap-2 text-left" onClick={() => setOpen(open === t.id ? null : t.id)}>
+                <span className="text-xs text-zinc-200">
+                  <b>{t.subject}</b> <span className="text-zinc-500">— {t.memberName}</span>
+                </span>
+                <span className={`chip !text-[10px] ${t.status === "open" ? "bg-accent/10 text-accent-soft border border-accent/30" : t.status === "answered" ? "bg-up/10 text-up border border-up/30" : "bg-base-700/30 text-zinc-500 border border-base-700"}`}>
+                  {t.status === "open" ? "รอตอบ" : t.status === "answered" ? "ตอบแล้ว" : "ปิด"}
+                </span>
+              </button>
+              {open === t.id && (
+                <div className="mt-2 space-y-1.5">
+                  {t.replies.map((r, i) => (
+                    <div key={i} className={`text-xs rounded-lg px-2.5 py-1.5 ${r.by === "admin" ? "bg-accent/10 text-zinc-200" : "bg-base-800 text-zinc-400"}`}>
+                      <span className="text-[10px] text-zinc-600 block">{r.by === "admin" ? "ทีมงาน" : t.memberName} · {new Date(r.at).toLocaleString("th-TH")}</span>
+                      {r.text}
+                    </div>
+                  ))}
+                  {t.status !== "closed" && (
+                    <div className="flex gap-2 mt-2">
+                      <input className="input !text-xs" placeholder="ตอบ..." value={reply} onChange={(e) => setReply(e.target.value)} />
+                      <button className="btn-primary !py-1.5 !text-xs" onClick={() => act(t.id)}>ตอบ</button>
+                      <button className="btn-ghost !py-1.5 !text-xs" onClick={() => act(t.id, true)}>ปิดตั๋ว</button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );

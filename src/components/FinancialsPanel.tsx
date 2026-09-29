@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import LockGate from "./LockGate";
+import AiBrief from "./AiBrief";
 
 // 📊 งบการเงิน 4 ปีจาก filings จริง (TTM ละเอียด + ประวัติรายปี + EDGAR สำหรับหุ้น US)
 // freemium: free เห็น TTM ล่าสุด · Starter เห็น 4 ปี · Pro เพิ่มรายไตรมาส + ดาวน์โหลด CSV
@@ -131,7 +132,23 @@ export default function FinancialsPanel({ ticker }: { ticker: string }) {
         </div>
       </div>
 
-      {/* กราฟรายได้/กำไร */}
+      {/* สรุปอ่านง่าย (AI/rule-based จากตัวเลขจริงด้านล่าง) */}
+      {(() => {
+        const latest = cols.find((c) => c.revenue !== undefined) ?? cols[0];
+        const lines = [
+          ...(latest?.revenue !== undefined ? [`รายได้ล่าสุด ${fmt(latest.revenue)}`, latest.netIncome !== undefined ? `กำไรสุทธิ ${fmt(latest.netIncome)}` : "", latest.grossMargin !== undefined ? `Gross Margin ${latest.grossMargin}%` : "", latest.netMargin !== undefined ? `Net Margin ${latest.netMargin}%` : "", latest.roe !== undefined ? `ROE ${latest.roe}%` : "", latest.debtToEquity !== undefined ? `หนี้/ทุน ${latest.debtToEquity}` : "", latest.currentRatio !== undefined ? `Current Ratio ${latest.currentRatio}` : ""].filter(Boolean) : []),
+          ...(d.ratios.revenueCagr !== undefined ? [`CAGR รายได้ ${d.ratios.revenueCagr}%`] : []),
+          ...(d.ratios.revenueGrowth !== undefined ? [`เติบโตล่าสุด ${d.ratios.revenueGrowth}%`] : []),
+          ...(d.ratios.fcfMargin !== undefined ? [`FCF Margin ${d.ratios.fcfMargin}%`] : []),
+          ...(d.ratios.netDebt !== undefined ? [`หนี้สุทธิ ${fmt(d.ratios.netDebt)}`] : []),
+        ];
+        const rule = [
+          d.ratios.revenueGrowth !== undefined ? `ธุรกิจ${d.ratios.revenueGrowth >= 0 ? "ยังเติบโต" : "หดตัว"} ${Math.abs(d.ratios.revenueGrowth)}%` : "",
+          latest?.netMargin !== undefined ? `อัตรากำไรสุทธิ ${latest.netMargin}%${Number(latest.netMargin) >= 15 ? " ทำกำไรได้แข็งแกร่ง" : Number(latest.netMargin) >= 5 ? " อยู่ในเกณฑ์ปานกลาง" : " ค่อนข้างบาง"}` : "",
+          latest?.debtToEquity !== undefined ? `หนี้ต่อทุน ${latest.debtToEquity}${Number(latest.debtToEquity) <= 1 ? " ภาระหนี้ต่ำ" : Number(latest.debtToEquity) >= 2 ? " หนี้ค่อนข้างสูง" : ""}` : "",
+        ].filter(Boolean).join(" · ");
+        return lines.length ? <AiBrief ticker={d.symbol} section="financials" lines={lines} rule={rule} /> : null;
+      })()}
       {chartData.length >= 2 && (
         <div className="h-52 mt-4">
           <ResponsiveContainer width="100%" height="100%">

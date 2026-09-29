@@ -10,6 +10,7 @@ import MoversByMarket from "@/components/MoversByMarket";
 import DailyPicks from "@/components/DailyPicks";
 import TodayBoard from "@/components/TodayBoard";
 import CommoditiesStrip from "@/components/CommoditiesStrip";
+import GuruConsensusCard from "@/components/GuruConsensusCard";
 import LogoMark from "@/components/LogoMark";
 import type { Quote } from "@/lib/types";
 
@@ -89,6 +90,9 @@ export default function HomePage() {
 
       {/* Daily Picks — ตอบคำถามแรกของคนเข้าใหม่: "ตัวไหนน่าสนใจวันนี้" */}
       <DailyPicks />
+
+      {/* หุ้นที่เซียนถือร่วมกัน (13F LIVE) */}
+      <GuruConsensusCard />
 
       {/* Watchlist ของผู้ใช้ (แสดงเมื่อมี) */}
       <WatchlistStrip />

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { useWatchlist } from "@/lib/store";
+import { addToBasket } from "@/lib/compareBasket";
 import type { Quote } from "@/lib/types";
 
 // แถบหุ้นที่ติดดาวไว้ — แสดงบนหน้าแรกให้เห็นทันทีที่เข้าเว็บ (เหตุผลให้กลับมาทุกวัน)
@@ -40,19 +41,26 @@ export default function WatchlistStrip() {
           const q = quotes[t];
           const up = (q?.changePct ?? 0) >= 0;
           return (
-            <Link key={t} href={`/stock/${t}`} className="card card-hover px-3 py-2 flex items-center justify-between">
-              <span className="font-bold text-sm text-zinc-100">{t}</span>
-              {q ? (
-                <span className="text-right">
-                  <span className="num text-xs text-zinc-300 block">{q.price < 10 ? q.price.toFixed(2) : q.price.toFixed(1)}</span>
-                  <span className={`num text-[10px] font-semibold ${up ? "text-up" : "text-down"}`}>
-                    {up ? "+" : ""}{q.changePct.toFixed(2)}%
+            <div key={t} className="card card-hover px-3 py-2 flex items-center justify-between gap-1">
+              <Link href={`/stock/${t}`} className="min-w-0 flex-1">
+                <span className="font-bold text-sm text-zinc-100">{t}</span>
+                {q ? (
+                  <span className="text-right float-right">
+                    <span className="num text-xs text-zinc-300 block">{q.price < 10 ? q.price.toFixed(2) : q.price.toFixed(1)}</span>
+                    <span className={`num text-[10px] font-semibold ${up ? "text-up" : "text-down"}`}>
+                      {up ? "+" : ""}{q.changePct.toFixed(2)}%
+                    </span>
                   </span>
-                </span>
-              ) : (
-                <span className="text-xs text-zinc-600">…</span>
-              )}
-            </Link>
+                ) : (
+                  <span className="text-xs text-zinc-600">…</span>
+                )}
+              </Link>
+              <button
+                className="text-zinc-600 hover:text-accent-soft text-xs shrink-0"
+                title="เพิ่มเข้าตะกร้าเปรียบเทียบ (สูงสุด 4)"
+                onClick={() => addToBasket(t)}
+              >⚔️</button>
+            </div>
           );
         })}
       </div>

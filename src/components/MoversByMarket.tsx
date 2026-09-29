@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import BrokerBadge from "@/components/BrokerBadge";
+import { addToBasket } from "@/lib/compareBasket";
 
 interface Mover {
   symbol: string; yahoo: string; name: string; sector: string;
@@ -66,19 +67,26 @@ export default function MoversByMarket({ controlledRegion }: { controlledRegion?
                 {side === "gainers" ? "🚀 ขึ้นแรง" : "💀 ลงแรง"}
               </div>
               {data[side].map((m) => (
-                <Link key={m.symbol} href={`/stock/${encodeURIComponent(m.yahoo)}`} className="flex items-center justify-between px-4 py-2 hover:bg-base-800 text-sm">
-                  <div className="min-w-0">
-                    <span className="font-bold text-zinc-100">{m.symbol}</span>
-                    <span className="text-zinc-500 text-xs ml-2 truncate">{m.name}</span>
-                    <span className="text-zinc-600 text-[10px] ml-2 hidden sm:inline">{m.sector}</span>
-                  </div>
-                  <div className="text-right shrink-0">
-                    <div className="num text-zinc-200 text-xs">{m.price < 10 ? m.price.toFixed(2) : m.price.toFixed(1)}</div>
-                    <div className={`num text-xs font-bold ${m.changePct >= 0 ? "text-up" : "text-down"}`}>
-                      {m.changePct >= 0 ? "+" : ""}{m.changePct.toFixed(2)}%
+                <div key={m.symbol} className="flex items-center hover:bg-base-800 text-sm">
+                  <Link href={`/stock/${encodeURIComponent(m.yahoo)}`} className="flex items-center justify-between flex-1 min-w-0 px-4 py-2">
+                    <div className="min-w-0">
+                      <span className="font-bold text-zinc-100">{m.symbol}</span>
+                      <span className="text-zinc-500 text-xs ml-2 truncate">{m.name}</span>
+                      <span className="text-zinc-600 text-[10px] ml-2 hidden sm:inline">{m.sector}</span>
                     </div>
-                  </div>
-                </Link>
+                    <div className="text-right shrink-0">
+                      <div className="num text-zinc-200 text-xs">{m.price < 10 ? m.price.toFixed(2) : m.price.toFixed(1)}</div>
+                      <div className={`num text-xs font-bold ${m.changePct >= 0 ? "text-up" : "text-down"}`}>
+                        {m.changePct >= 0 ? "+" : ""}{m.changePct.toFixed(2)}%
+                      </div>
+                    </div>
+                  </Link>
+                  <button
+                    className="px-2 text-zinc-600 hover:text-accent-soft text-xs shrink-0"
+                    title="เพิ่มเข้าตะกร้าเปรียบเทียบ (สูงสุด 4)"
+                    onClick={() => addToBasket(m.yahoo)}
+                  >⚔️</button>
+                </div>
               ))}
             </div>
           ))}

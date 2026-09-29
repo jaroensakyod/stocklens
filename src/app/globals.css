@@ -8,11 +8,14 @@
 
 html {
   scroll-behavior: smooth;
+  /* กัน horizontal scroll จากเนื้อหาลอย/มาร์คีที่เกินจอ (ตารางที่เลื่อนได้ใช้ overflow-auto เอง ไม่กระทบ) */
+  overflow-x: hidden;
 }
 
 body {
   @apply bg-base-950 text-zinc-200 antialiased;
   font-feature-settings: "tnum";
+  overflow-x: clip;
 }
 
 /* ===== scrollbar ===== */

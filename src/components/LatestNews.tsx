@@ -116,6 +116,12 @@ function Row({ item, i, aiAvailable, tier }: { item: LatestItem; i: number; aiAv
           <a href={item.link} target="_blank" rel="noopener noreferrer" className="text-[13.5px] text-zinc-100 font-medium leading-snug hover:text-accent-soft line-clamp-2">
             {item.title}
           </a>
+          {/* 🌐→🇹🇭 แปลอัตโนมัติ (Jev คัดข่าวสำคัญ → Gemini batch แปล → cache 12 ชม.) — เห็นเลย ไม่ต้องกด */}
+          {item.summaryTh && (
+            <p className="text-[11.5px] text-zinc-400 leading-snug mt-1 line-clamp-2">
+              <span className="text-accent-soft/80 text-[9px] mr-1">🇹🇭 AI แปล</span>{item.summaryTh}
+            </p>
+          )}
           <p className="text-[10px] text-zinc-600 mt-0.5 flex items-center gap-1.5 flex-wrap">
             <span className={item.lang === "th" ? "text-zinc-500" : "text-zinc-600"}>{item.lang === "th" ? "🇹🇭" : "🌍"} {item.source}</span>
             <span>· {timeAgo(item.time)}</span>

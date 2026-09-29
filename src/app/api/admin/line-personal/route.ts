@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminCode, daysLeft, readMembers } from "@/lib/admin";
 import { getQuotes, getUsdThb } from "@/lib/yahoo";
+import { getLiveGurus } from "@/lib/gurus13f";
 
 export const dynamic = "force-dynamic";
 
@@ -64,9 +65,22 @@ export async function POST(req: NextRequest) {
     if (targets.length === 0) {
       return NextResponse.json({ error: "ยังไม่มีสมาชิกที่กรอก LINE User ID + รายชื่อหุ้นที่ติดตาม — เพิ่มในตารางสมาชิก (ช่อง watch)" }, { status: 400 });
     }
-    // รวมทุก ticker ทุกคน → ดึง quote ครั้งเดียว
+    // รวมทุก ticker ทุกคน → ดึง quote ครั้งเดียว (+ ท่าทีเซียน 13F ต่อหุ้นที่ watch — ใช้ cache 12 ชม. ร่วมกับหน้าเว็บ)
     const allTickers = [...new Set(targets.flatMap((m) => m.watch!))];
-    const [quotes, usdThb] = await Promise.all([getQuotes(allTickers), getUsdThb().catch(() => 0)]);
+    const [quotes, usdThb, gurus] = await Promise.all([
+      getQuotes(allTickers),
+      getUsdThb().catch(() => 0),
+      getLiveGurus().catch(() => [] as Awaited<ReturnType<typeof getLiveGurus>>),
+    ]);
+    const usWatch = allTickers.filter((t) => !t.includes("."));
+    const guruMap = new Map<string, string[]>();
+    for (const g of gurus) {
+      for (const h of g.holdings) {
+        if (!h.ticker || !usWatch.includes(h.ticker)) continue;
+        const move = h.change?.type === "increased" ? "▲" : h.change?.type === "decreased" ? "▼" : h.change?.type === "new" ? "🆕" : "";
+        guruMap.set(h.ticker, [...(guruMap.get(h.ticker) ?? []), `${g.emoji}${g.name.split(" ").slice(-1)[0]} ${h.pct.toFixed(1)}%${move}`]);
+      }
+    }
     let sent = 0;
     const errors: string[] = [];
     for (const m of targets) {
@@ -79,9 +93,11 @@ export async function POST(req: NextRequest) {
         lines.push(`${up ? "🟢" : "🔴"} ${q.symbol} ${q.price.toFixed(2)} ${q.currency} (${up ? "+" : ""}${q.changePct.toFixed(2)}%)`);
         if (Math.abs(q.changePct) >= 2) flags++;
         if (q.currency === "USD" && usdThb > 0) lines.push(`   ≈ ${(q.price * usdThb).toFixed(0)}฿`);
+        const holders = guruMap.get(t.toUpperCase());
+        if (holders?.length) lines.push(`   🐋 เซียนถือ: ${holders.slice(0, 3).join(" · ")}${holders.length > 3 ? ` (+${holders.length - 3})` : ""}`);
       }
       if (flags > 0) lines.push("", `🚨 มี ${flags} ตัวขยับแรงวันนี้ (≥2%) — เข้าไปดูห่วงโซ่เหตุการณ์ได้ที่ StockLens`);
-      lines.push("", "— ข้อมูลหน่วง ~15 นาที · ไม่ใช่คำแนะนำการลงทุน");
+      lines.push("", "— ข้อมูลหน่วง ~15 นาที · เซียน13Fล่าช้า45วัน(top-20) · ไม่ใช่คำแนะนำการลงทุน");
       const r = await lineApi("push", token, { to: m.lineUserId, messages: [{ type: "text", text: lines.join("\n").slice(0, 3900) }] });
       if (r.ok) sent++;
       else errors.push(`${m.name}: ${r.error}`);

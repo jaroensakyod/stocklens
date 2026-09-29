@@ -9,6 +9,8 @@ import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import DisclaimerGate from "@/components/DisclaimerGate";
 import { AuthProvider } from "@/lib/authContext";
 import UserWatermark from "@/components/UserWatermark";
+import UserSync from "@/components/UserSync";
+import CompareBasket from "@/components/CompareBasket";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
@@ -60,6 +62,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <ChatWidget />
           <AlertWatcher />
           <UserWatermark />
+          <UserSync />
+          <CompareBasket />
           <DisclaimerGate />
         </AuthProvider>
         <ServiceWorkerRegister />

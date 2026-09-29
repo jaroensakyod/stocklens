@@ -1,8 +1,10 @@
 // ===== 📰 ข่าวล่าสุด (สไตล์ investing.com/latest-news) — ไทย+ตลาดโลก พร้อม Jev ตีความ =====
 // ทุกชิ้นผ่าน Jev: เชิงบวก/เชิงลบ/กลาง (scoreNews ที่มีอยู่) + "ส่งผลกระทบต่อกลุ่มไหน" (choice ใหม่)
 // แล้วโชว์หุ้นตัวแทนของกลุ่มพร้อมราคาเปลี่ยนแปลงจริง — แยกแท็บ "อัปเดตหุ้น" จากข่าวที่พูดถึงหุ้นตรงๆ
-import { cached, getNews, getQuotes } from "./yahoo";
+import { cached, getNews, getQuotes, getCached, setCached } from "./yahoo";
 import { scoreNewsMany, jevAsk, type NewsScore } from "./typesafe";
+import { chatOnce, hasAI } from "./ai";
+import { createHash } from "crypto";
 import setWatch from "@/data/set-watchlist.json";
 import universe from "@/data/universe.json";
 
@@ -16,6 +18,7 @@ export interface LatestItem {
   affect: string | null; // key ของ AFFECTS — กลุ่มที่ข่าวส่งผลกระทบ
   stocks: { t: string; chgPct: number | null }[]; // หุ้นที่เกี่ยว (ตัวแทนกลุ่ม หรือตัวที่ถูกพูดถึง)
   matched: string[]; // หุ้นที่ข่าวพูดถึงตรงๆ (ชื่อบริษัทไทยในพาดหัว / relatedTickers ของ Yahoo)
+  summaryTh?: string; // 🌐→🇹🇭 แปลอัตโนมัติ (Gemini batch คัดโดย Jev — cache 12 ชม.)
 }
 
 export interface LatestFeed {
@@ -223,6 +226,10 @@ export async function getLatestNews(): Promise<LatestFeed> {
     }
     const mood = scored.length ? { dir: (sum > 0.5 ? "bullish" : sum < -0.5 ? "bearish" : "neutral") as "bullish" | "bearish" | "neutral", score: Math.round(sum * 10) / 10 } : null;
 
+    // 🌐→🇹🇭 แปลอัตโนมัติ (ประหยัดสุดแบบ 2 ชั้น): Jev คัดไว้แล้วว่าข่าวไหนสำคัญจริง (substantive/impact)
+    // → Gemini แปลเฉพาะข่าวอังกฤษบนสุด ~8 ชิ้นแบบ batch 1 call (cache 12 ชม./หัวข้อ = คนทั้งเว็บแชร์กัน)
+    await autoTranslateTop(pool).catch(() => {});
+
     // อัปเดตหุ้น = พูดถึงหุ้นรายตัวจริง (มีใน universe/watchlist — กันบทค listicle ของ ETF แวมูเข้ามา)
     // + ผ่านประตูคุณภาพ (ไม่ใช่บทคขยะ/ข่าวเตือนปั่น)
     const knownStock = new Set<string>([
@@ -241,4 +248,60 @@ export async function getLatestNews(): Promise<LatestFeed> {
       jevOn,
     };
   }) as Promise<LatestFeed>;
+}
+
+// ---------- 🌐→🇹🇭 แปลข่าวอัตโนมัติ (ประหยัดสุด: Jev คัด → Gemini batch → cache 12 ชม.) ----------
+// เหตุผลที่ไม่ใช้ Jev แปล: Jev (TypeSafe) เป็นเครื่อง "ให้คะแนนแบบมี type" (choice/score) ไม่ใช่ตัวเขียนบท
+// บทบาทที่คุ้มที่สุด = ให้ Jev คัดข่าวสำคัญ (ทำอยู่แล้วผ่าน substantive/impact) แล้ว Gemini แปลเฉพาะที่ผ่าน
+const TRANSLATE_TTL = 12 * 3600_000;
+const TRANSLATE_MAX = 8;
+
+function titleKey(title: string): string {
+  return "newsth:" + createHash("sha1").update(title).digest("hex").slice(0, 20);
+}
+
+/** แปลข่าวอังกฤษบนสุด (ตาม impact ของ Jev) เป็นไทยแบบ batch 1 call — attach เข้า item.summaryTh */
+export async function autoTranslateTop(items: LatestItem[]): Promise<void> {
+  if (!hasAI()) return;
+  const targets = items
+    .filter((n) => n.lang === "en" && !n.summaryTh && n.score?.substantive !== false && (n.score?.impact ?? 1) >= 1)
+    .sort((a, b) => (b.score?.impact ?? 0) - (a.score?.impact ?? 0))
+    .slice(0, TRANSLATE_MAX);
+  if (!targets.length) return;
+
+  // ดึงจาก cache ก่อน — เหลือเฉพาะที่ยังไม่เคยแปล
+  const missing: LatestItem[] = [];
+  for (const n of targets) {
+    const hit = getCached<string>(titleKey(n.title), TRANSLATE_TTL);
+    if (hit) n.summaryTh = hit;
+    else missing.push(n);
+  }
+  if (!missing.length) return;
+
+  try {
+    const raw = await chatOnce(
+      [
+        {
+          role: "system",
+          content:
+            "คุณคือบรรณาธิการข่าวการเงินภาษาไทย หน้าที่: แปล/สรุปพาดหัวข่าวอังกฤษเป็นไทยสั้น 1 ประโยค (≤60 ตัวอักษร) คงตัวเลขสำคัญและชื่อบริษัท/ตัวย่อเดิม ไม่เพิ่มความเห็น ไม่แนะนำซื้อขาย " +
+            "ตอบเป็น JSON array ของ string เท่านั้น ตามลำดับที่ส่งให้ ห้าม markdown",
+        },
+        { role: "user", content: JSON.stringify(missing.map((n) => n.title)) },
+      ],
+      0.2
+    );
+    const m = raw.match(/\[[\s\S]*\]/);
+    if (!m) return;
+    const arr = JSON.parse(m[0]) as unknown[];
+    missing.forEach((n, i) => {
+      const t = typeof arr[i] === "string" ? (arr[i] as string).trim().slice(0, 200) : "";
+      if (t) {
+        n.summaryTh = t;
+        setCached(titleKey(n.title), t);
+      }
+    });
+  } catch {
+    // แปลพัง = โชว์หัวข้ออังกฤษเดิม (เหมือนก่อนมีระบบนี้)
+  }
 }
