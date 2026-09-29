@@ -1,5 +1,4 @@
 {
-  "_note": "ชุดทดสอบไทม์แมชชีน — เหตุการณ์จริง บริบทเขียนแบบ 'as-of' (ยืนอยู่ ณ วันนั้น ไม่มีข้อมูลอนาคต) ผลจริงคำนวณจากกราฟราคา Yahoo ในภายหลัง เพิ่มเหตุการณ์ใหม่ได้เรื่อยๆ",
   "events": [
     {
       "id": "ru-invasion-2022",
@@ -321,6 +320,212 @@
         {
           "symbol": "BABA",
           "name": "Alibaba"
+        }
+      ]
+    },
+    {
+      "id": "fukushima-water-2023",
+      "date": "2023-08-24",
+      "horizonDays": 30,
+      "title": "ญี่ปุ่นปล่อยน้ำทะเลฟุกุชิมา — จีนแบนอาหารทะเลญี่ปุ่น",
+      "context": "ญี่ปุ่นเริ่มปล่อยน้ำทะเลบำบัดจากฟุกุชิมา จีนประกาศห้ามนำเข้าอาหารทะเลญี่ปุ่นทันที กระทบธุรกิจอาหารทะเลญี่ปุ่นและความเชื่อมั่นผู้บริโภค",
+      "instruments": [
+        {
+          "symbol": "CVX",
+          "name": "Chevron"
+        },
+        {
+          "symbol": "PG",
+          "name": "P&G"
+        }
+      ]
+    },
+    {
+      "id": "israel-iran-strike-2024",
+      "date": "2024-04-14",
+      "horizonDays": 30,
+      "title": "อิหร่านโจมตีอิสราเอลด้วยโดรน/มิสไซล์ ~300 ลูก",
+      "context": "อิหร่านปล่อยโดรนและมิสไซล์โจมตีอิสราเอลโดยตรงครั้งแรก ตอบโต้การโจมตีสถานทูตในดามัสกัส น้ำมันพุ่ง ทองขึ้น ตลาดหุ้นลง",
+      "instruments": [
+        {
+          "symbol": "CL=F",
+          "name": "น้ำมันดิบ WTI"
+        },
+        {
+          "symbol": "GC=F",
+          "name": "ทองคำ"
+        },
+        {
+          "symbol": "LMT",
+          "name": "Lockheed Martin"
+        }
+      ]
+    },
+    {
+      "id": "boeing-door-2024",
+      "date": "2024-01-05",
+      "horizonDays": 45,
+      "title": "ประตูเครื่อง Boeing 737 MAX หลุดกลางอากาศ (Alaska Airlines)",
+      "context": "ประตูฉุกเฉินเครื่อง Boeing 737 MAX 9 หลุดระหว่างบิน FAA ระงับการบินทันที กระทบ Boeing หนัก + สายการบินที่ใช้ MAX",
+      "instruments": [
+        {
+          "symbol": "BA",
+          "name": "Boeing"
+        },
+        {
+          "symbol": "DAL",
+          "name": "Delta"
+        },
+        {
+          "symbol": "LMT",
+          "name": "Lockheed Martin"
+        }
+      ]
+    },
+    {
+      "id": "pfizer-covid-2022",
+      "date": "2022-03-15",
+      "horizonDays": 60,
+      "title": "Pfizer ประกาศวัคซีน COVID ประสิทธิภาพลดลงต่อ Omicron",
+      "context": "Pfizer รายงานว่าวัคซีนเข็ม 3 ประสิทธิภาพลดลงเมื่อเวลาผ่าน กระทบหุ้นวัคซีน + คาดการณ์ยอดสั่งซื้อบูสต์เพิ่มขึ้น",
+      "instruments": [
+        {
+          "symbol": "PFE",
+          "name": "Pfizer"
+        },
+        {
+          "symbol": "MRNA",
+          "name": "Moderna"
+        },
+        {
+          "symbol": "JNJ",
+          "name": "J&J"
+        }
+      ]
+    },
+    {
+      "id": "taiwan-chips-2022",
+      "date": "2022-07-29",
+      "horizonDays": 45,
+      "title": "Pelosi เยือนไต้หวัน — จีนประกาศซ้อมรบล้อมเกาะ",
+      "context": "Nancy Pelosi เยือนไต้หวัน จีนประกาศซ้อมทหารล้อมเกาะ 6 โซน กระทบห่วงโซ่เซมิคอนดักเตอร์ทั่วโลก ความเสี่ยงสงครามสูงขึ้น",
+      "instruments": [
+        {
+          "symbol": "TSM",
+          "name": "TSMC"
+        },
+        {
+          "symbol": "NVDA",
+          "name": "NVIDIA"
+        },
+        {
+          "symbol": "AAPL",
+          "name": "Apple"
+        }
+      ]
+    },
+    {
+      "id": "oil-negative-2020",
+      "date": "2020-04-20",
+      "horizonDays": 30,
+      "title": "น้ำมัน WTI ติดลบครั้งแรกในประวัติศาสตร์ (-$37)",
+      "context": "COVID ทำให้ความต้องการน้ำมันหาย คลังเก็บเต็ม สัญญาส่งมอบพฤษภาคม 2020 ราคาติดลบครั้งแรก ผู้ผลิตน้ำมันหนักหน่วง",
+      "instruments": [
+        {
+          "symbol": "CL=F",
+          "name": "น้ำมันดิบ WTI"
+        },
+        {
+          "symbol": "XOM",
+          "name": "ExxonMobil"
+        },
+        {
+          "symbol": "CVX",
+          "name": "Chevron"
+        }
+      ]
+    },
+    {
+      "id": "silicon-valley-crypto-2022",
+      "date": "2022-11-11",
+      "horizonDays": 30,
+      "title": "FTX ล้มละลาย — วิกฤตคริปโตลาม",
+      "context": "FTX ยื่นล้มละลายหลังถูกขึ้น Binance ถอนตัว Bitcoin ตกหนัก กระทบหุ้นที่เกี่ยวข้องกับคริปโตทั้งตลาด",
+      "instruments": [
+        {
+          "symbol": "BTC-USD",
+          "name": "Bitcoin"
+        },
+        {
+          "symbol": "COIN",
+          "name": "Coinbase"
+        },
+        {
+          "symbol": "NVDA",
+          "name": "NVIDIA"
+        }
+      ]
+    },
+    {
+      "id": "hurricane-ian-2022",
+      "date": "2022-09-28",
+      "horizonDays": 30,
+      "title": "พายุเฮอริเคนอีอัน ถล่มฟลอริดาระดับ 4",
+      "context": "พายุอีอัน ถล่มฟลอริดา ความเสียหาย ~$113B กระทบประกันภัย/พลังงาน/เกษตร น้ำมัน/แก๊สผลิตหยุดชั่วคราว",
+      "instruments": [
+        {
+          "symbol": "CL=F",
+          "name": "น้ำมันดิบ"
+        },
+        {
+          "symbol": "NG=F",
+          "name": "แก๊สธรรมชาติ"
+        },
+        {
+          "symbol": "TRV",
+          "name": "Travelers (ประกัน)"
+        }
+      ]
+    },
+    {
+      "id": "chip-act-2022",
+      "date": "2022-08-09",
+      "horizonDays": 60,
+      "title": "สหรัฐฯ ผ่าน CHIPS Act $52B — หนุนโรงงานเซมิในประเทศ",
+      "context": "Biden เซ็นกฎหมาย CHIPS and Science Act มูลค่า $280B อุดหนุนการผลิตเซมิคอนดักเตอร์ในสหรัฐฯ กระตุ้นหุ้นเซมิ + บริษัทที่มีโรงงานในสหรัฐฯ",
+      "instruments": [
+        {
+          "symbol": "INTC",
+          "name": "Intel"
+        },
+        {
+          "symbol": "TSM",
+          "name": "TSMC"
+        },
+        {
+          "symbol": "NVDA",
+          "name": "NVIDIA"
+        }
+      ]
+    },
+    {
+      "id": "japan-yen-2024",
+      "date": "2024-07-11",
+      "horizonDays": 30,
+      "title": "เยนแข็งค่าแรง — BOJ แทรกแซง ~$35B",
+      "context": "ธนาคารกลางญี่ปุ่นแทรกแซงค่าเยนแข็งค่าแรงหลังเยนอ่อนเกิน 160 กระทบหุ้นส่งออกญี่ปุ่น + ดอลลาร์/ทอง",
+      "instruments": [
+        {
+          "symbol": "USDJPY=X",
+          "name": "USD/JPY"
+        },
+        {
+          "symbol": "GC=F",
+          "name": "ทองคำ"
+        },
+        {
+          "symbol": "TM",
+          "name": "Toyota"
         }
       ]
     }
