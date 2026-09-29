@@ -153,6 +153,9 @@ export default function StockPage() {
             )}
             <a className="chip bg-base-800 text-zinc-400 border border-base-700 hover:text-accent-soft" href={`https://finance.yahoo.com/quote/${encodeURIComponent(q.symbol)}/news/`} target="_blank" rel="noopener noreferrer">📰 ข่าวล่าสุด</a>
             <a className="chip bg-base-800 text-zinc-400 border border-base-700 hover:text-accent-soft" href={`/compare?t=${encodeURIComponent(q.symbol)}`}>⚖️ เทียบหุ้น</a>
+            {!q.symbol.includes(".") && (
+              <a className="chip bg-base-800 text-zinc-400 border border-base-700 hover:text-accent-soft" href={`/options?s=${encodeURIComponent(q.symbol)}`}>🎯 Option</a>
+            )}
           </div>
         </div>
         <div className="ml-auto text-right">

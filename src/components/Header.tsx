@@ -46,6 +46,7 @@ const GROUPS: MenuGroup[] = [
     emoji: "🧰",
     items: [
       { href: "/starter", label: "🧑‍🎓 พอร์ตมือใหม่รายวัน", desc: "ไอเดียพอร์ตเริ่มต้นสำหรับมือใหม่ ปรับทุกวัน" },
+      { href: "/options", label: "🎯 Options Lab", desc: "Chain จริง + Greeks · AI วิเคราะห์ไม้ · Paper portfolio (การศึกษา)" },
       { href: "/model-portfolio", label: "💼 พอร์ตจำลอง AI", desc: "AI ปรับสมดุลพอร์ตจริงรายสัปดาห์ พร้อม NAV สะสม" },
       { href: "/value", label: "🤿 ใต้น้ำ vs 🎈 แพงเกินตัว", desc: "หุ้นตกลึกเกินพื้นฐาน vs วิ่งเกินตัว — มุมมอง contrarian" },
       { href: "/dividend", label: "📅 ปันผลรายเดือน", desc: "ปฏิทินรับปันผล + วางแผนกระแสเงินสด" },

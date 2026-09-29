@@ -21,6 +21,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ["/gurus", 0.8, true],
     ["/gurus/consensus", 0.8, true],
     ["/compare", 0.7, false],
+    ["/options", 0.7, false],
     ["/insights", 0.8, true],
     ["/shorts", 0.5, false],
     ["/free", 0.6, false],
