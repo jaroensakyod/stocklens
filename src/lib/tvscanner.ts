@@ -250,7 +250,7 @@ export async function findTvRow(yahooSymbol: string): Promise<{ row: TvRow; regi
   const region = suffix ? (SUFFIX_TO_REGION[suffix] ?? (suffix === ".BK" ? "thailand" : undefined)) : "america";
   if (!region) return null;
   const target = suffix ? bare + suffix : bare;
-  const univ = await tvUniverse(region, region === "america" ? 1000 : 400);
+  const univ = await tvUniverse(region, region === "america" ? 3000 : 400);
   const row =
     univ.find((r) => toYahooSymbol(region, r.symbol).toUpperCase() === target) ??
     univ.find((r) => r.symbol.toUpperCase() === bare);

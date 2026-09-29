@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
 
   // ตัดเครื่องมือที่ไม่ใช่หุ้นสามัญ (ETF/ETN/warrant/SPAC/notes) ที่หลุด filter type=stock ของ TV
   const JUNK = /(ETF|ETN|WARRANT|SPAC|BLANK CHECK|NOTES DUE|UNIT INVEST|RIGHTS)/i;
-  const all = (await tvUniverse(region, region === "america" || region === "thailand" ? 1000 : 400)).filter(
+  const all = (await tvUniverse(region, region === "america" ? 3000 : region === "thailand" ? 1000 : 400)).filter(
     (r) => !JUNK.test(r.name) && r.sector && Number.isFinite(r.price) && r.price > 0
   );
   if (!all.length) {
