@@ -137,6 +137,30 @@ export async function middleware(req: NextRequest) {
   res.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   res.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=(), interest-cohort=()");
   res.headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+
+  // CSP (กัน XSS) — อนุญาตเฉพาะ origin ของเรา + inline styles (Tailwind ต้องใช้)
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "";
+  const csp = [
+    "default-src 'self'",
+    `script-src 'self' 'unsafe-inline' ${siteUrl ? siteUrl + " " : ""}https://cloud.umami.is https://www.youtube.com https://s.ytimg.com`,
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "font-src 'self' https://fonts.gstatic.com",
+    `img-src 'self' data: blob: https:`,
+    `connect-src 'self' ${siteUrl ? siteUrl + " " : ""}https://cloud.umami.is https://api.typesafe.ai`,
+    "frame-src https://www.youtube.com https://www.youtube-nocookie.com",
+    "frame-ancestors 'self'",
+    "base-uri 'self'",
+    "form-action 'self'",
+  ].join("; ");
+  res.headers.set("Content-Security-Policy", csp);
+
+  // ⚠️ เตือน (ครั้งเดียวต่อ instance) ถ้า ADMIN_CODE ยังเป็น default
+  const g = globalThis as unknown as { _warnedAdminCode?: boolean };
+  if (process.env.ADMIN_CODE === "stocklens-admin" && !g._warnedAdminCode) {
+    g._warnedAdminCode = true;
+    console.warn("⚠️  ADMIN_CODE ยังเป็น default ('stocklens-admin') — เปลี่ยนใน Vercel env ก่อนเปิดใช้จริง!");
+  }
+
   return res;
 }
 
