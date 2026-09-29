@@ -252,13 +252,13 @@ export async function fetchRetry(url: string, tries = 3): Promise<Response> {
   throw lastErr;
 }
 
-interface ParsedEntry { issuer: string; value: number; shares: number; putCall?: string }
+export interface ParsedEntry { issuer: string; value: number; shares: number; putCall?: string }
 
 /** decode XML entities ในชื่อบริษัท (เช่น S&amp;P → S&P) */
 const decodeXml = (s: string) => s.replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&apos;/g, "'");
 
-/** parse XML 13F รายไฟล์ (แก้ namespace ก่อนแยกบล็อก) */
-function parse13fXml(raw: string): ParsedEntry[] {
+/** parse XML 13F รายไฟล์ (แก้ namespace ก่อนแยกบล็อก) — export ไว้ทดสอบด้วย fixture */
+export function parse13fXml(raw: string): ParsedEntry[] {
   const rawNS = raw.replace(/<(\/?)[a-zA-Z0-9]*:/g, "<$1");
   const g = (block: string, tag: string) => {
     const m = block.match(new RegExp("<" + tag + ">(?:<!\\[CDATA\\[)?([^<\\]]+)"));
@@ -331,7 +331,7 @@ async function fetchGuru13f(cik: number, offset = 0): Promise<{ filedAt: string;
 }
 
 /** รวม entries ตาม issuer + คำนวณ pct/QoQ — ใช้ร่วมทั้งรายการรวมและหน้า detail */
-function buildHoldings(f: { entries: ParsedEntry[]; prevEntries: ParsedEntry[] }, cfg: { notes?: Record<string, string> }, maxHoldings: number) {
+export function buildHoldings(f: { entries: ParsedEntry[]; prevEntries: ParsedEntry[] }, cfg: { notes?: Record<string, string> }, maxHoldings: number) {
   // ⚠️ filer บางรายเขียน <value> เป็น "ดอลลาร์" บางรายเป็น "หน่วยพัน" (สเปก 13F ว่าพัน แต่หลายรายใหญ่ส่งดอลลาร์)
   // ตรวจจากราคาแฝง: value/shares ถ้าค่ากลาง < 1 แปลว่าเป็นหน่วยพัน → คูณ 1000
   const prices = f.entries.filter((e) => e.shares > 0 && e.value > 0).map((e) => e.value / e.shares).sort((a, b) => a - b);

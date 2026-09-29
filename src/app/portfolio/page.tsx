@@ -12,6 +12,7 @@ import type { Quote } from "@/lib/types";
 import PortfolioAdvisor from "@/components/PortfolioAdvisor";
 import XrayPanel from "@/components/XrayPanel";
 import BalancePanel from "@/components/BalancePanel";
+import PushSetup from "@/components/PushSetup";
 import TickerPicker from "@/components/TickerPicker";
 
 type Tab = "watchlist" | "favorites" | "portfolio" | "balance" | "xray" | "advisor" | "alerts";
@@ -499,6 +500,7 @@ function AlertsTab({
 
   return (
     <div className="space-y-5">
+      <PushSetup />
       <div className="card p-4">
         <h2 className="text-sm font-bold text-zinc-100 mb-3">➕ ตั้งแจ้งเตือนราคา</h2>
         <div className="grid md:grid-cols-4 gap-2">

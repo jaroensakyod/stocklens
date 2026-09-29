@@ -1,7 +1,19 @@
 # 📋 PROJECT STATUS — StockLens (ฉบับละเอียด ครบทุกเรื่อง)
 
-> อัปเดต: 25 ก.ย. 2569 · โค้ดทั้งหมดอยู่ที่ `C:\Users\ASUS\Desktop\newdata` · รันได้ที่ http://localhost:3000 (`npx next start -p 3000` หลัง `npx next build`)
+> อัปเดต: 29 ก.ย. 2569 (รอบ 2) · โค้ดทั้งหมดอยู่ที่ `C:\Users\ASUS\Desktop\newdata` · รันได้ที่ http://localhost:3000 (`npx next start -p 3000` หลัง `npx next build`)
 > สรุปสำหรับเปิดเซสชันใหม่ทำต่อ หรือส่งต่อให้ใครก็อ่านรู้เรื่องทันที
+
+---
+
+## 0️⃣ ระบบคุณภาพ/พื้นฐานที่เพิ่มเข้ามา (29 ก.ย. รอบเย็น)
+
+| ระบบ | สถานะ | วิธีใช้ |
+|---|---|---|
+| **🧪 Vitest** (30 tests ผ่าน) | ✅ `npm test` / `test:watch` / `test:cover` + GitHub Actions ทุก push (`.github/workflows/test.yml`) | เทสต์อยู่ที่ `src/lib/__tests__/` 6 ไฟล์ (portfolioScore·peerBenchmark·gurus13f XML/หน่วย·compareBasket·latestNews·screenerThemes) — **เคยจับบั๊กจริงได้ 2 ตัวตอนเขียน**: ① water-filling cap ของ rebalancePlan (normalize เปิดเพดานกลับ) ② getBasket ไม่กรองขยะจาก localStorage |
+| **📲 Web Push แม้ปิดเว็บ** (สมาชิก Starter+) | ✅ พร้อมใช้ — env ครบใน `.env.local` แล้ว (VAPID_* ) | ผู้ใช้เปิดที่แท็บ 🔔 → ปุ่ม "เปิดแจ้งเตือนมือถือ" (สมัครได้ 5 อุปกรณ์ + ปุ่มทดสอบส่งจริง) · **cron ต้องตั้งเพิ่มนอกเว็บ**: Vercel Hobby จำกัด cron ทุก 15 นาทีไม่ได้ → ใช้ cron-job.org (ฟรี) ยิง `GET /api/cron/push-alerts?secret=<CRON_SECRET>` ทุก 15 นาที (vercel.json ใส่ไว้แล้วสำหรับแผน Pro) · iOS ต้อง install PWA ก่อน |
+| **🐛 Sentry** | ✅ graceful — **ยังไม่เปิดใช้จริง** (ไม่มี DSN = no-op) | สมัคร sentry.io ฟรี → เอา DSN ใส่ `NEXT_PUBLIC_SENTRY_DSN` ใน `.env.local`/Vercel → ทำงานทันทีทั้ง server+browser (`src/instrumentation.ts` + `sentry.client.config.ts` + `global-error.tsx`) — ไม่ต้องแก้โค้ดอีก |
+| **📊 Umami analytics** | ✅ เตรียมพร้อม (env-gated) | ตอน deploy: ตั้ง `NEXT_PUBLIC_UMAMI_URL` + `NEXT_PUBLIC_UMAMI_ID` → script โหลดเองใน layout (ไม่มี = ไม่โหลด) |
+| **🔍 เมื่อ Yahoo เปลี่ยน API** | ข้อปฏิบัติ | เปิด issues ของ `gadicc/node-yahoo-finance2` (v20) ดู fix ล่าสุดก่อนแก้ `src/lib/yahoo.ts` เอง — ยืมวิธีแก้ ไม่รื้อของเรา |
 
 ---
 

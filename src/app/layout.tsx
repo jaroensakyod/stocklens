@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "../sentry.client.config"; // Sentry browser — no-op เมื่อไม่มี NEXT_PUBLIC_SENTRY_DSN
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import TickerTape from "@/components/TickerTape";
@@ -43,6 +44,8 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const umamiUrl = process.env.NEXT_PUBLIC_UMAMI_URL;
+  const umamiId = process.env.NEXT_PUBLIC_UMAMI_ID;
   return (
     <html lang="th">
       <head>
@@ -52,6 +55,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap"
           rel="stylesheet"
         />
+        {/* Umami analytics (cookieless) — โหลดเฉพาะเมื่อตั้ง NEXT_PUBLIC_UMAMI_URL + _ID (ไม่มี = ไม่โหลดอะไร) */}
+        {umamiUrl && umamiId && <script defer src={`${umamiUrl}/script.js`} data-website-id={umamiId} />}
       </head>
       <body className="min-h-screen flex flex-col">
         <AuthProvider>

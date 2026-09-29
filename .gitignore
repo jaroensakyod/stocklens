@@ -12,3 +12,6 @@ out/
 src/data/members.json
 src/data/model-portfolio.json
 src/data/value-history.json
+
+# Graphify (เครื่องมือวิเคราะห์โค้ด — สร้างใหม่ได้ด้วย graphify update . ไม่ต้องเก็บใน repo)
+graphify-out/

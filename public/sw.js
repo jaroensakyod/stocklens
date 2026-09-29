@@ -1,5 +1,5 @@
-// StockLens Service Worker — network-first + หน้า offline fallback
-const CACHE = "stocklens-v1";
+// StockLens Service Worker — network-first + หน้า offline fallback + push notification
+const CACHE = "stocklens-v2";
 const OFFLINE_URL = "/offline";
 
 self.addEventListener("install", (event) => {
@@ -23,5 +23,40 @@ self.addEventListener("fetch", (event) => {
     fetch(req).catch(() =>
       caches.match(req).then((hit) => hit || caches.match(OFFLINE_URL))
     )
+  );
+});
+
+// ===== Push แจ้งเตือนราคาแม้ปิดเว็บ (payload: {title, body, tag, url}) =====
+self.addEventListener("push", (event) => {
+  let data = { title: "🔔 StockLens", body: "", tag: "stocklens", url: "/portfolio?tab=alerts" };
+  try {
+    data = Object.assign(data, event.data.json());
+  } catch (e) {
+    if (event.data) data.body = event.data.text();
+  }
+  event.waitUntil(
+    self.registration.showNotification(data.title, {
+      body: data.body,
+      tag: data.tag,
+      icon: "/icons/icon-192.png",
+      badge: "/icons/icon-192.png",
+      data: { url: data.url },
+    })
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const url = (event.notification.data && event.notification.data.url) || "/";
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((list) => {
+      for (const client of list) {
+        if (client.url.indexOf(self.location.origin) !== -1 && "focus" in client) {
+          client.navigate(url);
+          return client.focus();
+        }
+      }
+      return self.clients.openWindow(url);
+    })
   );
 });

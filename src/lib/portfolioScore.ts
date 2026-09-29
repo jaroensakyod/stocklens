@@ -206,15 +206,30 @@ export function rebalancePlan(input: ScoreInput & { mode: TargetMode; mcaps?: Re
     for (const h of holdings) targetPct[h.ticker] = t;
   }
 
-  // 2) บังคับเพดานต่อตัว (หุ้นแกนยืดหยุ่น +50% ของเพดาน) แล้ว normalize
-  for (let iter = 0; iter < 3; iter++) {
-    for (const h of holdings) {
-      const cap = h.core ? singleCeil * 1.5 : singleCeil;
-      if (targetPct[h.ticker] > cap) targetPct[h.ticker] = cap;
+  // 2) บังคับเพดานต่อตัวแบบ water-filling (ตรึงตัวที่เกิน → กระจายส่วนเกินให้ตัวที่ยังต่ำกว่าเพดานตามสัดส่วนเดิม
+  //    ทำเฉพาะเมื่อเพดานรวมกันเป็นไปได้ (Σcaps ≥ 100) — ไม่งั้นเพดานไร้ความหมาย คงสัดส่วนปกติ
+  const caps: Record<string, number> = {};
+  for (const h of holdings) caps[h.ticker] = h.core ? singleCeil * 1.5 : singleCeil;
+  if (holdings.reduce((a, h) => a + caps[h.ticker], 0) >= 100) {
+    const fixed = new Set<string>();
+    for (let iter = 0; iter < holdings.length + 2; iter++) {
+      const free = holdings.filter((h) => !fixed.has(h.ticker));
+      const freeSum = free.reduce((a, h) => a + targetPct[h.ticker], 0);
+      const budget = 100 - holdings.filter((h) => fixed.has(h.ticker)).reduce((a, h) => a + caps[h.ticker], 0);
+      if (!free.length || freeSum <= 0 || budget <= 0) break;
+      for (const h of free) targetPct[h.ticker] = (targetPct[h.ticker] / freeSum) * budget;
+      const newly = free.filter((h) => targetPct[h.ticker] > caps[h.ticker] + 1e-9);
+      if (!newly.length) break;
+      for (const h of newly) {
+        targetPct[h.ticker] = caps[h.ticker];
+        fixed.add(h.ticker);
+      }
     }
-    const sum = holdings.reduce((a, h) => a + targetPct[h.ticker], 0);
-    if (sum <= 0) break;
-    for (const h of holdings) targetPct[h.ticker] = (targetPct[h.ticker] / sum) * 100;
+  }
+  // ปิดท้าย: ตรวจว่าเป้ารวมเป็น 100 (เผื่อ edge ที่ลูปหลุดก่อนตั้งต้น)
+  const sumT = holdings.reduce((a, h) => a + targetPct[h.ticker], 0);
+  if (sumT > 0 && Math.abs(sumT - 100) > 0.01) {
+    for (const h of holdings) targetPct[h.ticker] = (targetPct[h.ticker] / sumT) * 100;
   }
 
   // 3) แผนซื้อ-ขาย (เทียบกับฐานหุ้นอย่างเดียว เงินสดคงไว้)

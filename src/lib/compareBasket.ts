@@ -9,7 +9,12 @@ export const BASKET_MAX = 4;
 export function getBasket(): string[] {
   try {
     const v = JSON.parse(localStorage.getItem(KEY) ?? "[]");
-    return Array.isArray(v) ? v.filter((x) => typeof x === "string").slice(0, BASKET_MAX) : [];
+    if (!Array.isArray(v)) return [];
+    // กรองของเสียที่อาจติดมากับ localStorage มืออื่น: เหลือเฉพาะรูป ticker จริง + ตัวพิมพ์ใหญ่
+    return v
+      .map((x) => String(x ?? "").toUpperCase().trim().slice(0, 12))
+      .filter((x) => /^[A-Z0-9.\-]+$/.test(x))
+      .slice(0, BASKET_MAX);
   } catch {
     return [];
   }
