@@ -154,11 +154,11 @@ export async function middleware(req: NextRequest) {
   ].join("; ");
   res.headers.set("Content-Security-Policy", csp);
 
-  // ⚠️ เตือน (ครั้งเดียวต่อ instance) ถ้า ADMIN_CODE ยังเป็น default
+  // ⚠️ เตือน (ครั้งเดียวต่อ instance) ถ้าไม่ได้ตั้ง ADMIN_CODE — dev ใช้ default ได้ แต่ production จะ fail-closed
   const g = globalThis as unknown as { _warnedAdminCode?: boolean };
-  if (process.env.ADMIN_CODE === "stocklens-admin" && !g._warnedAdminCode) {
+  if (!process.env.ADMIN_CODE && !g._warnedAdminCode) {
     g._warnedAdminCode = true;
-    console.warn("⚠️  ADMIN_CODE ยังเป็น default ('stocklens-admin') — เปลี่ยนใน Vercel env ก่อนเปิดใช้จริง!");
+    console.warn("⚠️  ADMIN_CODE ไม่ได้ตั้ง — dev ใช้ default 'stocklens-admin' ได้ แต่ production จะปิดทางเข้าแอดมิน/การเซ็น session ทั้งหมด (fail-closed)");
   }
 
   return res;

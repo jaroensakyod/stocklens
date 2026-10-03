@@ -82,12 +82,12 @@ export async function chatStream(messages: ChatMessage[], temperature = 0.4, max
 }
 
 /** เรียก LLM แบบรอผลทั้งก้อน (สำหรับงานสั้น เช่น คัดหุ้น แปลงเป็น JSON) */
-export async function chatOnce(messages: ChatMessage[], temperature = 0.2): Promise<string> {
+export async function chatOnce(messages: ChatMessage[], temperature = 0.2, maxTokens?: number): Promise<string> {
   const { baseUrl, apiKey, model } = aiConfig();
   const res = await fetch(baseUrl.replace(/\/$/, "") + "/chat/completions", {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
-    body: JSON.stringify({ model, messages, temperature }),
+    body: JSON.stringify({ model, messages, temperature, ...(maxTokens ? { max_tokens: maxTokens } : {}) }),
   });
   if (!res.ok) throw new Error(`AI ${res.status}`);
   const json = (await res.json()) as { choices?: { message?: { content?: string } }[] };

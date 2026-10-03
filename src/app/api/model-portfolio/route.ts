@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getModelPortfolio, runWeeklyAdjust, liveNav, nextMonday } from "@/lib/modelPortfolio";
 import { hasAI } from "@/lib/ai";
+import { adminCode } from "@/lib/admin";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 120;
@@ -24,7 +25,7 @@ export async function GET() {
 
 // ปรับพอร์ตทันที (แอดมิน) — กันคนยิงเปลือง AI
 export async function POST(req: NextRequest) {
-  if (req.headers.get("x-admin-code") !== (process.env.ADMIN_CODE || "stocklens-admin")) {
+  if (req.headers.get("x-admin-code") !== adminCode()) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
   const state = await runWeeklyAdjust(true);

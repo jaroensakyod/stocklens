@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { dataStats } from "@/lib/turso";
+import { adminCode } from "@/lib/admin";
 
 export const dynamic = "force-dynamic";
 
 // GET /api/admin/data-status (header x-admin-code) — คลังข้อมูลของเรามีอะไรแล้ว
 export async function GET(req: NextRequest) {
-  if (process.env.ADMIN_CODE && req.headers.get("x-admin-code") !== process.env.ADMIN_CODE) {
+  if (req.headers.get("x-admin-code") !== adminCode()) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
   const stats = await dataStats();

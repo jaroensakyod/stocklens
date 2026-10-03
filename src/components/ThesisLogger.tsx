@@ -44,7 +44,7 @@ export default function ThesisLogger({ ticker, prefilled }: { ticker: string; pr
               <input
                 className="input"
                 type="password"
-                placeholder="รหัสแอดมิน (ค่าเริ่มต้น stocklens-admin)"
+                placeholder="รหัสแอดมิน (ADMIN_CODE)"
                 value={code}
                 onChange={(e) => {
                   setCode(e.target.value);

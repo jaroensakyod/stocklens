@@ -19,7 +19,8 @@ export async function POST(req: NextRequest) {
         { role: "system", content: SYSTEM_NEWS },
         { role: "user", content: `ข่าวจาก ${publisher ?? "สำนักข่าว"}: ${title}` },
       ],
-      0.3
+      0.3,
+      600 // งานสรุป 2-3 ประโยค — ครอบเพดาน output ไว้ (ประหยัด + กันยืดยาวผิดสั่ง)
     );
     // 🛡️ Guardrail (Jev): สรุปข่าวไม่ควรกลายเป็นคำแนะนำซื้อขาย — ติด disclaimer ถ้าเกินเกณฑ์
     const g = await guardAdvice(summary).catch(() => null);

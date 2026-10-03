@@ -7,8 +7,15 @@ import { kvGet, kvSet, hasDB } from "./storage";
 const FILE = path.join(process.cwd(), "src/data/members.json");
 const DB_KEY = "members";
 
+// รหัสแอดมินจาก env — production ที่ไม่ตั้ง = โยนเลย (fail-closed)
+// ห้ามกลับไปใช้ค่า default ใน source: repo เป็นสาธารณะ ใครอ่านก็รู้ และ env หลุดวันหนึ่งจะเปิดประตูเงียบๆ
 export function adminCode(): string {
-  return process.env.ADMIN_CODE || "stocklens-admin";
+  const code = process.env.ADMIN_CODE;
+  if (code) return code;
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("ADMIN_CODE_NOT_SET: ตั้ง ADMIN_CODE ใน Vercel → Settings → Environment Variables ก่อน (ระบบปิดทางเข้าแอดมินทั้งหมดจนกว่าจะตั้ง)");
+  }
+  return "stocklens-admin"; // dev ที่เครื่องตัวเองเท่านั้น
 }
 
 export async function readMembers(): Promise<Member[]> {

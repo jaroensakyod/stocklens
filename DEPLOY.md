@@ -30,7 +30,8 @@ git push -u origin main
 | `AI_BASE_URL` | `https://api.z.ai/api/paas/v4` (GLM) หรือ `https://api.openai.com/v1` |
 | `AI_API_KEY` | key ของคุณ |
 | `AI_MODEL` | `glm-4.7` หรือ `gpt-4o-mini` |
-| `ADMIN_CODE` | รหัสหน้า /admin (ตั้งเอง ห้ามใช้ค่า default!) |
+| `ADMIN_CODE` | รหัสหน้า /admin (ตั้งเอง ห้ามใช้ค่า default!) — ไม่ตั้ง = หลังบ้านปิดทั้งหมด (fail-closed) |
+| `SESSION_SECRET` | (แนะนำ) secret เซ็น cookie login — สุ่ม `openssl rand -base64 32` · ไม่ตั้ง = ใช้ ADMIN_CODE เซ็นแทน |
 | `NEXT_PUBLIC_PROMPTPAY_NAME` | ชื่อบัญชีรับเงิน |
 | `NEXT_PUBLIC_PROMPTPAY_ID` | เบอร์/เลข PromptPay |
 | `NEXT_PUBLIC_FB_STARTER_URL` | ลิงก์กลุ่ม FB Starter |
@@ -51,7 +52,8 @@ git push -u origin main
 - [ ] ลองแชท 💬 ถามหุ้น
 - [ ] /radar พิมพ์เหตุการณ์ไทยได้
 - [ ] หน้า /pricing ขึ้น PromptPay ถูกต้อง
-- [ ] เปลี่ยน ADMIN_CODE แล้ว
+- [ ] เปลี่ยน ADMIN_CODE แล้ว (default ใช้ได้แค่ตอน `npm run dev`)
+- [ ] ตั้ง SESSION_SECRET แล้ว (หรือยอมรับว่าใช้ ADMIN_CODE เซ็น session)
 
 ## 5. ค่าใช้จ่าย
 - Vercel Hobby: **ฟรี** (พอสำหรับคนเข้าหลักพัน/วัน)

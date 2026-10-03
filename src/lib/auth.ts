@@ -7,8 +7,19 @@ import type { Member } from "./types";
 
 export const AUTH_COOKIE = "sl_token";
 export const ADMIN_COOKIE = "sl_admin";
-const SECRET = process.env.ADMIN_CODE || "stocklens-default-secret";
 const MAX_AGE = 30 * 24 * 3600; // 30 วัน
+
+// secret สำหรับเซ็น cookie — แยกเป็น SESSION_SECRET ได้ (เปลี่ยนรหัสแอดมินไม่ฆ่า session เดิม)
+// ไม่ตั้ง SESSION_SECRET = ใช้ ADMIN_CODE เซ็นต่อ (cookie ที่ออกไปก่อนหน้ายัง valid)
+// production ไม่มีทั้งสอง = โยน (fail-closed) — ไม่ยอมเซ็นด้วยค่า default ที่อยู่ใน repo สาธารณะ ไม่งั้นปลอม cookie เป็นแอดมิน/สมาชิก Pro ได้
+function sessionSecret(): string {
+  const s = process.env.SESSION_SECRET || process.env.ADMIN_CODE;
+  if (s) return s;
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("SESSION_SECRET_NOT_SET: ตั้ง SESSION_SECRET (หรืออย่างน้อย ADMIN_CODE) ใน env ของ production ก่อน");
+  }
+  return "stocklens-dev-secret"; // dev ที่เครื่องตัวเองเท่านั้น
+}
 
 export interface SessionMember {
   id: string;
@@ -25,7 +36,7 @@ export function generateAccessCode(): string {
 }
 
 function sign(data: string): string {
-  return createHmac("sha256", SECRET).update(data).digest("base64url");
+  return createHmac("sha256", sessionSecret()).update(data).digest("base64url");
 }
 
 export function createToken(m: SessionMember): string {

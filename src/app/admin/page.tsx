@@ -100,7 +100,7 @@ export default function AdminPage() {
         <input className="input" type="password" placeholder="รหัสผ่านแอดมิน (ADMIN_CODE)" value={code} onChange={(e) => setCode(e.target.value)} onKeyDown={(e) => e.key === "Enter" && login()} />
         <button className="btn-primary w-full" onClick={login}>เข้าสู่ระบบ</button>
         {msg && <p className="text-xs text-down text-center">{msg}</p>}
-        <p className="text-[11px] text-zinc-600 text-center">ค่าเริ่มต้น: stocklens-admin — เปลี่ยนได้ที่ .env.local</p>
+        <p className="text-[11px] text-zinc-600 text-center">รหัสอยู่ที่ env ADMIN_CODE (dev ใช้ค่า default จาก .env.local ได้)</p>
       </div>
     );
   }
